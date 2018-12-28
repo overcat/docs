@@ -1,20 +1,20 @@
 ---
-title: Create an Account
+title: 创建账户
 ---
 
-The first thing you’ll need to do anything on the Stellar network is an account. Accounts hold all your money inside Stellar and allow you to send and receive payments—in fact, pretty much everything in Stellar is in some way tied to an account.
+在 Stellar 网络上你需要做的第一件事是创建一个账户。 你所有的资产都将存在于这个账户中，你可以通过该账户发送和接收资产——实际上，Stellar 网络中几乎所有的东西都和账户有关。
 
-Every Stellar account has a **public key** and a **secret seed**. Stellar uses public key cryptography to ensure that every transaction is secure. The public key is always safe to share—other people need it to identify your account and verify that you authorized a transaction. The seed, however, is private information that proves you own your account. You should never share the seed with anyone. It’s kind of like the combination to a lock—anyone who knows the combination can open the lock. In the same way, anyone who knows your account’s seed can control your account.
+每个 Stellar 帐户都有一个**公钥**和一个**私密种子**。 Stellar 使用公钥加密（也称非对称加密）来确保每个事务都是安全的。 公钥可以安全的共享——其他人需要通过它来识别您的帐户并验证您是否授权了某笔事务。 私密种子可以证明你拥有某个账户，所以你永远不应该与任何人分享私密种子。 举例来说，如果一个账户是一把锁的话，那么私密种子就是打开它的钥匙。同样的道理，任何知道您帐户的私密种子的人都可以控制您的帐户。
 
-If you’re familiar with public key cryptography, you might be wondering how the seed differs from a private key. The seed is actually the single secret piece of data that is used to generate both the public and private key for your account. Stellar’s tools use the seed instead of the private key for convenience: To have full access to an account, you only need to provide a seed instead of both a public key and a private key.[^1]
+如果您熟悉公钥加密技术的话，可能会想知道私密种子与私钥有何不同。 私密种子实际上是用于为您的帐户生成公钥和私钥的唯一秘密数据。 为了方便起见，Stellar 的工具使用种子而不是私钥：要获得对帐户的完全控制权，只需提供私密种子而不需要同时提供公钥和私钥。[^1]
 
-Because the seed must be kept secret, the first step in creating an account is creating your own seed and key—when you finally create the account, you’ll send only the public key to a Stellar server. You can generate the seed and key with the following command:
+创建账户的第一步是创建自己的种子和密钥——因为种子需要保密，所以当你最终创建账户时，你只需将公钥发送到 Stellar 服务器。 您可以使用以下命令生成在种子和公钥：
 
-<code-example name="Generating Keys">
+<code-example name="生成密钥对">
 
 ```js
-// create a completely new and unique pair of keys
-// see more about KeyPair objects: https://stellar.github.io/js-stellar-sdk/Keypair.html
+// 创建一个全新且独一无二的密钥对。
+// 通过以下链接了解 KeyPair 对象：https://stellar.github.io/js-stellar-sdk/Keypair.html
 var pair = StellarSdk.Keypair.random();
 
 pair.secret();
@@ -24,8 +24,8 @@ pair.publicKey();
 ```
 
 ```java
-// create a completely new and unique pair of keys.
-// see more about KeyPair objects: https://stellar.github.io/java-stellar-sdk/org/stellar/sdk/KeyPair.html
+// 创建一个全新且独一无二的密钥对。
+// 通过以下链接了解 KeyPair 对象：https://stellar.github.io/java-stellar-sdk/org/stellar/sdk/KeyPair.html
 import org.stellar.sdk.KeyPair;
 KeyPair pair = KeyPair.random();
 
@@ -59,15 +59,14 @@ func main() {
 
 </code-example>
 
-Now that you have a seed and public key, you can create an account. In order to prevent people from making a huge number of unnecessary accounts, each account must have a minimum balance of 1 lumen (lumens are the built-in currency of the Stellar network).[^2] Since you don’t yet have any lumens, though, you can’t pay for an account. In the real world, you’ll usually pay an exchange that sells lumens in order to create a new account.[^3] On Stellar’s test network, however, you can ask Friendbot, our friendly robot with a very fat wallet, to create an account for you.
+现在有了种子和公钥，就可以创建帐户了。 为了防止人们创建大量无用的帐户，每个帐户必须持有最少 1 Lumen(Lumen 是 Stellar 网络的内置货币)。[^2] 由于您还没有 Lumen，因此您无法支付创建账户所需的费用。 在现实世界中，您可以通过交易所购买一些 Lumen 来创建您的新帐户。[^3] 但在 Stellar 的测试网络中，你可以使用 Friendbot 为您创建账户。
 
-To create a test account, send Friendbot the public key you created. It’ll create and fund a new account using that public key as the account ID.
+要创建测试帐户的话，请将您创建的公钥发送给 Friendbot，它将使用公钥作为帐户 ID 创建一个新帐户并为其提供一笔资金。
 
-<code-example name="Creating a test account">
+<code-example name="创建一个测试账户">
 
 ```js
-// The SDK does not have tools for creating test accounts, so you'll have to
-// make your own HTTP request.
+// 该 SDK 无法帮助您在测试网络中创建账户，所以你需要自己发起 HTTP 请求。
 var request = require('request');
 request.get({
   url: 'https://friendbot.stellar.org',
@@ -84,8 +83,7 @@ request.get({
 ```
 
 ```java
-// The SDK does not have tools for creating test accounts, so you'll have to
-// make your own HTTP request.
+// 该 SDK 无法帮助您在测试网络中创建账户，所以你需要自己发起 HTTP 请求。
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -109,8 +107,7 @@ import (
 )
 
 func main() {
-	// pair is the pair that was generated from previous example, or create a pair based on 
-	// existing keys.
+	// pair 是您之前创建的 keypair 实例
 	address := pair.Address()
 	resp, err := http.Get("https://friendbot.stellar.org/?addr=" + address)
 	if err != nil {
@@ -128,14 +125,14 @@ func main() {
 
 </code-example>
 
-Now for the last step: Getting the account’s details and checking its balance. Accounts can carry multiple balances—one for each type of currency they hold.
+现在是最后一步: 获取账户的详细信息并检查其余额。 账户可以有多个余额——每种货币各有一个余额。
 
-<code-example name="Getting account details">
+<code-example name="获取账户详情">
 
 ```js
 var server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
 
-// the JS SDK uses promises for most actions, such as retrieving an account
+// JS SDK 使用 Promise 来处理大部分操作，比如检索一个账户
 server.loadAccount(pair.publicKey()).then(function(account) {
   console.log('Balances for account: ' + pair.publicKey());
   account.balances.forEach(function(balance) {
@@ -186,16 +183,17 @@ func main() {
 
 </code-example>
 
-Now that you’ve got an account, you can [start sending and receiving payments](transactions.md).
+现在您已经有了一个账户，您可以[开始发送和接收付款](transactions.md)。
 
 <div class="sequence-navigation">
-  <a class="button button--previous" href="index.html">Back: Stellar Network Overview</a>
-  <a class="button button--next" href="transactions.html">Next: Send and Receive Money</a>
+  <a class="button button--previous" href="index.html">上一页: Stellar 网络概览</a>
+  <a class="button button--next" href="transactions.html">下一页: 发送和接收资金</a>
 </div>
 
 
-[^1]: A private key is still used to encrypt data and sign transactions. When you create a `KeyPair` object using a seed, the private key is immediately generated and stored internally.
 
-[^2]: Other features of Stellar, like [trust lines](../concepts/assets.md#trustlines), require higher minimum balances. For more on minimum balances, see [fees](../concepts/fees.md#minimum-account-balance)
+[^1]: 私钥仍用于加密数据和签署事务。 使用种子创建 `KeyPair`对象时，会立即生成私钥并在保存在程序内。
 
-[^3]: CoinMarketCap maintains a list of exchanges that sell lumens at http://coinmarketcap.com/currencies/stellar/#markets
+[^2]: Stellar 的一些其它特征，比如[信任线](../concepts/assets.md#trustlines), 需要更高的最低余额。 有关最低余额的更多信息，请参见[费用](../concepts/fees.md#minimum-account-balance)
+
+[^3]: CoinMarketCap 维护了一份出售 Lumen 的交易所清单： http://coinmarketcap.com/currencies/stellar/#markets
