@@ -1,5 +1,5 @@
 ---
-title: Send and Receive Money
+title: 付款和收款
 ---
 
 Now that you have an account, you can send and receive funds through the Stellar network. If you haven’t created an account yet, read [step 2 of the Get Started guide](./create-account.md).
@@ -442,9 +442,9 @@ paymentsRequest.stream(new EventListener<OperationResponse>() {
 
   }
 });
-````
+​````
 
-```go
+​```go
 package main
 
 import (
