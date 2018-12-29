@@ -585,7 +585,7 @@ Stellar 还支持让发送者发送一种货币，而接收者收到另外一种
 
 [^2]: 有关事务的详细信息可以在[事务页面](../concepts/transactions.md)上找到。
 
-[^3]: 这 100 个 Lumens 被称为恒星的**基本费用**。 基本费用是可以调整的，但是它可能多年才会调整一次。你可以通过[检查最新的总账信息](https://www.stellar.org/developers/horizon/reference/endpoints/ledgers-single.html)查询当前的费用。
+[^3]: 这 100 stroops 被称为恒星的**基本费用**。 基本费用是可以调整的，但是它可能多年才会调整一次。你可以通过[检查最新的总账信息](https://www.stellar.org/developers/horizon/reference/endpoints/ledgers-single.html)查询当前的费用。
 
 [^4]: 尽管 Horizon REST API 的大部分响应都使用 JSON，但 Stellar 中的大部分数据实际上是以一种称为 XDR(External Data Representation) 的格式存储的。XDR 的体积比 JSON 更小，并且以更规范的方式存储数据，这使得签名和验证 XDR 编码的消息更加容易。您可以在此[获取更多有关 XDR 的信息](https://www.stellar.org/developers/horizon/reference/xdr.html)。
 
