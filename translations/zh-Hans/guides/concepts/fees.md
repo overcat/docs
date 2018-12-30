@@ -1,65 +1,64 @@
 ---
-title: Fees
+title: 费用
 ---
 
-The Stellar network requires small [fees on transactions](#transaction-fee) and [minimum balances on accounts](#minimum-account-balance) in order to prevent people from overwhelming the network and to aid in prioritization.
+Stellar 网络要求提交事务需要支付一定的[手续费](#transaction-fee)，账户也需要满足[最低账户余额](#minimum-account-balance)的要求，这是为了防止网络过于拥堵，同时还可以用于确认事务的优先级。
 
-There are two special values used to calculate fees:
+有两个特殊值用于计算费用：
 
-1. The **base fee** (currently 100 stroops) is used in transaction fees.
-2. The **base reserve** (currently 0.5 XLM) is used in minimum account balances.
+1. **基本费用(base fee)** (目前为 100 stroops) 用于计算提交事务的费用
+2. **基本储备金(base reserve)** (目前为 0.5 XLM) 用于计算账户的最低余额
 
+## 事务的费用
 
-## Transaction Fee
-
-The fee for a transaction is the number of operations the transaction contains multiplied by the **base fee**, which is **100 stroops** (0.00001 XLM).
-
-```math-formula
-([# of operations] * [base fee])
-```
-
-For example, a transaction that allows trust on an account’s trustline *(operation 1)* and sends a payment to that account *(operation 2)* would have a fee of $$2 * [base fee] = 200 stroops$$.
-
-Stellar deducts the entire fee from the transaction’s [source account](./transactions.md#source-account), regardless of which accounts are involved in each operation or who signed the transaction.
-
-
-### Transaction Limits
-
-Each Stellar node usually limits the number of transactions that it will propose to the network when a ledger closes. If too many transactions are submitted, nodes propose the transactions with the highest fees for the ledger’s transaction set. Transactions that aren’t included are held for a future ledger, when fewer transactions are waiting.
-
-See [transaction life cycle](./transactions.md#life-cycle) for more information.
-
-## Fee Pool
-
-The fee pool is the lot of lumens collected from [transaction fees](./fees.md#transaction-fee).
-
-Stellar does not retain these lumens. They are distributed in the weekly process of [inflation voting](./inflation.md). 
-
-If there are any unallocated lumens after the vote, those lumens return to the fee pool for dispersal in the next round. 
-
-## Minimum Account Balance
-
-All Stellar accounts must maintain a minimum balance of lumens. Any transaction that would reduce an account's balance to less than the minimum will be rejected with an `INSUFFICIENT_BALANCE` error.
-
-The minimum balance is calculated using the **base reserve,** which is **0.5 XLM**:
+事务的费用是事务所包含的操作的数量乘以**基本费用**，基本费用为 **100 stroops** (0.00001 XLM)。
 
 ```math-formula
-(2 + [# of entries]) * [base reserve]
+([# 操作的数量] * [基本费用])
 ```
 
-The minimum balance for a basic account is $$2 * [base reserve]$$. Each additional entry costs the base reserve. Entries include:
+例如，若一个事务里有两个操作：一个账户设置一条 Trustline *（操作1）*，向另一个帐户发送付款 *（操作2）* ，那么这个事务的费用为 $$2 * [基本费用] = 200 stroops$$。
 
-- Trustlines
-- Offers
-- Signers
-- Data entries
+Stellar 从事务的[源账户(source account)](./transactions.md#source-account)中扣除全部费用，而不管每个操作涉及哪个账户或是哪些账户签署了事务。
 
-For example, an account with 1 trustline and 2 offers would have a minimum balance of $$(2 + 3) * [base reserve] = 2.5 XLM$$.
 
-Starting in protocol version 10, an account may also have lumen selling liabilities that must be satisfied in addition to the minimum balance discussed above. In this case, any transaction that would reduce an account's balance to less than the minimum plus lumen selling liabilities will be rejected with an `INSUFFICIENT_BALANCE` error.
+### 事务的限制
 
-## Fee Changes
+每个 Stellar 节点通常会限制总帐关闭时向网络提交的事务数。如果提交的事务太多，节点会优先提交那些手续费更高的事务，而那些没被提交的事务会在之后的总账中提交。
 
-The **base reserve** and **base fee** can change, but should not do so more than once every several years. For the most part, you can think of them as fixed values. When they are changed, the change works by the same consensus process as any transaction. For details, see [versioning](https://www.stellar.org/developers/guides/concepts/versioning.html).
+有关更多信息，请参见[事务的生命周期](./transactions.md#life-cycle)。
 
-You can look up the current fees by [checking the details of the latest ledger](../../horizon/reference/endpoints/ledgers-single.md).
+## 费用池
+
+费用池是从[交易费](./fees.md#transaction-fee)中收取的 Lumens。
+
+Stellar 不保留这些 Lumens。它们在每周的[通货膨胀投票](./inflation.md)中被分发出去。
+
+如果投票后有任何仍未分发的 Lumens，这些 Lumens 将返还到费用池，在下一轮投票中分发。
+
+## 最低账户余额
+
+所有 Stellar 账户必须保证账户满足最低账户余额的要求。任何试图将帐户余额减少到最低账户余额以下的事务将会被拒绝，并抛出`余额不足(INSUFFICIENT_BALANCE)`错误。
+
+最低账户余额可通过基本储备金(目前为 **0.5 XLM**)计算得出：
+
+```math-formula
+(2 + [# 子条目数]) * [基本储备金]
+```
+
+一个初始账户的最低账户余额为 $$2 * [基本储备金]$$。每增加一个条目的便需要多提供一份基准准备金，这些条目包括：
+
+- 信任线(Trustlines)
+- 交易挂单(Offers)
+- 签名账户(Signers)
+- 数据对(Data entries)
+
+例如，如果一个账户拥有 1 个 trustline 和 2 个 offers ，则该账户的最低账户余额为 $$(2 + 3) * [基本储备金] = 2.5 XLM$$.
+
+从协议版本 10 开始，帐户会记录 Lumens 的出售负债数量，除了上面讨论的最低余额外必须得到满足，如果有任何事务试图将帐户余额减少到最低账户余额加 Lumens 的出售负债数量以下的话，则会抛出`余额不足(INSUFFICIENT_BALANCE)`错误。
+
+## 费用的变更
+
+**基本储备金**和**基本费用**是会变动的，但它们多年才会变更一次。在大多数情况下，您可以将它们视为固定值。当它们被更改时，更改按照与任何事务相同的一致过程进行。当它们变更后，它会在这之后的事务中体现出来。有关详细信息，请参阅[版本]。
+
+您可以通过查看[最新总帐的详细信息](../../horizon/reference/endpoints/ledgers-single.md)来查看当前的费用。
