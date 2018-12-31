@@ -1,16 +1,16 @@
 ---
-title: Stellar Consensus Protocol
+title: Stellar 共识协议
 ---
 
-The Stellar Consensus Protocol (SCP) provides a way to reach consensus without relying on a closed system to accurately record financial transactions. SCP has a set of provable safety properties that optimize for safety over liveness—in the event of partition or misbehaving nodes, it halts progress of the network until consensus can be reached. SCP simultaneously enjoys four key properties: decentralized control, low latency, flexible trust, and asymptotic security.
+Stellar 共识协议(Stellar Consensus Protocol, SCP)提供了一种不依赖封闭系统准确记录金融交易而达成共识的方法。SCP 具有一系列可被证明的安全属性，这些安全属性是为了安全而非可用性而优化的ーー在节点被断开连接或不正常运行的情况下，它会阻止网络的运行，直到达成一致意见。 SCP 同时具有四个关键属性：分散式控制、低延迟、灵活的信任机制和渐近安全性。
 
-A few ways to explore SCP:
-* To learn all about the protocol, read the [white paper](https://www.stellar.org/papers/stellar-consensus-protocol.pdf). 
-* If you are implementing SCP, see the [internet draft](https://datatracker.ietf.org/doc/draft-mazieres-dinrg-scp/) and send questions and feedback to the [DIN mailing list](https://www.ietf.org/mailman/listinfo/Din).
-* View or contribute to the code in [stellar-core](https://github.com/stellar/stellar-core).
-* If white papers aren't your thing, here's a [technical summary](https://medium.com/a-stellar-journey/on-worldwide-consensus-359e9eb3e949). 
-* If you're new to consensus, get the basics from our graphic novel, [Adventures in Galactic Consensus](https://www.stellar.org/stories/adventures-in-galactic-consensus-chapter-1/). 
+你可以通过以下途径来探索 SCP：
+* 想要完全理解 SCP 的话，请阅读[白皮书](https://www.stellar.org/papers/stellar-consensus-protocol.pdf)。
+* 如果你正在实现 SCP, 请参阅 [internet draft](https://datatracker.ietf.org/doc/draft-mazieres-dinrg-scp/) 并将问题和反馈发送到 [DIN 邮件列表](https://www.ietf.org/mailman/listinfo/Din)。
+* 查看 [stellar-core](https://github.com/stellar/stellar-core) 的源代码，你可以尝试为它贡献源码。
+* 如果你不想阅读白皮书的话，你可以试试阅读这份 [技术总结](https://medium.com/a-stellar-journey/on-worldwide-consensus-359e9eb3e949)。
+* 如果你是初次了解共识算法，你可以通过我们为您准备的[漫画](https://www.stellar.org/stories/adventures-in-galactic-consensus-chapter-1/)来了解一些基本的概念。 
 
-You can also watch Professor David Mazières's [talk on SCP](https://www.youtube.com/watch?v=vmwnhZmEZjc):
+你也可以观看 David Mazières 教授[关于 SCP 的演讲](https://www.youtube.com/watch?v=vmwnhZmEZjc)：
 
 <a href="https://www.youtube.com/watch?v=vmwnhZmEZjc" target="_blank" rel="noopener noreferrer"><img src="https://i.ytimg.com/vi/vmwnhZmEZjc/hqdefault.jpg" alt="SCP talk" style="width: 480px; height: 360px" /></a>
