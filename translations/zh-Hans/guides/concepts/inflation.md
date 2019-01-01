@@ -1,23 +1,23 @@
 ---
-title: Inflation
+title: 通货膨胀
 ---
 
-The Stellar distributed network has a built-in, fixed, nominal [inflation](#inflation) mechanism. New lumens are added to the network at the rate of 1% each year. Each week, the protocol distributes these lumens to any account that gets over .05% of the "votes" from other accounts in the network. 
+Stellar 网络拥有[通货膨胀](#inflation)机制. 新的 Lumens 会以每年 1% 的速率添加到网络中, 通胀协议会将这些新 Lumens 分发给网络中得到了超过 .05% 的用户投票的账户。
 
-## How inflation voting works 
-Using the [set options](./list-of-operations.md#set-options) operation, every account selects another account as its **inflation destination**, or nominee to receive new currency. The inflation destination will persist until changed with another set options operation. 
+## 通胀投票如何运作
+每个账户都可以通过 [set options](./list-of-operations.md#set-options) 操作来设定一个**通胀目标(inflation destination)**, 这个通胀目标会收到通胀所产生的新 Lumens。除非你再次更新它，否则它会一直存在于你的账户中。
 
-Voting is weighted according to the number of lumens the voting account holds. For example, if account A has 120 lumens and sets its inflation destination to B, the network counts 120 votes for B.
+票数根据投票账户持有的 Lumens 数加权计算。举例来说，如果账户 A 拥有 120 Lumens，然后他将账户 B 设置为通胀目标，那么账户 B 就收到了 120 张投票。
 
-The distribution of new lumens is limited to once a week. Inflation is run in response to an [inflation operation](./list-of-operations.md#inflation) that anyone can submit to the network. This operation will fail if the inflation sequence number isn't one after the last sequence number. It will also fail if (sequence number * 1 week) of time hasn't elapsed since the network start date.  
+新 Lumens 的分发每周执行一次。任何人都可以向网络提交 [inflation](./list-of-operations.md#inflation) 操作。如果距网络开始运行的时间尚未过去一周，那么这个操作将会失败。
 
-Each time inflation is run, the lumens used to pay transaction [fees](./fees.md#transaction-fee) since the last voting round are also included in the total lumens distributed.
+每次通货膨胀运行时，自上一轮投票以来用于支付[交易费](./fees.md#transaction-fee)的 Lumens 也包含在分发的总 Lumens 中。
 
-When inflation is run, nodes carry out the following algorithm:
+当执行通胀时，节点会执行以下算法：
 
- 1. Calculate the `inflation pool` by (number of lumens in existence)*(weekly inflation rate) + fee pool.
- 2. Calculate the `MIN_VOTE` by (number of lumens in existence)*.0005. This is .05% of the existing lumens, the minimum amount of votes needed to get any part of the inflation pool.
- 2. Tally the votes for each account based on the **inflation destination** set for every account.
- 3. Determine which accounts exceeded the `MIN_VOTE`. These accounts are the winners.
- 4. The winners each get their prorata share of the inflation pool, if their account can receive that amount of lumens and still satisfy its lumen buying liabilities. Otherwise, the winner receives the maximum amount of lumens that it can receive while still satisfying its lumen buying liabilities, with the rest of their prorata share returned to the fee pool. For example, if a winner gets 2% of the votes, it will get 2% of the inflation pool assuming the account can receive that amount.
- 5. Return any unallocated lumens to the fee pool. 
+ 1. 通过 (存在的 Lumens 数量) * (每周的通货膨胀率) + 费用池 计算出 `通货膨胀资金池(inflation pool)`。
+ 2. 通过 (存在的 Lumens 数量) * .0005 计算出 `MIN_VOTE`。只有得到票数超过了 `MIN_VOTE` 的账户才能从通货膨胀资金池中获得 Lumens。
+ 3. 根据每个帐户设定的**通货膨胀目标**，计算每个帐户得到的票数。
+ 4. 那些得到票数超过 `MIN_VOTE` 的账户为胜出者。
+ 5. 胜出者将会收到通胀分发的 Lumens，但是，如果该账户本可以收到的新 Lumens 大于它的购买负债，那么超出的部分将会返还到费用池中。例如，如果胜出者获得 2％ 的选票，且该帐户满足上述条件，那么它将获得通胀池中 2％ 的 Lumens。
+ 6. 将未分配 Lumens 返还到费用池中。
