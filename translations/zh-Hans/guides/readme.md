@@ -1,25 +1,25 @@
 ---
-title: Stellar Development Guides
+title: Stellar 开发指南
 ---
 
-These guides are designed to help you learn more about the technical aspects of integrating Stellar into your application or service, from [the very basics](./get-started) to more detailed topics like [submitting transactions at a high rate with channels](./channels.md).
+开发指南会帮你了解如何将 Stellar 集成到您的应用程序或服务中去，它包含了[基础知识](./get-started)，也包含了像[使用 channels 来提高提交事务的频率](./channels.md)这类更高级的主题。
 
-If you are looking for detailed documentation on Stellar’s HTTP API or client libraries for your favorite programming language, check out the [API Reference](../reference) section.
+如果您正在寻找有关 Stellar 的 HTTP API 或您喜欢的编程语言的 SDK 的详细文档，请查看 [API 参考手册](../reference)。
 
-Some guides are grouped together:
+这些指南被归类为：
 
-## Get Started
+## 入门指南
 
-The [Get Started guide](./get-started) will introduce you to the basic technical aspects of Stellar, starting with an introduction to the various parts of the Stellar network, then moving on to address programmatically creating accounts and performing transactions.
+[入门指南](./get-started)将向您介绍 Stellar 网络最基础的用法，它首先介绍 Stellar 网络的各个部分，然后介绍如何通过编程来创建账户和执行事务。
 
-## Concepts
+## 概念
 
-The Concepts section contains overviews and explanations of various objects, terms, and technologies used throughout the Stellar ecosystem, from [accounts](./concepts/accounts.md) to the details of the [Stellar Consensus Protocol](./concepts/scp.md) that underlies everything.
+这部分包含了对整个 Stellar 生态系统中使用的各种对象、术语和技术的概述及解释，比如[账户](./concepts/accounts.md)和 [Stellar 共识协议](./concepts/scp.md)是什么。
 
 ## SDKs
 
-Looking for more details on Stellar’s client SDKs? You can find detailed documentation for each client SDK in the [API Reference](../reference) section.
+想了解 Stellar 客户端 SDK 的更多细节吗？您可以在 [API 参考手册](../reference)中找到各类客户端 SDK 的详细文档。
 
-## Walkthroughs
+## 演示
 
-Need more help? Need to understand how to implement something? Use these design patterns and tutorials as a starting place!
+想要更多帮助？想要了解如何实现某些东西？从这些设计模式和教程中获取灵感吧！
