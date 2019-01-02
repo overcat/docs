@@ -1,92 +1,64 @@
 ---
-title: Testnet
+title: 测试网络
 ---
 
-The testnet is a small test Stellar network, run by the Stellar Development
-Foundation (SDF), which is open to developers.
+测试网络(Testnet)是由 Stellar 开发基金会(SDF)为开发人员准备的一个小型 Stellar 测试网络。
 
-SDF runs 3 Stellar Core validators on the testnet.
+SDF 在测试网络中运行 3 个 Stellar Core 验证节点。
 
-You can connect a node to the testnet by configuring [stellar-core](https://github.com/stellar/stellar-core) to use this
-[configuration](https://github.com/stellar/stellar-core/blob/master/docs/stellar-core_testnet.cfg).
+你可以让 [stellar-core](https://github.com/stellar/stellar-core) 使用[此配置](https://github.com/stellar/stellar-core/blob/master/docs/stellar-core_testnet.cfg)来将其连接到测试网络。
 
-There is also a [Horizon instance](https://horizon-testnet.stellar.org/) that
-can directly interact with the testnet.
+SDF 还提供一个与测试网络相连接的 Horizon 实例。
 
-## What is the Stellar testnet good for?
+## Stellar 测试网络适合用来做什么？
 
-* [Creating test accounts](../get-started/create-account.md) (with funding thanks to Friendbot).
-* Developing applications and exploring tutorials on Stellar without the
-  potential to lose any valuable [assets](assets.md).
-* Test existing applications against new releases or release candidates of
-  [Stellar Core](https://github.com/stellar/stellar-core/releases) and [Horizon](https://github.com/stellar/go/releases).
-* Perform data analysis on a smaller, non-trivial data set compared to the public network.
+* [创建测试账户](../get-started/create-account.md) (由 Friendbot 提供测试资金)。
+* 在 Stellar 上开发应用程序和探索教程，而不会丢失任何有价值的[资产](assets.md)。
+* 测试 [Stellar Core](https://github.com/stellar/stellar-core/releases) 和 [Horizon](https://github.com/stellar/go/releases) 的新版本或候选版本。
+* 在一个与公共网络相比数据量极小的网络中进行数据分析。
 
-## What is the Stellar testnet not good for?
+## Stellar 测试网络不适合用来做什么？
 
-* Load and stress testing.
-  * If you want to test for performance, a good place to
-    get started is by taking a look at
-    [Stellar Core's core performance document](https://github.com/stellar/stellar-core/blob/master/performance-eval.md#networks-to-test-against).
-* High availability test infrastructure - SDF makes no guarantees around the
-  availability of the testnet.
-* Long term storage of data on the network - [the network is ephemeral, and resets perodically](test-net.md#periodic-reset-of-testnet-data).
-* Your testing infrastructure requires more control over the test environment,
-  such as:
-  * The ability to set the data reset frequency.
-  * The need to secure private or sensitive data (before launching on the public network)
+* 压力测试。
+  * 如果你想对性能进行测试的话，我们推荐您阅读 [Stellar Core 的性能说明](https://github.com/stellar/stellar-core/blob/master/performance-eval.md#networks-to-test-against)。
+* 测试高可用性基础架构 - SDF 无法保证测试网络的可用性。
+* 在网络上长期存储数据 - [测试网络上的数据不会永久保存，会被定期重置](test-net.md#periodic-reset-of-testnet-data)。
+* 你的测试软件需要对测试环境做更多的适应性处理，例如:
+  * 处理测试网络数据被重置的情况。
+  * 在将私密数据发送到公共网络上之前，你需要对它们进行妥善的处理。
 
-Keep in mind that you can always run your own test network for use cases that
-don't work well with SDF's testnet.
+如果不想使用 SDF 提供的测试网络的话，你可以自己搭建一个私有的测试网络。
 
-## Best Practices For Using Testnet
+## 使用测试网络的最佳实践
 
-### Periodic Reset of Testnet Data
-In order to preserve a good experience for developers, the SDF testnet is
-periodically reset to the genesis (initial) ledger. This ensures the removal of
-spam, minimizing the time to catch up to the latest ledger, and easier
-maintenance of the system over time.
+### 测试网络的数据会被定期重置
+为了让开发人员的拥有良好体验，SDF 测试网络会定期将总账重置为初始总账。这样可以删除网络中的垃圾信息，最大限度地缩短其它节点获取最新总帐的时间，并且可以使维护系统更加轻松。
 
-When this happens, all ledger entries (such as accounts, trustlines, offers,
-etc), transactions, and historical data are cleared for both Stellar Core and
-Horizon.
+当总账被重置为初始总账时，Stellar Core 和 Horizon 的所有总账条目(如账户、信任线、交易挂单等)、事务和历史数据都会被清除。
 
-As a result, developers should not rely on the existence of any accounts, or
-the state of any balances within testnet.
+因此，开发人员不应该依赖测试网络中的账户和资产。
 
-Starting in January 2019, the testnet will be reset once per quarter (every
-three months):
+从 2019 年 1 月开始，测试网络将每季度(每三个月)重置一次：
 
-* January
-* April
-* July
-* October
+* 一月
+* 四月
+* 七月
+* 十月
 
-SDF will announce the exact date with at least two weeks notice on the [Stellar
-Dashboard](http://dashboard.stellar.org/), along with several of Stellar's
-online developer communities.
+SDF 将至少提前两周在 [Stellar
+Dashboard](http://dashboard.stellar.org/) 及一些开发者社区中通知确切的日期。
 
-### Test Data Automation
+### 自动化测试
 
-Since most applications rely on data being present to do anything useful, it is
-highly recommended that you have testing infrastructure that can repopulate
-testnet with useful data after a reset. Not only will this make testing more
-reliable, but it will also help you scale out your testing infrastructure to
-a private test network if you choose to do so.
+由于大多数应用程序依赖于网络中已存在的数据来执行后续的操作，因此我们建议您在编写自动测试软件时，应该让它包含自动填充数据的功能，这样你才能从容的面对测试网络被重置的情况，而且如果您选择这样做的话，你可以低成本的将该测试软件应用在私有测试网络中。
 
-For example:
-* Generating issuers of assets for testing the development of a wallet.
-* Generating orders on the order book (both current and historical) for testing
-  the development of a trading client.
+例如：
+* 生成资产发行人以测试钱包的开发。
+* 生成挂单信息以开发和测试交易客户端。
 
-As a maintainer of an application, you will want to think about creating a data
-set that is representative enough to test your primary use cases, and allow for
-robust testing even when testnet is not available.
+作为应用程序的维护者，您需要考虑创建一个足以代表测试主要用例的数据集，以便在测试网络不可用时也能进行可靠的测试。
 
-A script can automate this entire process by [creating an account with
-Friendbot](../get-started/create-account.md), and submitting a set of
-[transactions](transactions.md) that are predefined as a part of
-your testing infrastructure.
+你的测试软件中应包含一系列的脚本来自动帮您完成数据的填充，比如通过脚本[自动使用 Friendbot 创建账户](../get-started/create-account.md)或提交一系列的
+[事务](transactions.md)。
 
-For additional questions we recommend heading over to
-[Stellar's Stack Exchange](https://stellar.stackexchange.com/).
+如果你还有其它问题的话，我们推荐您访问 [Stellar's Stack Exchange](https://stellar.stackexchange.com/)。
