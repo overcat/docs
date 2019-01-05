@@ -1,11 +1,10 @@
 ---
-title: Operations
+title: 操作
 ---
 
-[Transactions](./transactions.md) are made up of a [list of operations](./list-of-operations.md). Each
-operation is an individual command that mutates the ledger.
+[事务](./transactions.md)中包含了[一系列的操作](./list-of-operations.md)，每个操作都会改变总账。
 
-Here are the possible operation types:
+以下是目前可用的操作类型：
 - [Create Account](./list-of-operations.md#create-account)
 - [Payment](./list-of-operations.md#payment)
 - [Path Payment](./list-of-operations.md#path-payment)
@@ -19,112 +18,104 @@ Here are the possible operation types:
 - [Manage Data](./list-of-operations.md#manage-data)
 - [Bump Sequence](./list-of-operations.md#bump-sequence)
 
-Operations are executed on behalf of the source account specified in the
-transaction, unless there is an override defined for the operation.
+除非你在操作中明确指定了发起操作的源账户，否则默认将发起事务的源账户视为该操作的源账户。
 
-## Thresholds
+## 阈值(Thresholds)
 
-Each operation falls under a specific threshold category: low, medium, or high.
-Thresholds define the level of privilege an operation needs in order to succeed.
+每个操作都属于一个特定的阈值类别: 低、中或高。阈值定义了成功执行操作所需的权限级别。
 
-* Low Security:
+* 低等阈值：
   * AllowTrustTx
-    * Used to allow other signers to allow people to hold credit from this account but not issue credit.
+    * 允许或冻结其它账户持有的本账户发行的资产。
   * BumpSequence
-* Medium Security:
-  * All else
-* High Security:
+* 中等阈值：
+  * 所有属于高低等阈值操作之外的所有操作。
+* 高等阈值：
   * AccountMerge
-    * merge an account into another one
-  * SetOptions for Signer and threshold
-    * Used to change the Set of signers and the thresholds.
+    * 将一个账户合并到另外一个账户中
+  * 使用 SetOptions 操作设置签名账户和阈值
+    * 用于更改签名账户集和阈值
 
 
-## Validity of an operation
+## 验证操作是否有效
 
-There are two places in a [transaction life cycle](./transactions.md#life-cycle) when operations can fail. The first time is when a transaction is submitted to the network. The node to which the transaction is submitted checks the validity of the operation: in the **validity check**, the node performs some cursory checks to make sure the transaction is properly formed before including it in its transaction set and forwarding the transaction to the rest of the network.
+在[事务生命周期](./transactions.md#life-cycle)中，操作可能在其中两个阶段失败。首先是将事务提交给网络时，提交事务的节点会检查操作的有效性：在**有效性检查**中，节点进行一些粗略的检查，以确保事务所需的信息是完整的，然后将其包含在事务集中，并将事务转发给网络中的其它节点。
 
-The validity check only looks at the state of the source account. It ensures that:
-1) the outer transaction has enough signatures for the source account of the operation to meet the threshold for that operation.
-2) Operations-specific validity checks pass. These checks are ones that would stay true regardless of the ledger state—for example, are the parameters within the expected bounds? Checks that depend on ledger state don't happen until apply time—for example, a send operation won't check if you have enough balance to send until apply time.
+有效性检查仅查看源帐户的状态。它确保：
+1) 这个事务具有足够的帐户签名，以满足该操作所需的阈值。
+2) 这一步不会检查事务的其它参数是否合理，而是在事务被应用到总账是执行其它更多的检查，比如余额是否足够。
 
-Once a transaction passes this first validity check, it is propagated to the network and eventually included in a transaction set. As part of a transaction set, the transaction is applied to the ledger. At that point a fee is taken from the source account regardless of success/failure. Later, the transaction is processed: sequence number and signatures are verified before operations are attempted in the order they occur in the transaction. If any operation fails, the whole transaction fails and the effects of previous operations are rolled back.
+一旦事务通过了第一次有效性检查，它就会被打包到事务集中随后广播到网络中。事务作为事务集的一部分，会被打包到总帐中。此时，无论事务成功还是失败，都会从源帐户中收取手续费。稍后，系统将按照事务发生的顺序验证它们的序列号和签名。如果一个事务中有任何操作失败，则整个事务都会失败，账户将不会发生变动（但是手续费会扣除）。
+
+## 结果
+
+对于每个操作，都有一个与之匹配的结果类型。在成功的情况下，这个结果使用户知道这个操作产生了怎样的影响，在失败的情况下，它会向用户提供详细的错误信息。
+
+Stellar Core 按顺序将结果存放在 txhistory 表中以供其它组件使用。例如，Stellar Core 中的历史模块将对 txhistory 表中的数据进行进一步处理，以让它得以永久保存。它也可以用于外部程序，比如 Horizon 会从该表中收集必要的信息。
+
+## 涉及多个帐户的事务
+
+通常情况下，事务只涉及单一帐户上的操作。例如，如果帐户 a 想发送 Lumens 到帐户 b，这个事务只要获取到帐户 a 的授权即可。
+
+但是，我们也可以发起一个由多个帐户作为源账户的操作的事务。在这种情况下，要完成对操作进行授权，事务信封必须包含所涉及的每个帐户的签名。例如，一个事务中包含了两个支付操作，账户 a 和账户 b 分别发送一笔资产给账户 c，那么这个事务在提交到网络之前需要得到账户 a 和账户 b 的授权。
 
 
-## Result
+## 例子
+### 1. 不依赖第三方进行资产交换
 
-For each operation, there is a matching result type. In the case of success, this result allows users to gather information about the effects of the operation. In the case of failure, it allows users to learn more about the error.
+  Anush 想给 Bridget 发送一些 XLM (操作 1) 用于兑换一些 BTC (操作 2)。
 
-Stellar Core queues results in the txhistory table for other components to derive data from. This txhistory table is used by the history module in Stellar Core for uploading the history into long-term storage. It can also be used by external processes such as Horizon to gather the network history they need.
+  事务详情如下：
+  * 源帐号 = `Anush_account`
+  * 操作 1
+    * 源帐号  = _null_
+    * 发送 XLM --> `Bridget_account`
+  * 操作 2
+    * 源帐号 = _`Bridget_account`
+    * 发送 BTC --> `Anush_account`
 
-## Transactions involving multiple accounts
+   所需的签名：
+  * 操作 1: 需要 `Anush_account` 的签名(该操作默认使用事务的源帐户)（中等阈值）。
+  * 操作 2: 需要 `Bridget_account` 的签名（中等阈值）。
+  * 这个事务需要 `Anush_account` 的签名以验证该事务是由 `Anush_account` 发起的（低等阈值）。
 
-Typically transactions only involve operations on a single account. For example, if account A wanted to send lumens to account B, only account A needs to authorize the transaction.
+因此，如果 `Anush_account` 和 `Bridget_account` 都签署了该事务，它才是有效的。
 
-It's possible, however, to compose a transaction that includes operations on multiple accounts. In this case, to authorize the operations, the transaction envelope must include signatures of every account in question. For example, you can make a transaction where accounts A and B both send to account C. This transaction would need authorization from both account A and B before it's submitted to the network.
+### 2. 工作机
 
+   锚点希望每台机器都能单独的对基础账户（在这里指包含了大量资产的账户）进行操作。这样的话，每台机器将使用其本地帐户提交事务，并使用自己独立的序列号，而不用依赖于基础账户。想要了解交易序列号，请参阅[关于事务的文档](./transactions.md)。
 
-## Examples
-### 1. Exchange without third party
+   * 每台机器都有一个与之对应的密钥对。我们假设这里只有三台机器：Machine_1, Machine_2, 和 Machine_3。(实际上，锚点可以设置任意多的机器。)
+   * 将这三台机器的公钥添加到基础账户的签名列表中，并赋予它们中等签名权限，这样工作机就可以代表基础账户进行签名了。(想要了解更多与签名相关的知识，请查阅[关于多重签名的文档](multi-sig.md)。)
+   * 当一台机器（比如 Machine_2）想要向网络提交事务时，它会这样构建事务：
+      * 源账户=_Machine_2 的公钥_
+      * 序列号=_Machine_2 的账户的序列号_
+      * 操作
+        * 源账户=_基础账户(baseAccount)_
+        * 发送资产 --> 目标账户
+   * 使用 Machine_2 的密钥进行签名。
 
-  Anush wants to send Bridget some XLM (Operation 1) in exchange for BTC (Operation 2).
+   回想一下[事务文档](transactions.md)中的描述，所有事务都有自己的特定序列号，且这个序列号需要与源账户的序列号匹配。这种方案的优点是每台机器都可以增加其序列号并提交事务，而不会使其他机器提交的事务失效。通过为多个工作机器配置多个账户，此锚点能够提交尽可能多的事务而不会发生序列号冲突。
 
-  A transaction is constructed:
-  * source = `Anush_account`
-  * Operation 1
-    * source = _null_
-    * Payment send XLM --> `Bridget_account`
-  * Operation 2
-    * source = _`Bridget_account`
-    * Payment send BTC --> `Anush_account`
+### 3. 耗时较长的事务
 
-   Signatures required:
-  * Operation 1: requires signatures from `Anush_account` (the operation inherits
-    the source account from the transaction) to meet medium threshold
-  * Operation 2: requires signatures for `Bridget_account` to meet medium threshold
-  * The transaction requires signatures for `Anush_account` to meet low threshold since `Anush_account` is the
-    source for the entire transaction.
+需要多方签署的事务，可能需要花费较长的时间才会签署并提交到网络中，如例 1 中 Anush 和 Bridget 之间的交易。因为所有的交易都是用特定的序列号构造的，等待签名并提交的这段时间，Anush 的帐户无法再进行其它操作，否则会导致他和 Bridget 的交易失败。为了避免这种情况，可以使用类似于示例 2 的方案。
 
-Therefore, if both `Anush_account` and `Bridget_account` sign the transaction, it will be validated.  
-Other, more complex ways of submitting this transaction are possible, but signing with those two accounts is sufficient.
+  Anush 创建一个临时账户 `Anush_temp`, 并给它发送一些 XLM 以激活它，并将 `Anush_account` 的公钥作为签署者添加到 `Anush_temp` 的签名列表中，权重需要高于低等阈值。
 
-### 2. Workers
+  事务详情如下：
+  * 源账户=_Anush_temp_
+  * 序列号=_Anush_temp 的序列号_
+  * 操作 1
+    * 源账户=_Anush_account_
+    * 发送 XLM -> Bridget_account
+  * 操作 2
+    * 源账户=_Bridget_account_
+    * 发送 BTC -> Anush_account
 
-   An anchor wants to divide the processing of their online ("base") account between machines. That way, each machine will submit transactions from its local account and keep track of its own sequence number. For more on transaction sequence numbers, please refer to [the transactions doc](./transactions.md).
+  这个事务需要被 Anush_account 和 Bridget_account 签名, 但是它的序列号由 Anush_temp 提供。
 
-   * Each machine gets a private/key pair associated with it. Let's say there are only 3 machines: Machine_1, Machine_2, and Machine_3. (In practice, there can be as many machines as the anchor wants.)
-   * All three machines are added as Signers to the anchor's base account "baseAccount", with
-     a weight that gives them medium rights. The worker machines can then sign on behalf of the base account. (For more on signing, please refer to the [multisig documentation](multi-sig.md).)
-   * When a machine (say Machine_2) wants to submit a transaction to the network, it constructs the transaction:
-      * source=_public key for Machine_2_
-      * sequence number=_sequence number of Machine_2's account_
-      * Operation
-        * source=_baseAccount_
-        * Payment send an asset --> destination account
-   * sign it with the private key of Machine_2.
-
-   The benefit of this scheme is that each machine can increment its sequence number and submit a transaction without invalidating any transactions submitted by the other machines.  Recall from the [transactions doc](transactions.md) that all transactions from a source account have their own specific sequence number.  Using worker machines, each with an account, allows this anchor to submit as many transactions as possible without sequence number collisions.
-
-### 3. Long-lived transactions
-
-Transactions that require multiple parties to sign, such as the exchange transaction between Anush and Bridget from example #1, can take an arbitrarily long time. Because all transactions are constructed with specific sequence numbers, waiting on the signatures can block Anush's account. To avoid this situation, a scheme similar to Example #2 can be used.
-
-  Anush would create a temporary account `Anush_temp`, fund `Anush_temp` with XLM, and add the `Anush_account` public key as signer to `Anush_temp` with a weight crossing at least the low threshold.
-
-  A transaction is then constructed:
-  * source=_Anush_temp_
-  * sequence number=_Anush_temp seq num_
-  * Operation 1
-    * source=_Anush_account_
-    * Payment send XLM -> Bridget_account
-  * Operation 2
-    * source=_Bridget_account_
-    * Payment send BTC -> Anush_account
-
-  The transaction would have to be signed by both Anush_account and Bridget_account, but the sequence
-  number consumed will be from account Anush_temp.
-
-  If `Anush_account` wants to recover the XLM balance from `Anush_temp`, an additional operation "Operation 3" can be included in the transaction. If you want to do this, `Anush_temp` must add `Anush_account` as a signer with a weight that crosses the high threshold:
-  * Operation 3
+  如果 `Anush_account` 想回收 `Anush_temp` 账户中的 XLM，则可以在事务中添加“操作 3”。如果你想这样做，`Anush_account` 必须将 `Anush_temp` 添加到签名列表中，并赋予它高等签名权限：
+  * 操作 3
     * source=_null_
-    * Account Merge -> "Anush_account"
+    * 账户合并 -> "Anush_account"
