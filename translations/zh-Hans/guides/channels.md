@@ -1,26 +1,26 @@
 ---
-title: Channels
+title:信道 
 ---
-*Method for submitting transactions to the network at a high rate*
+*向网络高速提交事务的方法*
 
-If you are submitting [transactions](./concepts/transactions.md) to the network at a high rate or from different processes you must be careful that the transactions are submitted in the correct order of their sequence numbers. This can be problematic since typically you are submitting through Horizon and there is no guarantee that a given transaction is received by [stellar-core](https://github.com/stellar/stellar-core) until ledger close. This means that they can reach stellar-core out of order and will bounce with a bad sequence error. If you do wait for ledger close to avoid this issue that will greatly reduce the rate you can submit transactions to the network.
+如果你以较高速率或不同进程向网络提交[事务](./concepts/transactions.md)时，必须要小心让事务使用正确的序列号(sequence)次序进行提交。因为通常情况下你会使用Horizon进行提交事务，但其并不能保证给定的事务会被[Stellar core](https://github.com/stellar/stellar-core)接收到，除非关账成功。这可能会导致问题出现，也就是说事务可能乱序到达stellar core并引发不正确的序列号错误。如果你等待关账以避免类似错误，那么将会大大降低事务提交的速率。
 
-The way to avoid this is with the concept of **channels**.
+避免此类问题的方式是使用**信道**的概念。
 
-A channel is simply another Stellar account that is used not to send the funds but as the "source" account of the transaction. Remember transactions in Stellar each have a source account that can be different than the accounts being effected by the operations in the transaction. The source account of the transaction pays the fee and consumes a sequence number. You can then use one common account (your base account) to make the payment [operation](./concepts/operations.md) inside each transaction. The various channel accounts will consume their sequence numbers even though the funds are being sent from your base account. 
+信道即使用另外一个恒星账户作为事务的“源”账户。注意恒星中的每个事务都要源账户，可以与事务中被操作改变的账户不同。事务的源账户会支付事务手续费以及消耗序列号。你可以在事务中使用某一账号来进行支付[操作](./concepts/operations.md)。尽管资金是由该账户发出，构建这些事务的信道账户将会消耗掉它们的序列号。
 
-Channels take advantage of the fact that the "source" account of a transaction can be different than the source account of the operations inside the transaction. With this set up you can make as many channels as you need to maintain your desired transaction rate.
+信道使用了事务的源账户可以与事务内操作的源账户不同这一特性。利用这一点你可以按需创建多个信道来维系你希望的事务速率。
 
-You of course will have to sign the transaction with both the base account key and the channel account key.  
+当然，你需要使用信道账户和实际账户的密钥来签署该事务。
 
-For example:
+例如：
 ```
 StellarSdk.Network.useTestNetwork();
-// channelAccounts[] is an array of accountIDs, one for each channel
-// channelKeys[] is an array of secret keys, one for each channel
-// channelIndex is the channel you want to send this transaction over
+// channelAccounts[] 是信道账户数组，每一个代表一个信道
+// channelKeys[] 是信道账户的密钥数组
+// channelIndex 是你想要发生事务的信道
 
-// create payment from baseAccount to customerAddress
+// 创建从baseAccount到customerAddress的支付
 var transaction =
   new StellarSdk.TransactionBuilder(channelAccounts[channelIndex])
     .addOperation(StellarSdk.Operation.payment({
@@ -31,6 +31,6 @@ var transaction =
     }))
     .build();
 
-  transaction.sign(baseAccountKey);   // base account must sign to approve the payment
-  transaction.sign(channelKeys[channelIndex]);  // channel must sign to approve it being the source of the transaction
+  transaction.sign(baseAccountKey);   // base account需要签名验证支付
+  transaction.sign(channelKeys[channelIndex]);  // 信道需要签名验证源账户
 ``` 
