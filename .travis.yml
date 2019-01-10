@@ -9,7 +9,7 @@ before_script:
   - cd developers
   - npm install --no-shrinkwrap
   - node_modules/.bin/gulp git:clone
-  - cp -R repos/docs/translations/zh-Hans/* repos/docs/
+  - cp -R ../translations/zh-Hans/* repos/docs/
 
 script:
   - node_modules/.bin/gulp
