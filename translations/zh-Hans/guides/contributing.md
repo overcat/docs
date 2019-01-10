@@ -1,67 +1,60 @@
 ---
-title: Contribution Guide
+title: 贡献指南
 ---
 
-# How to contribute to a Stellar project
+# 如何为 Stellar 项目做出贡献
 
-Your contributions to the Stellar network will help improve the world’s financial
-infrastructure, faster.
+您对恒星网络的贡献将帮助我们更快地改善世界金融基础设施。
 
-We want to make it as easy as possible to contribute changes that
-help the Stellar network grow and thrive. There are a few guidelines that we
-ask contributors to follow so that we can merge your changes quickly.
+我们希望用户能够轻松的提交一个修改以帮助 Stellar 网络茁壮成长。以下是我们要求贡献者遵循的一些指导原则，以便我们能够快速合并您的更改。
 
-## Getting Started
+## 如何开始
 
-* Make sure you have a [GitHub account](https://github.com/join)
-* Create a GitHub issue for your contribution, assuming one does not already exist.
-  * Clearly describe the issue including steps to reproduce if it is a bug.
-* Fork the repository on GitHub
+* 您需要有一个 [GitHub 帐号](https://github.com/join)。
+* 如果 GitHub 上没有与您的问题相关的 Issue，那么您需要自己创建一个。
+  * 清晰且详细地描述这个问题，如果是一个 bug 的话请写出如何复现它。
+* Fork Github 上的代码仓库。
 
-## Finding things to work on
+## 找寻您可以参与的问题
 
-The first place to start is always looking over the current github issues for the project you are interested in contributing to. Issues marked with [help wanted](https://github.com/issues?q=is%3Aopen+is%3Aissue+user%3Astellar+label%3A%22help+wanted%22) are usually pretty self contained and a good place to get started.
+您可以现看看您感兴趣的项目的 GitHub Issue 列表，那些被标记为 [help wanted](https://github.com/issues?q=is%3Aopen+is%3Aissue+user%3Astellar+label%3A%22help+wanted%22) 的问题通常来说是一个好的切入点。
 
-Stellar.org also uses these same github issues to keep track of what we are working on. If you see any issues that are assigned to a particular person or have the `in progress` label, that means someone is currently working on that issue. The `orbit` label means we will likely be working on this issue in the next week or two. The `ready` label means that the issue is one we have prioritized and will be working on in our next orbit (stellar term for sprint) or two.
+我们也使用 GitHub Issues 来标记和跟踪正在处理的问题，如果您看到某个 Issue 被标记为 `in progress`，这意味着有其他人正在处理这个问题。`orbit` 标签意味着我们可能会在未来一两周处理这个问题。`ready` 标签意味着我们已经将它标记为高优先级，将尽快开始处理它。
 
-Feel free to make your own issues if you think something needs to added or fixed.
+如果您认为有些东西需要添加或修改，请添加或参与一个 Issue。
 
-## Making Changes
+## 更改
 
-* Create a topic branch from where you want to base your work.
-  * This is usually the master branch.
-  * Please avoid working directly on the `master` branch.
-* Make sure you have added the necessary tests for your changes and make sure all tests pass.
+* 以您想作出更改的分支为基础创建一个独立的主题分支，您将在这里进行修改。
+  * 您想修改的分支一般是 master 分支。
+  * 请避免直接在 `master` 分支进行修改。
+* 请确保您为您修改的代码添加了相应的测试，并且测试通过了。
 
-## Submitting Changes
+## 提交更改
 
-* [Sign the Contributor License Agreement](https://docs.google.com/forms/d/1g7EF6PERciwn7zfmfke5Sir2n10yddGGSXyZsq98tVY/viewform?usp=send_form)
-* All content, comments, and pull requests must follow the [Stellar Community Guidelines](https://www.stellar.org/community-guidelines/). 
-* Push your changes to a topic branch in your fork of the repository.
-* Submit a pull request to the repository for the project you’re working on in the Stellar organization.
- * Include a descriptive [commit message](https://github.com/erlang/otp/wiki/Writing-good-commit-messages).
- * Changes contributed via pull request should focus on a single issue at a time.
- * Rebase your local changes against the master branch. Resolve any conflicts that arise.
+* [签署贡献者许可协议](https://docs.google.com/forms/d/1g7EF6PERciwn7zfmfke5Sir2n10yddGGSXyZsq98tVY/viewform?usp=send_form)
+* 所有的内容、评论和 pull requests 必须遵循 [Stellar 社区指南](https://www.stellar.org/community-guidelines/)。
+* 将更改推送到您 fork 的仓库的一个主题分支中。
+* 向 Stellar 提交一个 pull request。
+ * [提交信息(commit message)](https://github.com/erlang/otp/wiki/Writing-good-commit-messages)应该描述您做了什么。
+ * 一个通过 pull request 提供的更改应该只关注一个问题(issue)。
+ * 确保您的 pull request 与当前代码库没有冲突。
 
-At this point you're waiting on us. We like to at least comment on pull requests within three
-business days (typically, one business day). We may suggest some changes, improvements or alternatives.
+之后您需要等待我们的审核。我们会在三个工作日之内（通常是一个工作日）对 pull requests 进行评论。我们可能会提出一些改变、改进或替代方案。
 
-## Minor Changes
+## 微小的更改
 
-### Documentation
-For small changes to comments and documentation, it is not
-always necessary to create a new GitHub issue. In this case, it is
-appropriate to start the first line of a commit with 'doc' instead of
-an issue number.
+### 文档
+对于注释和文档的小改动，并不总是需要创建新的 GitHub Issue。在这种情况下，请以 "doc" 作为提交消息的开头。
 
-# Additional Resources
-* [Contributor License Agreement](https://docs.google.com/forms/d/1g7EF6PERciwn7zfmfke5Sir2n10yddGGSXyZsq98tVY/viewform?usp=send_form)
-* [Explore the API](https://www.stellar.org/developers/reference/)
-* #dev channel on [Slack](http://slack.stellar.org)
-* #stellar-dev IRC channel on freenode.org
+# 其他资源
+* [贡献者许可协议](https://docs.google.com/forms/d/1g7EF6PERciwn7zfmfke5Sir2n10yddGGSXyZsq98tVY/viewform?usp=send_form)
+* [探索 API](https://www.stellar.org/developers/reference/)
+* [Slack](http://slack.stellar.org) 上的 #dev 频道
+* freenode.org 上的 #stellar-dev IRC 频道
 
 
-This document is inspired by:
+本文的灵感来自：
 
 https://github.com/puppetlabs/puppet/blob/master/CONTRIBUTING.md
 
