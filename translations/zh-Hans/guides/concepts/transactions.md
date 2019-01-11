@@ -1,76 +1,73 @@
 ---
-title: Transactions
+title: 事务
 ---
 
-Transactions are commands that modify the ledger state. Among other things, Transactions are used to send payments, enter
-orders into the [distributed exchange](./exchange.md), change settings on accounts, and authorize another account to hold
-your currency. If you think of the ledger as a database, then transactions are SQL commands.
+事务是修改总帐状态的命令。例如，事务中可包含发送付款、在[分布式交易所](./exchange.md)中生成订单、更改帐户设置、授权另一个帐户持有您发行的货币等改变总账的操作。如果您将总账视为一个数据库，那么事务就是 SQL 命令。
 
 
-Each transaction has the following attributes:
-> #### Source account
-> This is the account that originates the transaction. The transaction must be signed by this account, and the transaction fee must be paid by this account. The sequence number of this transaction is based off this account.
+事务具有以下属性：
+> #### 源帐号(Source account)
+> 发起事务的帐号被称之为源帐号。该事务必须被源帐号签署，手续费也由它支付。事务的序列号和源帐号的序列号相对应。
 >
-> #### Fee
-> Each transaction sets a [fee](./fees.md#transaction-fee) that is paid by the source account. If this fee is below the network minimum the transaction will fail. The more operations in the transaction, the greater the required fee.
+> #### 费用(Fee)
+> 每笔事务都设置了一个由源帐号支付的[费用](./fees.md#transaction-fee)，如果支付的费用少于网络要求的最低费用的话，这笔事务将会失败。事务中包含的操作越多，需要的手续费越多。
 >
-> #### Sequence number
-> Each transaction has a sequence number. Transactions follow a strict ordering rule when it comes to processing of transactions per account. For the transaction to be valid, the sequence number must be 1 greater than the sequence number stored in the source [account entry](./accounts.md) when the transaction is applied. As the transaction is applied, the source account's stored sequence number is incremented by 1 before applying operations. If the sequence number on the account is 4, then the incoming transaction should have a sequence number of 5. After the transaction is applied, the sequence number on the account is bumped to 5.
+> #### 序列号(Sequence number)
+> 每个事务都有一个序列号。系统遵循严格的排序规则来处理每个帐户的事务。要使事务有效，在应用事务时，它的序列号必须比存储在源[帐户字段](https://stellar-docs.overcat.me/guides/concepts/accounts.html)中的序列号大 1。应用事务时，源账户的序列号将会加 1。如果源帐户上序列号为 4，则传入事务的序列号应为 5，应用事务后，源帐户上的序列号将变为 5。
 >
-> Note that if several transactions with the same source account make it into the same transaction set, they are ordered and applied according to sequence number. For example, if 3 transactions are submitted and the account is at sequence number 5, the transactions must have sequence numbers 6, 7, and 8.
+> 请注意，如果具有相同源帐户的几个事务被放入同一个事务集中，则系统会根据序列号对它们进行排序和应用。例如，如果某账户提交了 3 个事务，且该账户的序列号为 5，则事务的序列号必须为 6、7 和 8。
 >
-> #### List of operations
-> Transactions contain an arbitrary list of [operations](./operations.md) inside them. Typically there is just one operation, but it's possible to have multiple (up to 100).  Operations are executed in order as one ACID transaction, meaning that either all operations are applied or none are.  If any operation fails, the whole transaction fails. If operations are on accounts other than the source account, then they require signatures of the accounts in question.
+> #### 操作集
+> 事务中包含了一个[操作集](./operations.md)，一般来说，其中只有一个操作，但是它最多可以包含 100 个操作。操作会按顺序执行，它们具有原子性，也就是说一个事务中的所有操作要么都执行成功，要么都执行失败。如果一个操作的源账户是其它账户而不是事务的源账户，那么事务需要额外的签名。
 >
-> #### List of signatures
-> Up to 20 signatures can be attached to a transaction. See [Multi-sig](./multi-sig.md) for more information. A transaction is considered invalid if it includes signatures that aren't needed to authorize the transaction—superfluous signatures aren't allowed.
+> #### 签名集
+> 一个事务最多可包含 20 个签名。如果事务包含授权事务不需要的签名，则该事务会视为无效——即不允许添加多余的签名。阅读[多重签名](./multi-sig.md)了解更多。
 >
-> Signatures are required to authorize operations and to authorize changes to the source account (fee and sequence number).
+> 需要签名来授权执行操作和更改源帐户（收取费用和改变账户序列号）。
 >
-> #### Memo
-> *optional* The memo contains optional extra information. It is the responsibility of the client to interpret this value. Memos can be one of the following types:
->   - `MEMO_TEXT` : A string encoded using either ASCII or UTF-8, up to 28-bytes long.
->   - `MEMO_ID` :  A 64 bit unsigned integer.
->   - `MEMO_HASH` : A 32 byte hash.
->   - `MEMO_RETURN` : A 32 byte hash intended to be interpreted as the hash of the transaction the sender is refunding.
+> #### 备注(Memo)
+> *可选* 备注中包含了其它可选的信息，客户端负责处理这个备注。备注可以是以下几种类型：
 >
-> #### Time bounds
-> *optional* The UNIX timestamp (in seconds), determined by ledger time, of a lower and upper bound of when this transaction will be valid. If a transaction is submitted too early or too late, it will fail to make it into the transaction set. `maxTime` equal `0` means that it's not set.
+> - `MEMO_TEXT` : 使用 ASCII 或 UTF-8 编码的字符串，最长为 28 字节
+> - `MEMO_ID` :  64 位无符号整数
+> - `MEMO_HASH` : 32 字节的 hash
+> - `MEMO_RETURN` : 32 字节的 hash，用于记录退款事务的 hash
+>
+> #### 时间界限(Time bounds)
+> *可选* 事务被允许进入总账的时间，这个时间用 UNIX 时间戳(秒) 表示，包含一个上限（最晚时间）和一个下限（最早时间）。一个事务提交的时间早于或晚于时间界限，都会因无法加入事务集而执行失败。`maxTime` 为 `0` 表示时间界限的上限不被限制。
 
-## Transaction sets
+## 事务集
 
-Between ledger closings, all the nodes in the network are collecting transactions. When it is time to close the next ledger, the nodes collect these transactions into a transaction set. SCP is run by the network to reach agreement on which transaction set to apply to the last ledger.
+在总账关闭前，所有的节点都会收集事务。当下一个总账要关闭时，节点将这些事务收集到一个事务集中。网络运行通过 SCP 让各个节点就应该应用哪个事务集达成共识。
 
-## Life cycle
+## 生命周期
 
-1. **Creation**: The user creates a transaction, fills out all the fields, gives it the correct sequence number, adds whatever operations it wants, etc. Try it with [js-stellar-sdk](https://www.stellar.org/developers/js-stellar-sdk/learn/).
+1. **创建**：用户创建一个事务。尝试使用 [js-stellar-sdk](https://www.stellar.org/developers/js-stellar-sdk/learn/) 创建一个事务。
 
-2. **Signing**: Once the transaction is filled out, all the needed signatures must be collected and added to the transaction envelope. Commonly it's just the signature of the account doing the transaction, but more complicated setups can require collecting signatures from multiple parties. See [multi-sig](./multi-sig.md).
+2. **签名**：事务创建完成后，必须收集所有需要的签名并将其添加到事务信封中。一般情况下，只需要源账户的签名就可以完成授权，但是如果这个事务包含了更复杂的操作的话可能需要更多账户的签名。请参阅[多重签名](./multi-sig.md)。
 
-3. **Submitting**: After signing, the transaction should be valid and can now be submitted to the Stellar network. Transactions are typically submitted using [horizon](https://www.stellar.org/developers/horizon/reference/transactions-create.html), but you can also submit the transaction directly to an instance of [stellar-core](https://github.com/stellar/stellar-core).
+3. **提交**：签署后，交易应该是有效的，现在可以提交到 Stellar 网络了。事务通常通过 [horizon](https://www.stellar.org/developers/horizon/reference/transactions-create.html) 提交，但您也可以直接将事务提交给 [stellar-core](https://github.com/stellar/stellar-core) 实例。
 
-4. **Propagating**: Once stellar-core receives a transaction, either given to it by a user or another stellar-core, it does preliminary checks to see if the transaction is valid. Among other checks, it makes sure that the transaction is correctly formed and the source account has enough to cover the transaction fee. Stellar-core doesn't check things that require inspecting the state of the ledger beyond looking up the source account—e.g., that the destination account to which the transaction is trying to send exists, that the account has enough of this asset to sell, that it's a valid path.
-If the preliminary checks pass, then stellar-core propagates the transaction to all the other servers to which it's connected. In this way, a valid transaction is flooded to the whole Stellar network.
+4. **广播**： 当 stellar-core 接收到用户或其他 stellar-core 提供的事务后，它将进行初步检查，以判断该事务是否有效。在后续的检查中（此类检查不包含在这一步中），系统会确保交易格式的正确性、源账户拥有足够的资金来支付交易费用。但在这个阶段 Stellar-core 只会检查源账户的状态，而不会检查诸如交易的接收账户是否存在、账户有足够的资产可以出售、这是否是一个有效的支付路径等其它东西。只要初步检查通过，那么 stellar-core 就会把事务广播给它连接的所有其他服务器。通过这种方式，一个有效的事务会被扩散到整个 Stellar 网络中。
 
-5. **Including in a transaction set**: When it's time to close the ledger, stellar-core takes all the transactions it has heard about since last ledger close and collects them into a transaction set. If it hears about any incoming transactions now, it puts them aside for next ledger close.
-Stellar-core nominates the transaction set it has collected. SCP resolves the differences between the various transaction sets proposed and decides on the one transaction set that the network will apply.
+5. **将事务打包到事务集中**：当总账关闭时，stellar-core 会将自从上一次总账关闭到现在收集到的所有事务打包到一个事务集中。如果此时还有其它事务被提交，这些事务会在下个总账关闭时被处理。SCP 解决各个节点提议的事务集之间的差异，并决定哪个事务集会被最终应用到网络中。
 
-6. **Application**: Once SCP agrees on a particular transaction set, that set is applied to the ledger. At this point, a fee is taken from the source account for every transaction in that set. Operations are attempted in the order they occur in the transaction. If any operation fails, the whole transaction fails, and the effects of previous operations in that transaction are rolled back. After all the transactions in the set are applied, a new ledger is created and the process starts over.
+6. **应用**：当 SCP 决定采用哪个事务集之后，这个事务集便会被应用到总账中。此时，系统会向该集合中的每个事务的源账户收取费用。操作按照它们在事务中发生的顺序执行，如果有任何操作失败，则整个事务都将失败，也就是说这个事务中所有的操作都不会生效。应用该集合中的所有事务之后，系统将会创建一个新的总账，并重新启动这个流程。
 
-## Possible Errors
+## 可能产生的错误
 
-Transaction can fail with one of the errors in a table below. Error reference for operations can be found in [List of operations](./list-of-operations.md) doc.
+事务可能会执行失败，以下是错误代码对照表。操作执行失败的原因请查阅[操作列表](./list-of-operations.md)的文档。
 
-|Error| Code| Description|
+|错误| 代码 | 描述|
 | --- | --- | --- |
-|FAILED| -1| One of the operations failed (check [List of operations](./list-of-operations.md) for errors).|
-|TOO_EARLY| -2| Ledger `closeTime` before `minTime` value in the transaction.|
-|TOO_LATE| -3| Ledger `closeTime` after `maxTime` value in the transaction.|
-|MISSING_OPERATION| -4| No operation was specified.|
-|BAD_SEQ| -5| Sequence number does not match source account.|
-|BAD_AUTH| -6| Too few valid signatures / wrong network.|
-|INSUFFICIENT_BALANCE| -7| Fee would bring account below [minimum reserve](./fees.md).|
-|NO_ACCOUNT| -8| Source account not found.|
-|INSUFFICIENT_FEE| -9| [Fee](./fees.md) is too small.|
-|BAD_AUTH_EXTRA| -10| Unused signatures attached to transaction.|
-|INTERNAL_ERROR| -11| An unknown error occured.|
+|FAILED| -1| 事务中的某个操作执行失败 (请查阅[操作列表](./list-of-operations.md)) |
+|TOO_EARLY| -2| 总账的 `closeTime` 早于事务中的 `minTime`|
+|TOO_LATE| -3| 总账的 `closeTime` 晚于事务中的 `maxTime`|
+|MISSING_OPERATION| -4| 事务中没有包含操作|
+|BAD_SEQ| -5| 事务序列号错误|
+|BAD_AUTH| -6| 没有足够多的有效签名/错误的网络|
+|INSUFFICIENT_BALANCE| -7| 执行该事务将导致账户的[基本储备金](./fees.md)不足|
+|NO_ACCOUNT| -8| 源账户不存在|
+|INSUFFICIENT_FEE| -9| [手续费](./fees.md)不足|
+|BAD_AUTH_EXTRA| -10| 包含了没有使用到的签名|
+|INTERNAL_ERROR| -11| 未知错误 |
