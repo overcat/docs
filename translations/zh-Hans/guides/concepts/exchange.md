@@ -1,65 +1,46 @@
 ---
-title: Distributed Exchange
+title: 分布式交易所
 ---
 
+除了支持[资产](https://stellar-docs.overcat.me/guides/concepts/assets.html)的发行和转移之外，Stellar 网络还内置了一个**分布式交易所**，任何类型的资产都可以在这里交易。总账中存储了帐户持有的余额以及帐户购买或出售资产的订单。
 
-In addition to supporting the issuing and movement of [assets](./assets.md), the Stellar network also acts as a decentralized **distributed exchange**
-of any type of asset that people have added to the network. Its ledger stores both balances held by user accounts and offers that user accounts make to buy or sell assets.
+## 订单(Offers)
+帐户可以使用 [Manage Offer](./list-of-operations.md#manage-offer) 操作发起购买或出售资产的[订单](https://stellar-docs.overcat.me/guides/concepts/list-of-operations.html#manage-offer)。要发起一个订单，帐户必须持有要出售的资产。同样，该帐户必须信任其意图购买的资产的发行人。
 
-## Offers
-An account can make offers to buy or sell assets using the [Manage Offer](./list-of-operations.md#manage-offer) operation.
-In order to make an offer, the account must hold the asset it wants to sell. Similarly, the account must trust the issuer of the asset it's trying to buy.
+当帐户发起订单时，将根据该资产对的订单薄检查该订单。如果新订单超过现存订单的报价，则按现有订单的价格完成这个新订单。假设您提出使用 10 XLM 购买 2 BTC。如果已经存在以 10 XLM 出售 2 BTC 的订单，您的报价将采用该报价 —— 您将获得 2 BTC 并失去 10 XLM。
 
-When an account makes an offer, the offer is checked against the existing orderbook for that asset pair. If the offer crosses
-an existing offer, it is filled at the price of the existing offer. Let's say that you make an offer to buy 10 XLM for 2 BTC. If an offer already
-exists to sell 10 XLM for 2 BTC, your offer will take that offer--you'll be 2 BTC poorer but 10 XLM richer.
+如果一个新订单没有现有订单能满足它，那么这个订单将保存在订单簿中，直到它被另一个订单所满足，或是在跨资产支付中被满足，或是被创建者取消、或者由于创建者不再拥有待出售资产而失效。
 
-If the offer doesn't cross an existing offer, the offer is saved in the orderbook until it is either taken by another offer,
-taken by a payment, canceled by the account that created the offer, or invalidated because the account making the offer no longer has the asset for sale.
+从协议版本 10 开始，订单不可能失效，因为拥有订单的账户中的待出售的资产将会被冻结。每个订单分别为卖出资产和买入资产的卖出负债和买入负债，这些负债累加在订单创建者的账户(对于 Lumens 来说)或信任线(对其他资产来说)中。任何可能导致账户无法偿还债务的操作都将失败，如发送过多余额。这保证了订单中能被顺利成交。
 
-Starting in protocol version 10, it is no longer possible for an offer to be invalidated because the account owning the offer no longer has the asset for sale. Each offer contributes
-selling liabilities for the selling asset and buying liabilities for the buying asset, which are aggregated in the account (for lumens) or trustline (for other assets) owned by
-the account creating the offer. Any operation that would cause an account to be unable to satisfy its liabilities, such as sending away too much balance, will fail. This guarantees that
-any offer in the orderbook can be executed entirely.
+Stellar 的订单就像传统市场中限价单一样。
 
-Offers in Stellar behave like limit orders in traditional markets. 
+对于价格相同的订单，旧的订单优先于新的订单。
 
-For offers placed at the same price, the older offer is filled before the newer one.  
+## 订单薄(Orderbook)
+**订单薄**是恒星网络上未完成的订单的记录。这个记录位于任何两个资产之间 —— 在这种情况下，假设资产是绵羊和小麦。订单薄记录了每个想要买卖绵羊和小麦的账户。
 
-## Orderbook
-An **orderbook** is a record of outstanding orders on the Stellar network. This record sits between any two assets--in this case,
-let's say the assets are sheep and wheat. The orderbook records every account wanting to buy sheep for wheat on one side and every account wanting to sell sheep for wheat on the other side.
+某些资产之间的订单很少或根本不存在。但这并不是一个问题：正如下面详细讨论的那样，资产转换路径可以促进两个交易稀少的资产之间的交换。
 
-Some assets will have a very thin or nonexistent orderbook between them. That's fine: as discussed in greater detail below, paths of orders can facilitate exchange between two thinly traded assets.
+## 被动订单(Passive offers)
+**被动订单**能让订单薄中存在零价差的订单。如果你想创建订单让人们可以以 1:1 的价格兑换锚点 A 发行的美元和锚点 B 发行的美元，你可以创建两个被动订单，这个两个订单不会相互满足并成交。
+
+被动订单是一种不会在相同报价的情况下成交的订单，只有在报价不相等时才会成交。
+例如，使用 XLM 购买 BTC 的最佳价格为 100XLM/BTC，然后你创建了一个以 100XLM/BTC 的价格售出 BTC 的被动订单，你的被动订单将不会立刻成交。
+你创建了一个以 99XLM/BTC 的价格售出 BTC 的被动订单，那么这个订单将会立刻以 100XLM/BTC 的价格成交。
 
 
-## Passive offers
-**Passive offers** allow markets to have zero spread. If you want to offer USD from anchor A for USD from anchor B at a 1:1 price, you can create two passive offers so the two offers don't fill each other.
+## 跨资产支付(Cross-asset payments)
+假设您拥有绵羊，并且想从只接受小麦作为付款的商店买东西。您可以在 Stellar 中创建一个付款，自动将您的绵羊以绵羊/小麦订单薄中的最佳价格兑换成小麦。
 
-A passive offer is an offer that does not take a counteroffer of equal price. It will only fill if the prices are not equal.
-For example, if the best offer to buy BTC for XLM has a price of 100XLM/BTC, and you make a passive offer to sell BTC at 100XLM/BTC, your passive offer *does not* take that existing offer.
-If you instead make a passive offer to sell BTC at 99XLM/BTC it would cross the existing offer and fill at 100XLM/BTC.
+您还可以使用更复杂的资产转换路径。想象一下，绵羊/小麦订单薄有很大的价格差异或是根本不存在。在这种情况下，如果您先将羊换成砖块，然后再将砖块兑换成小麦，您可能会获得更好的价格。所以这个可能存在的路径有两个跃点：绵羊 -> 砖块 -> 小麦。这条路径将依次使用绵羊/砖块订单薄和砖块/小麦订单薄。
 
+这些资产转换路径最多可包含 6 个跃点，但整个付款过程具有原子性，要么都成功要么都失败。付款人永远不会持有他不需要的其它种类资产。
 
-## Cross-asset payments
-Suppose you are holding sheep and want to buy something from a store that only accepts wheat. You can create a payment in
-Stellar that will automatically convert your sheep into wheat. It goes through the sheep/wheat orderbook and converts your sheep at the best available rate.
+找到付款的最佳路径的过程称为**路径寻找**。寻路涉及查看当前的订单薄并搜寻如何兑换才能为您提供最佳价格。这个过程并不是由 Stellar Core 处理的，而是通过像 Horizon 之类的其它软件处理的。
 
-You can also make more complicated paths of asset conversion. Imagine that the sheep/wheat orderbook has a very large spread
-or is nonexistent. In this case, you might get a better rate if you first trade your sheep for brick and then sell that brick for wheat.
-So a potential path would be 2 hops: sheep->brick->wheat. This path would take you through the sheep/brick orderbook and then the brick/wheat orderbook.
+## 首选货币(Preferred currency)
 
-These paths of asset conversion can contain up to 6 hops, but the whole payment is atomic--it will either succeed or fail. The payment sender will never be left holding an unwanted asset.
+由于 Stellar 的跨资产支付非常简单，用户可以将资金保留在自己喜欢的任何资产上。**首选货币**创造了一个非常灵活、开放的系统。
 
-This process of finding the best path of a payment is called **pathfinding**. Pathfinding involves looking at the current
-orderbooks and finding which series of conversions gives you the best rate. It is handled outside of Stellar Core by something like Horizon.
-
-
-## Preferred currency
-Because cross-asset payments are so simple with Stellar, users can keep their money in whatever asset they prefer to hold. **Preferred currency** creates a very flexible, open system. 
-
-Imagine a world where, anytime you travel, you never have to exchange currency except at the point of sale. A world where
-you can choose to keep all your assets in, for example, Google stock, cashing out small amounts as you need to pay for things. Cross-asset payments make this world possible.
-
-
-
+想象一下这样一个世界，在你旅行的时候，你不需要兑换货币(除非是使用 POS 机支付)，你可以直接将你持有的资产，例如谷歌股票兑换成小额现金用于支付。跨资产支付使这样的世界成为可能。
