@@ -1,40 +1,40 @@
 ---
-title: Next Steps
+title: 下一步
 sequence:
   previous: 4-compliance-server.md
 ---
 
-Congratulations! If you’ve made it to this point, you should now have a working bridge server, federation server, and compliance server, with the ability to make and receive secure, sanctioned payments on the Stellar network.
+恭喜！如果您已经抵达这里，您现在应已拥有可用的桥接服务，联邦服务，和合规服务，可以在恒星网络上收发安全可控的付款了。
 
-## Testing
-Sending and receiving require your servers to interact with someone else's. This can make it difficult to test. For this reason SDF has built a handy testing harness were you can test sending and receiving against our test anchor. It can simulate various failure scenarios so you can be sure all corner cases are handled. Check out the testing tool here [gostellar.org](http://gostellar.org).
+## 测试
 
-## Moving to Production
+收发需要您的服务器与其他人进行交互，测试可能变得困难。 鉴于此，恒星基金会构建了一个方便的测试工具，您可以使用我们的测试锚点进行测试收发。 它可以模拟各种故障情景，因此您可以确保处理所有极端情况。 在这里查看测试工具[gostellar.org](http://gostellar.org).
 
-As you prepare to move your services into production and support transactions on the public Stellar network, you should make sure to carefully check a few things:
+## 转移到生产环境
 
-- Update the Horizon URL and network passphrase in your bridge server and compliance server configuration files. The bridge server will need a horizon server on the public network (instead of the test network) to send transactions. Both the bridge and compliance servers also have a `network_passphrase` in their configuration. The public network uses a separate passphrase:
+当您准备将服务转移到生产环境并支持恒星公有网络上的事务时，您应该确保仔细检查以下几点：
+
+- 更新桥接服务和合规服务配置文件中的Horizon URL和网络密语（network passphrase）。 桥接服务将需要公有网络（而不是测试网络）上的horizon服务器来发送事务。 桥接服务和合规服务在其配置文件中也有`network_passphrase`选项。公有网络使用另外的密语：
 
     ```toml
     network_passphrase = "Public Global Stellar Network ; September 2015"
     ````
 
-- Ensure that your bridge server and the internal port of your compliance server are not publicly accessible. Both of these servers allow for privileged operations that could be very costly if someone can reach them when they should not have access.
+- 确保您的桥接服务和合规服务的内部端口不对外公开。这两个服务都允许特权操作，如果有一些不该有权限的人访问到了它们，可能付出的代价会非常昂贵。
 
+## 接下来是？
 
-## What Next?
+虽然您现在已经学会了处理锚点的核心操作，但是运营锚点可能需要了解或应该考虑的事情还有很多：
 
-While you’ve now learned to handle the core operations of an anchor, there are many more things anchors might want to learn about or should consider:
-
-- [Operate your own node and horizon server on the Stellar network](https://stellar.org/developers/stellar-core/software/admin.html). Doing so makes you less reliant on other providers and makes the whole Stellar network stronger.
-- Read our guide on [security](../security.md).
-- Make offers to [buy and sell assets on the distributed exchange](../concepts/exchange.md).
-- Use a [market making bot to automate liquidity provisioning for your asset](https://github.com/lightyeario/kelp).
-- Explore [multisignature systems](../concepts/multi-sig.md) to make critical accounts more secure.
-- Use [channels](../channels.md) to submit more transactions at a time.
-- Talk with other Stellar developers in [Stellar’s Slack community](http://slack.stellar.org/)
-- [Contribute](../contributing.md) your own fixes and improvements to Stellar software.
+- [运行自有节点和horizon服务](https://stellar.org/developers/stellar-core/software/admin.html)。这样做可以减少对其它供应商的依赖，并使整个恒星网络更加强大。
+- 阅读本指南中[security](../security.md)章节。
+- 学习[在分布式交易所上买卖资产](../concepts/exchange.md)。
+- 使用[做市机器人来为您的资产注入自动化流动性](https://github.com/lightyeario/kelp)。
+- 探索[多重签名系统](../concepts/multi-sig.md)保证关键账户更加安全。
+- 使用[信道](../channels.md)来同时提交更多事务。
+- 与其它恒星开发者聊天：[恒星Slack社区](http://slack.stellar.org/)
+- 为恒星软件[贡献](../contributing.md) 您的补丁以及改进代码。
 
 <nav class="sequence-navigation">
-  <a rel="prev" href="4-compliance-server.md">Back: Compliance Server</a>
+  <a rel="prev" href="4-compliance-server.md">上一章节：合规服务</a>
 </nav>
