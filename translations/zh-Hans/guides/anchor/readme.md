@@ -1,103 +1,103 @@
 ---
-title: Architecture
+title: 架构
 sequence:
   next: 2-bridge-server.md
 ---
 
-Anchors are entities that people trust to hold their deposits and [issue credits](../issuing-assets.md) into the Stellar network for those deposits. All money transactions in the Stellar network (except lumens) occur in the form of credit issued by anchors, so anchors act as a bridge between existing currencies and the Stellar network. Most anchors are organizations like banks, savings institutions, farmers’ co-ops, central banks, and remittance companies.
+锚点是人们信任的实体，可以持有用户的存入款项并在恒星网络上对应地[发行资产](../issuing-assets.md)。恒星中所有运转的资产（除XLM以外）均由锚点发行而产生，所以锚点在现有货币和恒星中扮演桥梁的角色。大多数锚点均以组织的形式存在，如银行，储蓄机构，合作社，中央银行，以及汇款公司等等。
 
-Before continuing, you should be familiar with:
+在继续前，您应该熟悉下列概念：
 
-- [Issuing assets](../issuing-assets.md), the most basic activity of an anchor.
-- [Federation](../concepts/federation.md), which allows a single Stellar account to represent multiple people.
-- [Compliance](../compliance-protocol.md), if you are subject to any financial regulation.
+- [发行资产](../issuing-assets.md)， 锚点的最基础行为动作。
+- [联邦协议](../concepts/federation.md)， 可以允许单个恒星账户指代多个人。
+- [合规协议](../compliance-protocol.md)，如果您受到任何金融监管。
 
 
-## Account Structure
+## 账户架构
 
-As an anchor, you should maintain at least two accounts:
+作为锚点，您至少要维护两个账户：
 
-- An **issuing account** used only for issuing and destroying assets.
-- A **base account** used to transact with other Stellar accounts. It holds a balance of assets issued by the *issuing account*.
+- 一个只用来发行和销毁资产的 **发行账户**
+- 一个用于处理其它事务的 **基本帐户** ，持有由*发行账户*发行的资产。
 
-Create them on the test network using the [laboratory](https://stellar.org/laboratory/) or the steps from the [“get started” guide](../get-started/create-account.md).
+使用 [laboratory](https://stellar.org/laboratory/) 在测试网络创建这两个账户，或者使用[“get started”指南](../get-started/create-account.md)中的步骤创建。
 
-For this guide, we’ll use the following keys:
+在此指南中，我们使用以下密钥对：
 
 <dl>
-  <dt>Issuing Account ID</dt>
+  <dt>发行账户ID</dt>
   <dd><code>GAIUIQNMSXTTR4TGZETSQCGBTIF32G2L5P4AML4LFTMTHKM44UHIN6XQ</code></dd>
-  <dt>Issuing Seed</dt>
+  <dt>发行账户密钥</dt>
   <dd><code>SBILUHQVXKTLPYXHHBL4IQ7ISJ3AKDTI2ZC56VQ6C2BDMNF463EON65U</code></dd>
-  <dt>Base Account ID</dt>
+  <dt>基本帐户ID</dt>
   <dd><code>GAIGZHHWK3REZQPLQX5DNUN4A32CSEONTU6CMDBO7GDWLPSXZDSYA4BU</code></dd>
-  <dt>Base Seed</dt>
+  <dt>基本账户Seed</dt>
   <dd><code>SAV75E2NK7Q5JZZLBBBNUPCIAKABN64HNHMDLD62SZWM6EBJ4R7CUNTZ</code></dd>
 </dl>
 
 
 
-### Customer Accounts
+### 客户账户
 
+有两种简单的方式来统计账户的资金：
 There are two simple ways to account for your customers’ funds:
 
-1. Maintain a Stellar account for each customer. When a customer deposits money with your institution, you should pay an equivalent amount of your custom asset into the customer’s Stellar account from your *base account*. When a customer needs to obtain physical currency from you, deduct the equivalent amount of your custom asset from their Stellar account.
+1. 为每个客户维护一个恒星账户。当客户从您的机构存入资金，您应该从*基本账户*上支付等量的资产到客户的恒星账户。当用户需要获得实际货币时，从他们的账户上减去等量的资产。
 
-    This approach simplifies bookkeeping by utilizing the Stellar network instead of your own internal systems. It can also allow your customers a little bit more control over how their account works in Stellar.
+    这种方式使用恒星网络而不是自有内部网系统，从而简化了记账。这样也可以让客户能够更多的控制其恒星账户运作的方式。
 
-2. Use [federation](../concepts/federation.md) and the [`memo`](../concepts/transactions.md#memo) field in transactions to send and receive payments on behalf of your customers. In this approach, transactions intended for your customers are all made using your *base account*. The `memo` field of the transaction is used to identify the actual customer a payment is intended for.
+2. 使用 [联邦协议](../concepts/federation.md) 和 事务中的[`memo`](../concepts/transactions.md#memo) 字段来代表客户进行收发款项。这种方式为您的客户进行的交易，都是使用*基本账户*进行。e 事务的`memo`字段用来标记支付对应的实际客户。
 
-    Using a single account requires you to do additional bookkeeping, but means you have fewer keys to manage and more control over accounts. If you already have existing banking systems, this is the simplest way to integrate Stellar with them.
+    使用单一账户需要您进行附加的记账工作，但也意味着您只需保管少量的密钥对，以及更好的控制账户。如果您已有类似的银行系统。这是与恒星集成最简单的方式。
 
-You can also create your own variations on the above approaches. **For this guide, we’ll follow approach #2—using a single Stellar account to transact on behalf of your customers.**
-
-
-## Data Flow
-
-In order to act as an anchor, your infrastructure will need to:
-
-- Make payments.
-- Monitor a Stellar account and update customer accounts when payments are received.
-- Look up and respond to requests for federated addresses.
-- Comply with Anti-Money Laundering (AML) regulations.
-
-Stellar provides a prebuilt [federation server](https://github.com/stellar/go/tree/master/services/federation) and [regulatory compliance server](https://github.com/stellar/bridge-server/blob/master/readme_compliance.md) designed for you to install and integrate with your existing infrastructure. The [bridge server](https://github.com/stellar/bridge-server/blob/master/readme_bridge.md) coordinates them and simplifies interacting with the Stellar network. This guide demonstrates how to integrate them with your infrastructure, but you can also write your own customized versions.
-
-### Making Payments
-
-When using the above services, a complex payment using federation and compliance works as follows:
-
-![Diagram of sending a payment](assets/anchor-send-payment-compliance.png)
-
-1. A customer using your organization’s app or web site sends a payment using your services.
-2. Your internal services send a payment using the bridge server.
-3. The bridge server determines whether compliance checks are needed and forwards transaction information to the compliance server.
-4. The compliance server determines the receiving account ID by looking up the federation address.
-5. The compliance server contacts your internal services to get information about the customer sending the payment in order to provide it to the receiving organization’s compliance systems.
-6. If the result is successful, the bridge server creates a transaction, signs it, and sends it to the Stellar network.
-7. Once the transaction is confirmed on the network, the bridge server returns the result to your services, which should update your customer’s account.
+您也可以基于此创建您自己的方式。 **在此指南中，我们使用第二种方式——使用一个恒星账号来代表客户进行交易。**
 
 
-### Receiving Payments:
+## 数据流 
 
-When someone is sending a transaction to you, the flow is slightly different:
+为了运营锚点，您的基础架构需要：
 
-![Diagram of receiving a payment](assets/anchor-receive-payment-compliance.png)
+- 发起支付。
+- 监控某个恒星账户，当有支付过来时更新客户的账户信息。
+- 查询和回应对联邦地址的请求。
+- 遵守反洗钱（AML）规定。
 
-1. The sender looks up the Stellar account ID to send the payment to based on your customer’s federated address from your federation server.
-2. The sender contacts your compliance server with information about the person sending the payment.
-3. Your compliance server contacts three services you implement:
-    1. A sanctions callback to determine whether the sender is permitted to pay your customer.
-    2. If the sender wants to check your customer’s information, a callback is used to determine whether you are willing to share your customer’s information.
-    3. The same callback used when sending a payment (above) is used to actually get your customer’s information.
-4. The sender submits the transaction to the Stellar network.
-5. The bridge server monitors the Stellar network for the transaction and sends it to your compliance server to verify that it was the same transaction you approved in step 3.1.
-6. The bridge server contacts a service you implement to notify you about the transaction. You can use this step to update your customer’s account balances.
+恒星提供了预先编译好的[联邦服务](https://github.com/stellar/go/tree/master/services/federation) 和 [合规服务](https://github.com/stellar/bridge-server/blob/master/readme_compliance.md)，可以用来安装和与您的现有基础设施进行集成。[桥接服务](https://github.com/stellar/bridge-server/blob/master/readme_bridge.md) 可以与他们协同，并简化与恒星网络的交互工作。 本指南会演示如何将它们与您的基础架构进行集成，但您也可以自行编写软件并进行集成。
 
-**While these steps can seem complicated, Stellar’s bridge, federation, and compliance services do most of the work.** You only need to implement four callbacks and create a [stellar.toml](../concepts/stellar-toml.html) file where others can find the URL of your services.
+### 发起支付
 
-In the rest of this guide, we’ll walk through setting up each part of this infrastructure step by step.
+使用上述服务时，使用联邦协议和合规协议的复杂付款会如下工作：
+
+![发起支付图示](assets/anchor-send-payment-compliance.png)
+
+1. 客户使用您组织的应用或网站提供的服务发起付款。
+2. 您的内部服务使用桥接服务发送付款。
+3. 桥接服务确定是否需要合规性检查，并将交易信息转发给合规服务。
+4. 合规服务通过查找联邦地址来确定接收账户ID。
+5. 合规服务与您的内部服务联系，获取发送付款的客户的信息，以便将其提供给接收组织的合规系统。
+6. 如果合规结果成功，桥接服务将创建事务，对其进行签名，然后将其发送到恒星网络。
+7. 在网络确认交易后，桥接服务会将结果返回给您的服务，该服务应更新您客户的账户。
+
+### 接收支付：
+
+当有人向你发送交易时，流程有所不同：
+
+![接收支付图示](assets/anchor-receive-payment-compliance.png)
+
+1. 发送方向您的联邦服务发起查询客户的联邦地址操作，并获得恒星账户ID以便发送付款。
+2. 发送方会与您的合规服务联系，提供有关付款人的信息。
+3. 您的合规服务会联系三项服务，您需要自行实现：
+    1. 一个禁令回调服务，用以确定是否允许该付款人向您的客户付款。
+    2. 如果发送方想要检查客户的信息，则会使用一个回调服务来确定您是否愿意分享客户信息。
+    3. 步骤3.2的回调服务，还可用于实际获取客户信息。
+4. 发送方将事务提交到恒星网络。
+5. 桥接服务就此事务监控恒星网络，发现后将其发送到您的合规服务，以验证它是您在步骤3.1中批准的同一事务。
+6. 桥接服务会联系您自行实现的另一服务，以通知您有关该事务的信息。您可以使用此步骤更新客户的账户余额。
+
+**虽然这些步骤看起来很复杂，但恒星的桥接服务，联邦服务和合规服务可以完成大部分工作。** 您只需要实现4个回调服务，并创建一个[stellar.toml](../concepts/stellar-toml.html)文件用于别人查询服务的URL即可。
+
+接下来，我们将逐步介绍如何配置这些基础设施的每一部分。
 
 <nav class="sequence-navigation">
-  <a rel="next" href="2-bridge-server.md">Next: Bridge Server</a>
+  <a rel="next" href="2-bridge-server.md">下一章节：桥接服务</a>
 </nav>
