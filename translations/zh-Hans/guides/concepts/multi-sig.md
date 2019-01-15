@@ -1,156 +1,141 @@
 ---
-title: Multisignature
+title: 多重签名
 ---
 
-## Transaction signatures
-Stellar uses **signatures** as authorization. Transactions always need authorization from at least one public key in order
-to be considered valid. Generally, transactions only need authorization from the public key of the source account.
+## 事务签名
+Stellar 使用**签名**进行授权。事务总是需要至少一个公钥的授权才能被视为有效。通常情况下，事务只需要来自源帐户的公钥的授权。
 
-Transaction signatures are created by cryptographically signing the transaction object contents with a secret key. Stellar
-currently uses the ed25519 signature scheme, but there's also a mechanism for adding additional types of public/private
-key schemes. A transaction with an attached signature is considered to have authorization from that public key.
+事务签名是通过使用密钥对事务中的内容进行加密签名创建的。Stellar 目前使用的是 ed25519 签名方案，但是您也可以使用其他类型的公钥/密钥方案。带有附加签名的事务被视为得到了该公钥的授权。
 
-In two cases, a transaction may need more than one signature. If the transaction has operations that affect more than one
-account, it will need authorization from every account in question. A transaction will also need additional signatures if
-the account associated with the transaction has multiple public keys. For examples, see the [operations guide](./operations.md#examples).
+在两种情况下，事务可能需要多个签名。如果交易具有影响多个帐户的操作，则需要每个相关帐户的授权。如果与事务关联的帐户具有多个公钥，则事务还需要额外的签名。有关示例，请参阅[操作指南](./operations.md#examples)。
 
-## Thresholds
-[Operations](./operations.md) fall under a specific threshold category: low, medium, or high.
-The threshold for a given level can be set to any number from 0-255. This threshold is the amount of signature weight required to authorize an operation at that level.
+## 阈值
 
-Let's say Diyang sets the medium threshold on one of her accounts to 4. If that account submits a transaction that includes a payment operation (medium security), the transaction's threshold is 4--the signature weights on it need to be greater than or equal to 4 in order to run. If Diyang's master key--the key corresponding to the public key that identifies the account she owns--has a weight less than 4, she cannot authorize a transaction without other signers.
+所有的[操作](./operations.md)都属于特定的阈值类别: 低、中或高。给定水平的阈值可以设置为 0-255 之间的任意数字。此阈值是授权该级别上的操作所需的签名权重。
 
-Once the signature threshold is met if there are any leftover signatures then the transaction is regarded as having too many signatures which results in a failed transaction even if the remaining signatures are valid, i.e. for a transaction signed with N signatures, if the threshold is reached using K signatures then the transaction will fail if N > K.
+假设 Diyang 把她的一个账户的中等阈值设置为 4。如果该账户提交了一个包含支付操作(中等阈值权限)的事务，则该事务的阈值为 4 —— 事务上的签名权重必须大于或等于 4 它能被成功执行。如果 Diyang 的主密钥的权重小于 4，那么她不能在没有其他可签名者授权的情况下成功执行该事务。
 
-Each account can set its own threshold values. By default all thresholds levels are set to 0, and the master key is set to weight 1. The [Set Options](./list-of-operations.md#set-options) operation allows you to change the weight of the master key and to add other signing keys with different weights.
+当事务的签名阈值满足后，如果有任何多余的签名，事务将会因具有过多的签名而失败，即使多余的签名是有效的。例如，一个事务拥有 N 个签名，当验证到第 K 个签名时(N > K)就已经满足了事务所需的阈值，那么这个事务将会失败。
 
-Low Security:
-  * [Transaction processing](./transactions.md)
-    * Charging a fee or updating the sequence number for the source account
-  * [Allow Trust](./list-of-operations.md#allow-trust) operation
-    * Used to allow people to hold credit from this account without exposing the key that enables sending payments from this account.
+每个帐户都可以设置自己的阈值。默认情况下，所有阈值级别都被设置为 0，并且主密钥的权重被设置为 1。[Set Options](./list-of-operations.md#set-options) 操作允许您更改主密钥的权重并添加具有不同权重的其他签名密钥。
+
+低等权限操作：
+  * [事务处理](./transactions.md)
+    * 从源账户中收取手续费并更改其序列号
+  * [Allow Trust](./list-of-operations.md#allow-trust) 操作
+    * 允许或冻结其它账户持有的本账户发行的资产。
   * [Bump Sequence](./list-of-operations.md#bump-sequence)
-    * Modify the account's sequence number directly
+    * 修改账户的序列号
 
-Medium Security:
- * All [other operations](./list-of-operations.md)
+中等权限操作：
+ * 除高低等权限操作之外的[所有操作](./list-of-operations.md)。
 
-High Security:
-  * [Set Options](./list-of-operations.md#set-options) to change the signers or the thresholds
-    * Allows you to create a set of signers that give or revoke access to the account.
-  * [Account Merge](./list-of-operations.md#account-merge) to merge accounts
+高等权限操作：
+  * 使用 [Set Options](./list-of-operations.md#set-options) 操作设置签名账户和阈值
+    * 允许您为账户添加或删除可签名账户。
+  * [Account Merge](./list-of-operations.md#account-merge) 用于将一个账户合并到另外一个账户中
 
-For most cases, it is recommended to set thresholds such that `low <= medium <= high`.
+在大多数情况下，我们推荐将阈值的大小设置为 `low <= medium <= high`。
 
-## Additional signing keys
-Accounts are identified by a public key. The private key that corresponds to this public key is called the **master key**. Additional signing keys can be added to the account using the [Set Options](./list-of-operations.md#set-options) operation.
+## 额外的签名密钥
+帐户由一个公钥标识。与此公钥对应的密钥称为主密钥。可以使用 [Set Options](./list-of-operations.md#set-options) 操作将其他签名密钥添加到帐户中。
 
-If the weight of the master key is ever updated to 0, the master key is considered to be an invalid key and you cannot sign any transactions with it (even for operations with a threshold value of 0). If there are other signers listed on the account, they can still continue to sign transactions.
+如果主密钥的权重被设置为 0，那么主密钥就被认为是无效的密钥，您不能使用它签署任何事务(即使对于阈值为 0 的操作也是如此)。如果该帐户上有其它的签名者，他们仍然可以继续授权事务。
 
-"Signers" refers to the master key or to any signing keys added later. A signer is defined as the pair: public key, weight. 
+"签名者"指的是主密钥或后来添加的任何签名密钥。签名者由公钥及权重构成。
 
-Each additional signer beyond the master key increases the account's [minimum balance](./fees.md#minimum-account-balance).
+每个除主密钥之外的额外签名者都会增加账户的[最低账户余额](#minimum-account-balance)。
 
-## Alternate Signature Types
-To enable some advanced smart contract features there are a couple of additional signature types. These signature types also have weights and can be added and removed similarly to normal signature types. But rather than check a cryptographic signature for authorization they have a different method of proving validity to the network.
+## **备选签名类型**
+要启用一些高级的特性(如智能合约)，还需要一些额外的签名类型。这些签名类型也具有权重，可以像普通签名类型那样添加和删除它们。但是，与检查加密签名的授权不同的是，他们用另外一种不同的方法来证明其在网络上的有效性。
 
-### Pre-authorized Transaction
-It is possible for an account to pre-authorize a particular transaction by adding the hash of the future transaction as a "signer" on the account. To do that you need to prepare the transaction beforehand with proper sequence number. Then you can obtain the hash of this transaction and add it as signer to account.
+### Pre-authorized Transaction(预授权事务)
+帐户可以通过将准备在未来提交的事务的 hash 添加为帐户上的"签名人"来预先授权该事务。为此，您需要事先准备一个包含了适当序列号的事务，然后您可以获得此事务的 hash 并将其作为签名者添加到账户中。
 
-Signers of this type are automatically removed from the account when a matching transaction is properly applied. In case of error, or when matching transaction is never submitted, the signer remains and must be manually removed using the [Set Options](./list-of-operations.md#set-options) operation.
+当与签名者列表中的 hash 匹配的事务被成功执行后，这个签名者将自动从帐户中删除。如果匹配的事务出现错误，或者从未提交匹配的事务，则签名者仍然会保留在账户中，您必须使用 [Set Options](./list-of-operations.md#set-options) 操作手动删除它。
 
-This type of signer is especially useful in escrow accounts. You can pre-authorize two different transactions. Both could have the same sequence number but different destinations. This means that only one of them can be executed.
+这种类型的签名者在托管账户中特别有用。您可以预先授权两个不同的事务，两者具有相同的序列号且不同的接收者，这意味这它们中只有一个能被成功执行。
 
 ### Hash(x)
-Adding a signature of type hash(x) allows anyone who knows `x` to sign the transaction. This type of signer is especially useful in [atomic cross-chain swaps](https://en.bitcoin.it/wiki/Atomic_cross-chain_trading) which are needed for inter-blockchain protocols like [lightning networks](https://lightning.network).
+添加 hash(x) 类型的签名允许任何知道 `x` 的人签署事务。这种类型的签名者可用于[原子跨链交换](https://en.bitcoin.it/wiki/Atomic_cross-chain_trading)，而原子交换是像[闪电网络](https://lightning.network)这样的区块链间的协议所需要的。
 
-First, create a random 256 bit value, which we call `x`. The SHA256 hash of that value can be added as a signer of type hash(x). Then in order to authorize a transaction, `x` is added as one of the signatures of the transaction.
-Keep in mind that `x` will be known to the world as soon as a transaction is submitted to the network with `x` as a signature. This means anyone will be able to sign for that account with the hash(x) signer at that point. Often you want there to be additional signers so someone must have a particular secret key and know `x` in order to reach the weight threshold required to authorize transactions on the account.
+首先，创建一个随机的 256 bit 值，我们称之为 `x`。该值的 SHA256 hash 可以作为 hash(x) 类型的签名者添加。然后，为了对事务进行授权，将 `x` 添加为事务的签名之一。请记住，一旦有以 `x` 作为签名的事务被提交到网络上，那么 `x` 将被世界上的任何人知道。这意味着此时任何人都可以使用 `x` 对事务进行签名。通常您需要为您的账户配置其它签名者，这样别人只有同时知道其它签名者的密钥和 `x` 才能得到在该帐户上执行事务所需的权重阈值。
 
+## Envelopes(信封)
+事务**信封**包含了事务对象和一组签名。事务对象是签名者实际签署的东西。从技术上讲，事务信封是在网络中传输并包含在事务集中的东西。
 
+## 授权
+若要确定事务是否具有运行所需的授权，请累加事务信封中所有签名的权重。如果权重和大于或等于为该操作类型设置的阈值(见下文)，则该操作被视为通过了授权。
 
-## Envelopes
-A transaction **envelope** wraps a transaction with a set of signatures. The transaction object is the thing that the signers are actually signing. Technically, a transaction envelope is the thing that is passed around the network and included in transaction sets.
-
-## Authorization
-To determine if a transaction has the necessary authorization to run, the weights of all the signatures in the transaction envelope are added up. If this sum is equal to or greater than the threshold (see below) set for that operation type, then the operation is authorized.
-
-This scheme is very flexible. You can require many signers to authorize payments from a particular account. You can have an account that any number of people can authorize for. You can have a master key that grants access or revokes access from others. It supports any m of n setup.
+通过多重签名，您可以作出很多灵活的方案，比如您可以设置一个账户使它的付款需要得到多位签名者的授权，您也可以配置一个任何人都能执行授权操作的帐户，您还可以拥有一个能够授予或撤销别人对账户访问权限的主密钥。以下是一些示例：
 
 
-## Operations
-### Example 1: Anchors
-> You run an anchor that would like to keep its issuing key offline. That way, it's less likely a bad actor can get ahold of the anchor's key and start issuing credit improperly. However, your anchor needs to authorize people holding credit by running the `Allow Trust` operation. Before you issue credit to an account, you need to verify that account is OK.
+## 操作示例
+### 示例 1：锚点
+> 您运行一个锚点并使发行账户保持离线状态。这样一来，恶意用户几乎不可能得到发行账户的密钥，从而防止恶意用户发行资产。但是，您需要通过运行 `Allow Trust` 操作来授权其它用户是否能持有您发行的资产。在向帐户发放资产之前，您需要验证该帐户是否正常。
 
-Multisig allows you to do all of this without exposing the master key of your anchor. You can add another signing key
-to your account with the operation `Set Options`.  This additional key should have a weight below your anchor account's
-medium threshold. Since `Allow Trust` is a low-threshold operation, this extra key authorizes users to hold your anchor's
-credit. But, since `Payment` is a medium-threshold operation, this key does not allow anyone who compromises your anchor to issue credit.
+多重签名允许您在不暴露锚点的主密钥的情况下完成所有操作。您可以使用 `Set Options` 操作向您的帐户添加另一个签名密钥，并且这个签名者的权重应低于中等阈值。因为 `Allow Trust` 是一个低阈值操作，所以这个额外的密钥可以授权其它用户持有锚点发行的资产。但是，由于 `Payment` 是一个中等阈值的操作，所以这个额外的密钥并不能授权锚点发行资产，因此您的锚点仍然是安全的。
 
-Your account setup:
+您的账户设置如下：
 ```
-  master key weight: 2
-  additional signing key weight: 1
-  low threshold: 0
-  medium threshold: 2
-  high threshold: 2
+  主密钥权重：2
+  额外的密钥的权重：1
+  低等阈值：0
+  中等阈值：2
+  高等阈值：2
 ```
 
-### Example 2: Joint Accounts
-> You want to set up a joint account with Bilal and Carina such that any of you can authorize a payment. You also want to set up the account so that, if you choose to change signers (e.g., remove or add someone), a high-threshold operation, all 3 of you must agree. You add Bilal and Carina as signers to the joint account. You also ensure that it takes all of your key weights to clear the high threshold but only one to clear the medium threshold.
+### 示例 2：联合帐户
+> 您想与 Bilal 和 Carina 建立联合帐户，以便三人中的任何人都可以授权付款。您还想设置帐户，以便在三人都同意的情况下可以更改签名者（例如，删除或添加某人）。您将 Bilal 和 Carina 作为签名者添加到联名帐户中，然后配置三人的权重，使其高于中低等阈值，并让三人权重和等于高等阈值。
 
 Joint account setup:
 ```
-  master key weight: 1
-  low threshold: 0
-  medium threshold: 0
-  high threshold: 3
-  Bilal's signing key weight: 1
-  Carina's signing key weight: 1
+  主密钥权重：1
+  低等阈值：0
+  中等阈值：0
+  高等阈值：3
+  Bilal 的密钥权重：1
+  Carina 的密钥权重：1
 ```
 
-### Example 3: Company Accounts
-> Your company wants to set up an account that requires 3 of 6 employees to agree to *any* transaction from that account.
+### 示例 3：公司账户
+> 您的公司想要拥有一个账户，任何由该账户发起的事务必须得到 3 到 6 个雇员的签署才能成功执行。
 
-Company account setup:
+公司账户的设置如下：
 ```
-  master key weight: 0 (Turned off so this account can't do anything without an employee)
-  low threshold: 3
-  medium threshold: 3
-  high threshold: 3
-  Employee 1 key weight: 1
-  Employee 2 key weight: 1
-  Employee 3 key weight: 1
-  Employee 4 key weight: 1
-  Employee 5 key weight: 1
-  Employee 6 key weight: 1
-```
-
-### Example 4: Expense Accounts
-> You fully control an expense account, but you want your two coworkers Diyuan and Emil to be able to authorize transactions
-from this account. You add Diyuan and Emil's signing keys to the expense account. If either Diyuan or Emil leave the company,
-you can remove their signing key, a high-threshold operation.
-
-Expense account setup:
-```
-  master key weight: 3
-  low: 0
-  medium: 0
-  high: 3
-  Diyuan's key weight: 1
-  Emil's key weight: 1
+  主密钥权重：0 (屏蔽主密钥，该账户无法在未获得雇员签名的情况下执行任何操作)
+  低等阈值：3
+  中等阈值：3
+  高等阈值：3
+  雇员 1 的密钥权重：1
+  雇员 2 的密钥权重：1
+  雇员 3 的密钥权重：1
+  雇员 4 的密钥权重：1
+  雇员 5 的密钥权重：1
+  雇员 6 的密钥权重：1
 ```
 
-### Example 5: Custom Currencies
-> You want to issue a custom currency and ensure that no more will ever be created. You make a source account and issue
-the maximum amount of currency to a holding account. Then you set the master weight of the source account to below the
-medium threshold--the source account can no longer issue currency.
+### 示例 4：开支账户
+> 您完全控制一个开支帐户，但您希望您的两个同事 Diyuan 和 Emil 能够授权对该账户发起的事务进行授权。您在该账户上加上 Diyuan 和 Emil 的签名密钥。如果 Diyuan 或者 Emil 离开了公司，您可以移除他们的签名密钥（这是高等权限操作）。
 
-Source account setup:
+开支账户的设置如下：
 ```
-  master key weight: 0
-  low threshold: 0
-  medium threshold: 0
-  high threshold: 0
+  主密钥权重：3
+  低等阈值：0
+  中等阈值：0
+  高等阈值：3
+  Diyuan 的密钥的权重：1
+  Emil 的密钥的权重：1
 ```
-Note that even though the thresholds are 0 here, the master key cannot successfully sign a transaction because it's own weight is 0, which makes it an invalid signing key.
+
+### 示例 5：自定义货币
+> 您想要发行自定义货币并确保之后不会再增发该货币。您可以创建一个源帐户并向持有帐户发送您想发行的货币金额。然后，将源帐户的主密钥权重设置为低于中等阈值，此后该源帐户不能再发行货币。
+
+源账户的设置如下：
+```
+  主密钥权重：0
+  低等阈值：0
+  中等阈值：0
+  高等阈值：0
+```
+注意，即使这里的阈值为 0，主密钥也不能对事务进行签名，因为它自身的权重为 0，这使它成为了无效的签名密钥。

@@ -1,14 +1,14 @@
 ---
-title: Stellar Attachment Convention
+title: Stellar 附件公约
 ---
 
-# Attachments
+# 附件
 
-Sometimes there is a need to send more information about a transaction than fits in the provided memo field, for example: KYC info, an invoice, a short note. Such data shouldn't be placed in the [ledger](./concepts/ledger.md) because of its size or private nature. Instead, you should create what we call an `Attachment`. A Stellar attachment is simply a JSON document. The sha256 hash of this attachment is included as a memo hash in the transaction. The actual attachment document can be sent to the receiver through some other channel, most likely through the receiver's [Auth server](./compliance-protocol.md).
+有时您需要在事务中提供一些其它的信息，但是这些信息无法存入备注(Memo)中，例如：KYC 信息、发票、简短说明。因为它的大小或私人性质，这些数据不应该放在[总账](./concepts/ledger.md)中。您应该创建一个`附件`，Stellar 附件是一个 JSON 文档。此附件的 sha256 hash 作为备注(Memo)被包含在事务中。实际的附件文档可以通过其他途径发送给接收方，例如通过接收方的[认证服务器](./compliance-protocol.md)。
 
-## Attachment structure
+## 附件的结构
 
-Attachments have a flexible structure. They can include the following fields but these are optional and there can be extra information attached.
+附件具有灵活的结构。它们可以选择性的包含以下字段，并且可以附加额外的信息。
 
 ```json
 {
@@ -39,20 +39,20 @@ Attachments have a flexible structure. They can include the following fields but
 }
 ```
 
-Name | Data Type | Description
+字段名 | 数据类型 | 描述 
 -----|-----------|------------
-`nonce` | string | [Nonce](https://en.wikipedia.org/wiki/Cryptographic_nonce) is a unique value. Every transaction you send should have a different value. A nonce is needed to distinguish attachments of two transactions sent with otherwise identical details. For example if you send $10 to Bob two days in a row.
-`transaction.sender_info` | JSON | JSON containing KYC info of the sender. This JSON object can be extended with more fields if needed.
-`transaction.route` | string | The route information returned by the receiving federation server (`memo` value). Tells the receiver how to get the transaction to the ultimate recipient. 
-`transaction.note` | string | A note attached to transaction.
-`operations[i]` | | `i`th operation data. Can be omitted if transaction has only one operation.
-`operations[i].sender_info` | JSON | `sender_info` for `i`th operation in the transaction. If empty, will inherit value from `transaction`.
-`operations[i].route` | string | `route` for `i`th operation in the transaction. If empty, will inherit value from `transaction`.
-`operations[i].note` | string | `note` for `i`th operation in the transaction. If empty, will inherit value from `transaction`.
+`nonce` | string | [Nonce](https://en.wikipedia.org/wiki/Cryptographic_nonce) 是一个独一无二的值。您发送的每个事务都应该有着不同的 Nonce 值。系统需要通过 nonce 来区分两个带有相同细节的事务的附件。例如，您连续两天寄 10 美元给鲍勃。 
+`transaction.sender_info` | JSON | 这个 JSON 中包含了发送者的 KYC 信息。如果需要的话，这个 JSON 中可以包含更多的信息。 
+`transaction.route` | string | 路径信息由联邦服务器提供(`memo` 值)。告诉接收方如何将事务发送给最终的接收方。 
+`transaction.note` | string | 备注信息。 
+`operations[i]` | | 第 `i` 个操作的数据。如果这个事务只有一个操作的话可以省略。 
+`operations[i].sender_info` | JSON | 第 `i` 个操作的 `sender_info`。如果为空的话则会从事务中继承该值。 
+`operations[i].route` | string | 第 `i`个操作的 `route`。如果为空的话则会从事务中继承该值。 
+`operations[i].note` | string | 第 `i`个操作的 `note`。如果为空的话则会从事务中继承该值。 
 
-## Calculating Attachment hash
+## 计算附件的 hash
 
-To calculate the Attachment hash you need to stringify the JSON object and calculate `sha-256` hash. In Node.js:
+要计算附件的 hash，需要对 JSON 对象进行字符串化并计算其 `sha-256` hash。在 Node.js 中：
 
 ```js
 const crypto = require('crypto');
@@ -62,13 +62,13 @@ hash.update(JSON.stringify(attachment));
 var memoHashHex = hash.digest('hex');
 ```
 
-To add the hash to your transaction use the [`TransactionBuilder.addMemo`](http://stellar.github.io/js-stellar-base/TransactionBuilder.html#addMemo) method.
+您可以使用 [`TransactionBuilder.addMemo`](http://stellar.github.io/js-stellar-base/TransactionBuilder.html#addMemo) 方法向事务中添加该值。
 
-## Sending Attachments
+## 发送附件
 
-To send an Attachment and its hash (in a transaction) to Auth server of a receiving organization read the [Compliance protocol](./compliance-protocol.md) doc for more information.
+若要向接收方的认证服务器发送附件及事务中的散列，请阅读[合规协议](./compliance-protocol.md)的文档以获取更多信息。
 
-## Example
+## 示例
 
 ```js
 var crypto = require('crypto');
