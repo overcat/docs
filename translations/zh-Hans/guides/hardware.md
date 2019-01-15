@@ -1,83 +1,83 @@
 ---
-title: Hardware Requirements
+title: 硬件需求
 ---
 
-# Considerations
+# 注意事项
 
-The Stellar Network is a live system and the hardware requirements will grow along with usage of the network. Please keep this in mind as you decide what hardware you want to use for your Stellar integration.
+ Stellar 网络是一个持续增长的系统，硬件需求会随着网络的增长而增长。在选用配置时请务必考虑到这一点。
 
-If you opt to go with the minimum requirements that we have listed below, you may experience some lag during times of peak traffic on the network as your node tries to catch up to the rest of the network. For a smooth experience you should opt to go with the recommended hardware requirements listed for each service.
+如果您选择使用下面列出的最低配置要求，您可能会在网络流量高峰期间遇到一些延迟，因为您的节点需要花费一些时间同步最新的网络数据。为了获得流畅的体验，我们推荐您总是选用推荐配置。
 
-We will do our best to keep this doc up-to-date as we make further improvements to the codebase.
+随着我们对代码库的进一步改进，我们将尽最大努力使这个文档保持最新。
 
-# Nodes
+# 节点
 
 ## Stellar-Core
 
-Instances of Stellar-Core are part of the network as a node and therefore need to be large enough to support the volume on the network.
+Stellar-Core 实例是 Stellar 网络节点的一部分，因此需要足够大的硬盘来支撑这不断增长的网络。
 
-### Minimum
-**CPU**: 4-Core (8-Thread) Intel i7/Xeon or equivalent (c5.xlarge on AWS)\
+### 最低配置
+**CPU**: 4-Core (8-Thread) Intel i7/Xeon 或同等产品 (AWS 上的 c5.xlarge 机型)\
 **RAM**: 8GB DDR4\
 **SSD**: 64GB
 
-### Recommended
-**CPU**: 8-Core (16-Thread) Intel i7/Xeon or equivalent (c5.2xlarge on AWS)\
+### 推荐配置
+**CPU**: 8-Core (16-Thread) Intel i7/Xeon 或同等产品 (AWS 上的 c5.2xlarge 机型)\
 **RAM**: 16GB DDR4\
 **SSD**: 120GB
 
 ## Horizon
 
-Instances of Horizon ingest data from the network and therefore need to be large enough to support ingesting all of the latest transactions on the network.
+Horizon 实例会从网络中提取数据，因此需要足够大硬盘来保存从网络中提取的事务数据。
 
-There is a significant amount of computation that is done on the DB side of Horizon, these requirements are only for the application side of horizon. If you are going by these requirements then you will need to account for using a larger machine if using the same machine for the DB, or a separate machine for the DB altogether.
+Horizon 会对它的数据库进行大量的操作，而以下配置并没有将运行此数据库的需要消耗资源计算在内。所以你需要将数据库允许在另一台独立的服务器上，或者适当提高机器的配置。
 
-### Minimum
-**CPU**: 8-Core (16-Thread) Intel i7/Xeon or equivalent (c5.2xlarge on AWS)\
+### 最低配置
+**CPU**: 8-Core (16-Thread) Intel i7/Xeon 或同等产品 (AWS 上的 c5.2xlarge 机型)\
 **RAM**: 16GB DDR4\
 **SSD**: 64GB
 
-### Recommended
-**CPU**: 16-Core (32-Thread) Intel i7/Xeon or equivalent (c5.4xlarge on AWS)\
+### 推荐配置
+**CPU**: 16-Core (32-Thread) Intel i7/Xeon 或同等产品 (AWS 上的 c5.4xlarge 机型)\
 **RAM**: 32GB DDR4\
 **SSD**: 120GB
 
-# Anchor Servers
+# 锚点需要的服务
 
-The hardware requirements for these anchor services depend on your own internal usage, i.e. these hardware requirements will not increase as the volume on the network increases. Our suggestions below assume that you will run one machine for each service, although you can combine services onto a single machine with a larger capacity using VMs if you prefer.
+这些锚点服务的硬件要求取决于您自己的内部使用情况，也就是说这些硬件要求不会随着 Stellar 网络容量的增加而增加。我们的建议您将每项服务运行在一台独立的服务器上，但如果您愿意的话，也可以使用 VM 技术将多个服务运行在单个服务器上。
 
-## Bridge Server
+## 桥接服务器
 
-### Minimum
-**CPU**: 2-Core (4-Thread) Intel i7/Xeon or equivalent (c5.large on AWS)\
+### 最低配置
+**CPU**: 2-Core (4-Thread) Intel i7/Xeon or 或同等产品 (AWS 上的 c5.large 机型)\
 **RAM**: 4GB DDR3/DDR4\
-**SSD**: Needs a DB to hold processed transactions. Above CPU and RAM requirements don’t account for running this database’s hardware. DB size depends on your usage of the network. 20GB seems like a good starting point.
+**SSD**: 需要一个数据库来保存已处理的事务。上述的 CPU 和 RAM 要求并没有将运行此数据库的需要消耗资源计算在内。数据库的大小取决于您对网络的使用情况。在最开始，你可以配置一个 20GB 的磁盘。
 
-### Recommended
-**CPU**: 4-Core (8-Thread) Intel i7/Xeon or equivalent (c5.xlarge on AWS)\
+### 推荐配置
+**CPU**: 4-Core (8-Thread) Intel i7/Xeon or 或同等产品 (AWS 上的 c5.xlarge 机型)\
 **RAM**: 8GB DDR4\
-**SSD**: Needs a DB to hold processed transactions. Above CPU and RAM requirements don’t account for running this database’s hardware. DB size depends on your usage of the network. 20GB seems like a good starting point.
+**SSD**: 需要一个数据库来保存已处理的事务。上述的 CPU 和 RAM 要求并没有将运行此数据库的需要消耗资源计算在内。数据库的大小取决于您对网络的使用情况。在最开始，你可以配置一个 20GB 的磁盘。
 
-## Federation Server
+## 联邦服务器
 
-### Minimum
-**CPU**: 2-Core (4-Thread) Intel i7/Xeon or equivalent (c5.large on AWS)\
+### 最低配置
+**CPU**: 2-Core (4-Thread) Intel i7/Xeon 或同等产品 (AWS 上的 c5.large 机型)\
 **RAM**: 4GB DDR3/DDR4\
-**SSD**: Needs a DB to hold federation table. Above CPU and RAM requirements don’t account for running this database’s hardware. DB size depends on how many accounts you have. See callbacks for more information.
+**SSD**: 需要一个数据库来保存联邦记录表。上述的 CPU 和 RAM 要求并没有将运行此数据库的需要消耗资源计算在内。数据库的大小取决于您对保存了多少账户。请参阅日志获取更多信息。
 
-### Recommended
-**CPU**: 4-Core (8-Thread) Intel i7/Xeon or equivalent (c5.xlarge on AWS)\
+### 推荐配置
+**CPU**: 4-Core (8-Thread) Intel i7/Xeon 或同等产品 (AWS 上的 c5.xlarge 机型)\
 **RAM**: 8GB DDR4\
-**SSD**: Needs a DB to hold federation table. Above CPU and RAM requirements don’t account for running this database’s hardware. DB size depends on how many accounts you have. See callbacks for more information.
+**SSD**: 需要一个数据库来保存联邦记录表。上述的 CPU 和 RAM 要求并没有将运行此数据库的需要消耗资源计算在内。数据库的大小取决于您对保存了多少账户。请参阅日志获取更多信息。
 
-## Compliance Server
+## 合规服务器
 
-### Minimum
-**CPU**: 2-Core (4-Thread) Intel i7/Xeon or equivalent (c5.large on AWS)\
+### 最低配置
+**CPU**: 2-Core (4-Thread) Intel i7/Xeon 或同等产品 (AWS 上的 c5.large 机型)\
 **RAM**: 4GB DDR3/DDR4\
-**SSD**: Needs a DB to hold processed transactions. Above CPU and RAM requirements don’t account for running this database’s hardware. DB size depends on your usage of the network. 20GB seems like a good starting point.
+**SSD**: 需要一个数据库来保存已处理的事务。上述的 CPU 和 RAM 要求并没有将运行此数据库的需要消耗资源计算在内。数据库的大小取决于您对网络的使用情况。在最开始，你可以配置一个 20GB 的磁盘。
 
-### Recommended
-**CPU**: 4-Core (8-Thread) Intel i7/Xeon or equivalent (c5.xlarge on AWS)\
+### 推荐配置
+**CPU**: 4-Core (8-Thread) Intel i7/Xeon 或同等产品 (AWS 上的 c5.xlarge 机型)\
 **RAM**: 8GB DDR4\
-**SSD**: Needs a DB to hold processed transactions. Above CPU and RAM requirements don’t account for running this database’s hardware. DB size depends on your usage of the network. 20GB seems like a good starting point.
+**SSD**: 需要一个数据库来保存已处理的事务。上述的 CPU 和 RAM 要求并没有将运行此数据库的需要消耗资源计算在内。数据库的大小取决于您对网络的使用情况。在最开始，你可以配置一个 20GB 的磁盘。
