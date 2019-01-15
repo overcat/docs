@@ -22,7 +22,7 @@ title: 操作清单
 ## Create Account(创建账户)
 [JavaScript](http://stellar.github.io/js-stellar-sdk/Operation.html#.createAccount) | [Java](http://stellar.github.io/java-stellar-sdk/org/stellar/sdk/CreateAccountOperation.Builder.html) | [Go](https://godoc.org/github.com/stellar/go/build#CreateAccountBuilder)
 
-通过这个操作给特定的账户发送一定数量的 Lumens 以在网络中创建它。
+通过这个操作给特定的账户发送一定数量的 Lumens 以在网络中创建该账户。
 
 阈值等级：中
 
@@ -30,7 +30,7 @@ title: 操作清单
 
 参数：
 
-| 参数        | 类型       | 描述                                                                                |
+| 参数        | 类型       | 描述                                                                                |
 | ---------------- | ---------- | ------------------------------------------------------------------------------------------ |
 | Destination      | account ID | 需要被激活的账户地址。                                  |
 | Starting Balance | integer    | 用于创建新账户的 XLM 的数量，这些 XLM 将从源账户中扣除。 |
@@ -56,7 +56,7 @@ title: 操作清单
 
 参数：
 
-|参数| 类型| 描述|
+|参数| 类型| 描述|
 | --- | --- | --- |
 |Destination| account ID| 收款方的账户 ID。 |
 |Asset| asset| 发送的资产类型。 |
@@ -84,7 +84,7 @@ title: 操作清单
 需要注意的几点：
 * 路径支付不允许中间报价来自源账户，因为这会产生最差的汇率。您需要将路径付款拆分为两个支付数目较小的路径付款，或者确保源帐户的订单不在订单簿的顶部。
 * 双方的账户余额在操作结束是计算。
-   * 这里有一点值得一提，当 `(收款账户, 接收的资产) == (发送账户, 发送的资产)` 时，该账户相当于在操作执行期间获得无息贷款。
+   * 这里有一点值得一提，当 `(收款账户, 接收的资产) == (发送账户, 发送的资产)` 时，该账户相当于在操作执行期间获得无息贷款。
 
 阈值等级：中
 
@@ -92,7 +92,7 @@ title: 操作清单
 
 参数：
 
-|参数| 类型| 描述|
+|参数| 类型| 描述|
 | --- | --- | --- |
 |Send asset| asset| 从发送账户中扣除的资产类型。 |
 |Send max| integer| 允许从源账户中扣除的 `send asset` 的最大数额(不包括手续费)。 |
@@ -133,7 +133,7 @@ title: 操作清单
 
 结果：`ManageOfferResult`
 
-|参数| 类型| 描述|
+|参数| 类型| 描述|
 | --- | --- | --- |
 | Selling| asset| 订单创建者想出售的资产。 |
 | Buying| asset| 订单创建者想购买的资产。 |
@@ -174,7 +174,7 @@ title: 操作清单
 
 结果：`CreatePassiveOfferResult`
 
-|参数| 类型| 描述|
+|参数| 类型| 描述|
 | --- | --- | --- |
 |Selling| asset| 订单创建者想出售的资产。 |
 |Buying| asset| 订单创建者想购买的资产。 |
@@ -213,7 +213,7 @@ title: 操作清单
 
 参数：
 
-|参数| 类型| 描述|
+|参数| 类型| 描述|
 | --- | --- | --- |
 |inflation Destination| account ID| 通货膨胀的目标帐户。 |
 |Clear flags| integer| 指定您想要清除的标识位。想要详细了解标识位，请参阅[账户文档](./accounts.md)。位掩码整数从帐户的现有标识中减去。这允许在不知道现有标志的情况下设置特定标识位。 |
@@ -248,7 +248,7 @@ title: 操作清单
 
 结果：`ChangeTrustResult`
 
-|参数| 类型| 描述|
+|参数| 类型| 描述|
 | --- | --- | --- |
 |Line| asset| 某项资产的信任线。举例来说，一个用户新建了一条信任线，允许最多持有 200 个锚点发行的 USD，则 `line` 应该设置为：USD:anchor。 |
 |Limit| integer| 持有的该资产的数量的限制。以上个例子为例，`limit` 应该设置为 200。 |
@@ -275,7 +275,7 @@ title: 操作清单
 
 结果：`AllowTrustResult`
 
-|参数| 类型| 描述|
+|参数| 类型| 描述|
 | --- | --- | --- |
 |Trustor| account ID| 设置了该信任线的目标账户。 |
 |Type| asset | 信任线中的资产类型。例如，如果锚点希望允许另一个帐户持有其美元资产，则 `Type` 应该设置为 USD:anchor。 |
@@ -299,7 +299,7 @@ title: 操作清单
 
 结果：`AccountMergeResult`
 
-|参数| 类型| 描述|
+|参数| 类型| 描述|
 | --- | --- | --- |
 |Destination| account ID| 该账户将会收到源账户的所有 XLM。 |
 
@@ -340,7 +340,7 @@ title: 操作清单
 
 结果：`ManageDataResult`
 
-|参数| 类型| 描述|
+|参数| 类型| 描述|
 | --- | --- | --- |
 |Name| string | 长度最多为 64 bytes 的字符串。如果这是一个新的键(Name)，它将向帐户添加给定的数据条目。如果此键(Name)已经存在，则将修改其对应的值。 |
 |Value| binary data | (可选) 如果该值为空的话，这个数据条目会被删除。如果存在的话，则会作为值设置在数据条目中。该值最长为 64 bytes。 |
@@ -367,7 +367,7 @@ Bump sequence 操作允许源帐户增大自己的序列号，通过该操作您
 
 结果：`BumpSequenceResult`
 
-|参数| 类型| 描述|
+|参数| 类型| 描述|
 | --- | --- | --- |
 |bumpTo| SequenceNumber| 您想要将操作的源账户的序列号更改为该值。 |
 
