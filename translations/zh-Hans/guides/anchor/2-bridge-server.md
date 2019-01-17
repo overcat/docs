@@ -15,7 +15,7 @@ Stellar.org 维护了一个[桥接服务](https://github.com/stellar/bridge-serv
 
 桥接服务需要一个 MySQL 或 PostgreSQL 数据库，以追踪和协同事务及合规信息。创建一个名为 `stellar_bridge` 的空数据库和用户即可。您无需创建/添加任何表，桥接服务有[一个特殊命令会完成建表动作](#start-the-server)。
 
-## 下载和配置桥接服务=
+## 下载和配置桥接服务
 
 接下来，根据您的操作系统平台[下载最新版本的桥接服务](https://github.com/stellar/bridge-server/releases)。将其安装到任意地方，并在同一目录内创建一个名叫 `bridge.cfg` 的文件。该文件用于存储配置。如下所示：
 
