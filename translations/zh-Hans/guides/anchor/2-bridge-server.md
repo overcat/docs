@@ -1,25 +1,23 @@
 ---
-title: Bridge Server
+title: 桥接服务
 sequence:
   previous: readme.md
   next: 3-federation-server.md
 ---
 
-Stellar.org maintains a [bridge server](https://github.com/stellar/bridge-server/blob/master/readme_bridge.md), which makes it easier to use the federation and compliance servers to send and receive payments. When using the bridge server, the only code you need to write is a private service to receive payment notifications and respond to regulatory checks from the bridge and compliance servers.
+Stellar.org 维护了一个[桥接服务](https://github.com/stellar/bridge-server/blob/master/readme_bridge.md)，可以更加方便对接联邦服务和合规服务进行收发资产。使用桥接服务时，您仅需撰写一个私有服务，接收收付款提醒，以及响应来自桥接服务和合规服务的合规性检查。
 
-![Payment flow diagram](assets/anchor-send-payment-basic-bridge.png)
+![支付流程图示](assets/anchor-send-payment-basic-bridge.png)
 
-When using the bridge server, you send payments by making an HTTP POST request to it instead of a Horizon server. It doesn’t change a whole lot for simple transactions, but it will make the next steps of federation and compliance much simpler.
+使用桥接服务，您需要通过 HTTP Post 方式发送支付请求到桥接服务而不是 Horizon 服务。对于简单的收发工作，这并没有太多效率提升，但可以使联邦服务和合规工作变得容易得多。
 
+## 创建数据库
 
-## Create a Database
+桥接服务需要一个 MySQL 或 PostgreSQL 数据库，以追踪和协同事务及合规信息。创建一个名为 `stellar_bridge` 的空数据库和用户即可。您无需创建/添加任何表，桥接服务有[一个特殊命令会完成建表动作](#start-the-server)。
 
-The bridge server requires a MySQL or PostgreSQL database in order to track and coordinate transaction and compliance information. Create an empty database named `stellar_bridge` and a user to manage it. You don’t need to add any tables; the bridge server has [a special command to do that for you](#start-the-server).
+## 下载和配置桥接服务=
 
-
-## Download and Configure Bridge Server
-
-Next, [download the latest bridge server](https://github.com/stellar/bridge-server/releases) for your platform. Install the executable anywhere you like. In the same directory, create a file named `bridge.cfg`. This will store the configuration for the bridge server. It should look something like:
+接下来，根据您的操作系统平台[下载最新版本的桥接服务](https://github.com/stellar/bridge-server/releases)。将其安装到任意地方，并在同一目录内创建一个名叫 `bridge.cfg` 的文件。该文件用于存储配置。如下所示：
 
 <code-example name="bridge.cfg">
 
@@ -27,59 +25,57 @@ Next, [download the latest bridge server](https://github.com/stellar/bridge-serv
 port = 8006
 horizon = "https://horizon-testnet.stellar.org"
 network_passphrase = "Test SDF Network ; September 2015"
-# We'll fill this in once we set up a compliance server
+# 当配置合规服务时，填写此处
 compliance = ""
 
-# This describes the assets that can be sent and received.
-# Repeat this section to add support for more asset types.
+# 用于收发的资产，可以填写多个
 [[assets]]
 code="USD"
 issuer="GAIUIQNMSXTTR4TGZETSQCGBTIF32G2L5P4AML4LFTMTHKM44UHIN6XQ"
 
 [database]
-type = "mysql"  # or "postgres" if you created a postgres database
+type = "mysql"  # 或 "postgres" 如果你创建了一个 postgres 数据库
 url = "dbuser:dbpassword@/stellar_bridge"
 
 [accounts]
-# The secret seed for your base account, from which payments are made
+# 基本账户的密钥，用于向外支付
 base_seed = "SAV75E2NK7Q5JZZLBBBNUPCIAKABN64HNHMDLD62SZWM6EBJ4R7CUNTZ"
-# The account ID that receives payments on behalf of your customers. In this
-# case, it is the account ID that matches `base_seed` above.
+# 用以代替客户进行接收支付的账号，这里我们使用基本账户
 receiving_account_id = "GAIGZHHWK3REZQPLQX5DNUN4A32CSEONTU6CMDBO7GDWLPSXZDSYA4BU"
-# A secret seed that can authorize trustlines for assets you issue. For more,
-# see https://stellar.org/developers/guides/concepts/assets.html#controlling-asset-holders
+# 一个用于对你发行的资产进行授权(authorized)的账号密钥。
+# 访问 https://stellar.org/developers/guides/concepts/assets.html#controlling-asset-holders 获取更多信息
 # authorizing_seed = "SBILUHQVXKTLPYXHHBL4IQ7ISJ3AKDTI2ZC56VQ6C2BDMNF463EON65U"
-# The ID of the account that issues your assets
+# 资产发行账号
 issuing_account_id = "GAIUIQNMSXTTR4TGZETSQCGBTIF32G2L5P4AML4LFTMTHKM44UHIN6XQ"
 
 [callbacks]
-# The server will send POST requests to this URL to notify you of payments
+# 桥接服务会发送 POST 请求到下述URL，通知到账。
 receive = "http://localhost:8005/receive"
 ```
 
 </code-example>
 
 
-## Start the Server
+## 启动服务
 
-Before starting the server the first time, the tables in your database need to be created. Running bridge server with the `--migrate-db` argument will make sure everything is set to go:
+在第一次启动服务之前，必须创建数据库表。使用 `--migrate-db` 参数运行桥接服务会确定万事俱备：
 
 ```bash
 ./bridge --migrate-db
 ```
 
-Each time you update the bridge server to a new version, you should run this command again. It will upgrade your database in case anything needs to be changed.
+每次升级升级桥接服务时，您都应运行此命令。这会在有变动时升级数据库。
 
-Now that your database is fully set up, you can start the bridge server by running:
+现在您的数据库已经准备好，你可以使用下述命令启动服务：
 
 ```bash
 ./bridge
 ```
 
 
-## Send a Payment
+## 发起支付
 
-The bridge server takes commands in the form of HTTP requests, so we can test submitting a payment by sending a `POST` request to `/payments`. Try sending 1 USD to the account `GCFXHS4GXL6BVUCXBWXGTITROWLVYXQKQLF4YH5O5JT3YZXCYPAFBJZB`. (Remember that the receiving account will need to trust the asset first. See [issuing assets](../issuing-assets.md) for more details.)
+桥接服务通过 HTTP 请求接受命令。所以我们可以试着通过向 `/payments` 发起一个 `POST` 请求来提交一笔支付。试试发送1美元到`GCFXHS4GXL6BVUCXBWXGTITROWLVYXQKQLF4YH5O5JT3YZXCYPAFBJZB`账户。（注意接收账号需要提前信任该资产，参看 [发行资产](../issuing-assets.md)）
 
 <code-example name="Send a Payment">
 
@@ -155,11 +151,11 @@ public class PaymentRequest() {
 </code-example>
 
 
-## Create a Server to Receive Payments
+## 创建一个用于接收支付的服务
 
-![Payment flow diagram](assets/anchor-receive-payment-basic-bridge.png)
+![支付流程图示](assets/anchor-receive-payment-basic-bridge.png)
 
-In the bridge server configuration file, you might have noticed a callback URL named `receive`. Whenever a payment is received, the bridge server will send an HTTP `POST` request to the URL you specified. The main responsibility of the `receive` endpoint is to update your customer’s balance in response to receiving a payment (since the payment went to your account on Stellar).
+在桥接服务配置文件里,您可能已经注意到一个名为 `receive` 的回调URL。只要收到付款,桥接服务将发送一个 HTTP `POST` 请求到您指定的这个URL。此 `receive` 回调的主要职责就是收到付款时更新客户的资产（因为付款是到你指定的账户上的）。
 
 <code-example name="Implementing the Receive Callback">
 
@@ -257,7 +253,7 @@ public class StellarCallbacks {
 
 </code-example>
 
-To test that your receive callback works, let’s try sending 1 USD to a customer with the account name `Amy` at your bank. (For a review of sending payments using the API, check [step 3 of “get started”](../get-started/transactions.md).)
+为测试您的receive回调工作是否正常，可以尝试支付1美元给在您银行里账户名为 `Amy` 的客户。（通过API进行支付，参看[“get started”的第三部分](../get-started/transactions.md)。）
 
 <code-example name="Test Receive Callback">
 
@@ -322,9 +318,9 @@ try {
 
 </code-example>
 
-After running the above code, your callback server should have logged information about the payment.
+在运行上面的代码之后，您的回调服务应记录到支付信息。
 
 <nav class="sequence-navigation">
-  <a rel="prev" href="./">Back: Architecture</a>
-  <a rel="next" href="3-federation-server.md">Next: Federation Server</a>
+  <a rel="prev" href="./">上一章节：架构</a>
+  <a rel="next" href="3-federation-server.md">下一章节：联邦服务</a>
 </nav>
