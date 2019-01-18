@@ -1,66 +1,65 @@
 ---
-title: Security
+title: 安全
 ---
 
-You’ll trade assets that are very valuable with Stellar, so security is important. The following guidelines can help keep your Stellar integration secure.
+您在恒星上交易的资产很真贵，所以安全很重要。接下来的指导方案可以帮助您与恒星集成时保持安全。
+
+## 内置安全性
+
+恒星使用工业标准级的公钥加密工具和技术，这意味着代码被充分测试和易于理解。网络上的所有事务都是公开的,这意味着资金的流动总是可以审计。每个事务是由使用[Ed25519算法](https://ed25519.cr.yp.to)的人签名发送，该算法从密码学上可以证明发送方被授权发起事务。
+
+虽然所有事务都是公开的，但使用恒星代表客户进行汇兑资金的银行，可以通过在事务备忘录（memo）字段中使用加密或唯一标识符的方式，来保护有关收发资产的客户信息。这使银行能够满足法规遵从要求，并在保证保密信息安全的同时保持交易历史可验证。
 
 
-## Built-in security
+## 保护离线账户
 
-Stellar uses industry-standard public-key cryptography tools and techniques, which means the code is well tested and well understood. All transactions on the network are public, which means the movement of funds can always be audited. Each transaction is signed by whomever sent it using the [Ed25519 algorithm](https://ed25519.cr.yp.to), which cryptographically proves that the sender was authorized to make the transaction.
+保护账户的一个最简单方法就是将其私密种子（secret seed）离线保存——它可以是位于没有联网的计算机上，也可能只是某人钱包里的一张纸。可以在离线计算机上创建和签名事务，然后将其保存到U盘（或其它介质）并传输到具有联网权限的计算机上，该计算机将事务发送到 Horizon 服务器或 Stellar Core 实例。 如果将种子存储在纸上而不是计算机上，请使用不会保存种子的程序来创建和签署事务。
 
-While all transactions are public, banks using Stellar to exchange funds on behalf of individual account holders can keep information about the individuals sending and receiving it private by storing encrypted or unique identifiers in the transaction’s memo field. This allows banks to meet regulatory compliance requirements and keep transaction history verifiable while still keeping privileged information secure.
+由于离线计算机没有网络连接，因此对无法物理接触的人来说得到账户的密钥非常困难。 但是，这也使每个事务都成为一个非常依赖手动的过程。通常的做法是维护两个账户：一个安全保存大部分资产的离线账户和另一个只包含少量资产的在线账户。 大多数事务可以使用在线账户执行，并且当资金较少时，一个人可以从离线账户手动为其补充资金。
 
-
-## Secure offline accounts
-
-One of the simplest methods for securing an account is keeping its secret seed stored offline—it could be on a computer with no connection to the internet or just a piece of paper in someone’s wallet. Transactions can be created and signed on an offline computer, then saved to a USB drive (or some other means of storage) and transferred to a computer with internet access, which sends the transactions to a Horizon server or Stellar Core instance. If storing the seed on paper instead of a computer, use a program that doesn’t save the seed to create and sign the transaction.
-
-Since an offline computer has no connection, it is extremely hard for someone without physical access to it to access the account’s keys. However, this also makes every transaction an extremely manual process. A common practice instead is to maintain two accounts: one offline account that securely holds the majority of your assets and another online account that holds only a few assets. Most transactions can be performed with the online account and, when its funds are low, a person can manually replenish it from the offline account.
-
-You can think of this method like having both a bank vault and a cash register drawer. Most of the time the vault is closed and locked. It is only opened occasionally (and under specific procedures) to replenish a register drawer that is running low or to store excess funds from a register drawer that is overflowing. If someone attempts to rob the bank, it is extremely hard for them to get away with anything more than what was in the register drawer.
+您可以将此方法比作银行金库和前台收银机。大部分时间金库总是关闭并锁定的。它只是偶尔（并在特定程序下）打开，为收银机补充资金或者保管资金。 如果有人试图抢劫银行，他们最多也就能拿走收银机里的资金。
 
 
-## Require multiple authorizations or signers
+## 需要多个授权或签名人
 
-Sensitive accounts can be secured by requiring authorization from multiple individuals to make a transaction. Read the [multisignature guide](concepts/multi-sig.md) to learn more about how.
+通过要求来自多人的授权进行交易，可以保护敏感账户。阅读[多重签名指南](concepts/multi-sig.md) 以了解更多信息。
 
-If you require multiple signers, you should also ensure that you do not require all the possible signers to sign a transaction. If one of the signers loses the keys to their account, you will no longer be able to perform transactions if they have to sign them.
-
-
-## Ensure assets are revocable
-
-If you issue your own assets, you should usually ensure that they can be revoked using the [“authorization revocable” flag on the account](concepts/accounts.md#flags). This allows you to effectively freeze your assets in someone else’s account in case of theft or in other extenuating circumstances.
+如果您需要多个签名人，还应确保对于任意事务都不能要求所有签名人同时签名。否则如果有一个签名人丢失了他们账户密钥，您将无法再发起事务。
 
 
-## Perform compliance checks
+## 确保资产可被撤销
 
-Stellar’s core protocol limits itself to being a simple and verifiable means for exchanging assets. If you are a financial institution or are making large transactions, you should also perform <abbr title="Know Your Customer">KYC</abbr> and any related regulatory compliance checks. You can find more information in our [compliance protocol guide](compliance-protocol.md) or use the [Stellar Bridge Server](https://github.com/stellar/bridge-server) to simplify the process.
-
-
-## What if an account’s keys are compromised?
-
-Because Stellar’s security is based around public key encryption, it’s critical that an account’s secret seed is not shared. Anyone who has access to the seed effectively has control of the account. However, if someone learns your account’s seed or you accidentally share it with someone who shouldn’t know it, you can remove its ability to control the account with the following steps:
-
-1. Make a new key pair.
-2. Add the new public key as a signer on the compromised account. (Use the [`set options` operation](concepts/list-of-operations.md#set-options)).
-3. Remove the compromised key’s signing authority on the compromised account.
-4. Now the new public key controls the account and the compromised keys are no longer able to sign transactions.
-5. Notify the owners of other accounts that the key has signing authority on that the key was compromised. They need to follow steps 2 and 3 for their accounts as well.
-
-It’s important to understand that accounts that allow multiple signatures need to be able to remove a compromised key. You should always be careful that signature weights are set up so that this is possible—never require *all* signers to be involved in a transaction.
+如果您发行自己的资产，通常应该确保可以使用[账户上的“authorization revocable” 标识](concepts/accounts.md#flags)撤销它们。 这样您就可以在发生盗窃或其它情况下，有效地将您的资产冻结在其他人的账户中。
 
 
-## What if there’s a bug in Stellar’s code?
+## 执行合规检查
 
-Every node keeps a history archive, so you always have a strong and reliable record of what happened. Parties affected by a bug can examine all the historical details and agree on a method of remediation while the bug is being fixed.
-
-
-## Securing a Stellar Core Instance
-
-It’s generally a good idea to make sure access to Stellar Core is extremely limited. Make sure only the ports needed to communicate with Horizon and other Stellar Core instances on the public network are open. Access to Stellar Core’s databases should also be highly restricted.
+恒星的核心协议将自身局限于作为资产汇兑的简单且可验证的手段。 如果您是金融机构或正在进行大宗交易，您还应该执行<abbr title="Know Your Customer"> KYC 客户身份识别</ abbr>以及任何相关的监管合规性检查工作。 您可以在我们的[合规协议指南](compliance-protocol.md)中找到更多信息，或使用[恒星桥接服务](https://github.com/stellar/bridge-server)简化该过程。
 
 
-## Keep Up to Date with Security Patches
+## 如果账户密钥泄漏了怎么办？
 
-Make sure that you’re using the most secure software available by keeping up-to-date with the latest releases. Stellar.org publishes release announcements on a mailing list you can subscribe to at https://www.freelists.org/list/sdf-releases.
+由于恒星的安全性基于公钥加密技术，因此保护账户的私密种子（secret seed）至关重要。拿到种子的任何人都可以控制账户。但是，如果有人知道了您账户的种子或您不小心泄漏给外人，您可以通过以下步骤移除该种子对账户的控制权限：
+
+1. 创建一个新的密钥对。
+2. 将其公钥加入到该账号的签名人列表中。(使用[ `set options` 操作](concepts/list-of-operations.md#set-options))。
+3. 从该账号上移除泄漏密钥的签名权限。
+4. 现在新的公钥可以控制该账号，泄漏密钥无法再签发事务。
+5. 通知其它泄露密钥拥有签名权限账户的拥有者该密钥已泄漏。他们也需要需要重复23步骤。
+
+重要的是要了解允许多重签名的账户需要能够删除泄漏的密钥。您应该始终谨慎得设置签名权重，以便实现以下目标——对于任意事务都不能要求*所有*签名人同时签名。
+
+
+## 恒星的代码有问题怎么办？
+
+每个节点都会保留一个历史存档，因此您始终可以获取健壮可靠的历史记录。受问题影响的各方可以检查所有历史细节，并在问题修复时就修复方法达成一致。
+
+
+## 保护Stellar core实例安全Securing a Stellar Core Instance
+
+限制对Stellar Core的访问权限通常是个好主意。 确保只打开与Horizon及公有网络上的其它Stellar Core实例通信所需的端口。访问Stellar Core的数据库也应受到高度限制。
+
+
+## 保持使用最新的安全补丁
+
+通过与最新版本保持同步，确保您使用最安全的软件。 Stellar.org使用邮件列表发布发布公告，您可以在 https://www.freelists.org/list/sdf-releases 订阅。
