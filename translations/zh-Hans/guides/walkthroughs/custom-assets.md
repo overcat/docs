@@ -1,142 +1,135 @@
 ---
-title: Custom Assets
+title: 自定义资产
 ---
 
-In order to distribute a custom asset or token on the Stellar Network, three unique accounts will be used. First, is the source account. The source account is the account of the entity looking to create a new token. Second is the issuing account. The issuing account is created by the source account as a mechanism to create new tokens. The third account is the distribution account. The goal of distribution account is to act as the mechanism for distributing tokens to the public. 
+想要在 Stellar 网络发行资产或令牌的话，您需要维护三个账户。一个是源帐户，源帐户是想要创建新令牌的实体的帐户，另一个是发行账户，发行账户由源帐户创建，新令牌是由此账户创建的，还有一个是分发帐户，实体使用此账户将新令牌分发给公众。
 
-Most of the Stellar documentation is centered on financial institutions as anchors. An anchor is an entity that acts as a bridge between existing currencies and the Stellar Network, and involves setting up systems like a compliance server and a bridge server. It is not necessary to become an anchor in order to create custom assets and tokens on the Stellar Network. 
+大多数的 Stellar 文档都以诸如锚点这样的金融机构为中心。锚点是一个实体，充当货币和 Stellar 网络之间的桥梁，锚点需要设置合规服务器和桥接服务器等系统。如果您只是想在 Stellar 网路上发行资产或令牌的话，那么没有必要成为一个锚点。
 
-The following presents a breakdown of the transactions required to create a custom token. The transactions can be translated to API requests or can be executed using [Stellar Laboratory](https://www.stellar.org/laboratory/).
-
-
-## Steps 
-
-#### Transaction 1: Create the issuing account
-**Account**: source account  
-**Operations**:
-- [Create Account](../concepts/list-of-operations.md#create-account): create issuing account in system
-	 - starting balance: [minimum balance](../concepts/fees.md#minimum-account-balance) + [transaction fee](../concepts/fees.md#transaction-fee)
-
-**Signers**: source account
-
-#### Transaction 2: Create the distribution account
-**Account**: source account  
-**Operations**:
-- [Create Account](../concepts/list-of-operations.md#create-account): create distribution account in system
-	 - starting balance: [minimum balance](../concepts/fees.md#minimum-account-balance) including trustlines  
-
-**Signers**: source account
+以下是创建自定义令牌所需事务的详细信息。事务可以直接通过 API 提交，也可以使用 [Stellar Laboratory](https://www.stellar.org/laboratory/) 执行。
 
 
-Transaction 1 and Transaction 2 are submitted to the network by the token creator. This creates the issuing and distribution accounts and gives the source entity access to the public and private key of each account. The issuing account is funded with minimum balance with no entries. It is given additional money to handle the transfer fee of transferring the assets at the end of the escrow agreement, and additional money to handle the fee of transferring the assets to the distribution account. The distribution account must be funded with the minimum balance with one entry, as it will need to create a trustline (an entry) in the future. The starting balances are the minimums need in order to make the accounts valid on the Stellar Network - the actual amount used to create the two accounts can be any amount, as long as it's larger than the minimums. The distribution account can start off being funded with the minimum balance without entries, but the next transaction will create a trustline for the account, thus raising its minimum balance. 
+## 步骤
+
+#### 事务 1：创建发行账户
+**发起事务的账户**：源账户  
+**操作**：
+- [Create Account](../concepts/list-of-operations.md#create-account): 在网络中创建发行账户。
+	 - starting balance: [账户最低余额](../concepts/fees.md#minimum-account-balance) + [提交事务所需的手续费](../concepts/fees.md#transaction-fee)
+
+**事务的签署者**：源账户
+
+#### 事务 2：创建分发账户
+**发起事务的账户**：源账户
+**操作**：
+- [Create Account](../concepts/list-of-operations.md#create-account): 在网络中创建分发账户。
+	 - starting balance: 包含了创建信任线所需的[账户最低余额](../concepts/fees.md#minimum-account-balance)
+
+**事务的签署者**：源账户
 
 
-#### Transaction 3: Creating Trust
-**Account**: distribution account  
-**Operations**:
-- [Change Trust](../concepts/list-of-operations.md#change-trust): create a trustline to the issuing account
-	 - asset: asset code format
-	 	- code: asset code
-	 	- issuer account: issuing account
-	 - trust limit: max tokens  
-
-**Signers**: distribution account
+事务 1 和事务 2 由源账户创建并提交给网络。在这一步您将创建发行账户和分发账户。您需要给这两个账户发送适量的 Lumens 以使它们满足最低账户余额的要求，对于发行账户来说，您不需要为它设置任何子条目，对于分发账户来说，您需要为它设置一条信任发行账户的信任线，所以它包含一个子项目。您还应该为它们提供少量资金，使它们能够支付提交事务产生的手续费。
 
 
-Transaction 3 is submitted to the network by the token creator. It creates a trustline between the issuing account and the distribution account. There are currently two formats of asset code supported for tokens: Alphanumeric 4-character maximum (Alphanumeric 4) and Alphanumeric 12-character maximum (Alphanumeric 12). The alphanumeric character set is any characters from the set [a-z][A-Z][0-9]. In this step, you are introducing your token/asset to the Stellar network, but you are not creating any for trading. The trust limit parameter limits the number of tokens the distribution account will be able to hold at once.  It is recommended to either make this number larger than the total number of tokens expected to be available on the network or set it to be the maximum value (a total of max int64 stroops) that an account can hold.
+#### 事务 3：添加信任线
+**发起事务的账户**：分发账户  
+**操作**：
+- [Change Trust](../concepts/list-of-operations.md#change-trust): 添加一条包含了发行账户的信任线
+	 - asset: 资产
+	 	- code: 资产代码
+	 	- issuer account: 发行账户
+	 - trust limit: 令牌的最大发行量  
+
+**事务的签署者**：分发账户
 
 
-#### Transaction 4: Asset Creation
-**Account**: issuing account  
-**Operations**:
-- [Payment](../concepts/list-of-operations.md#payment): give the distribution account the tokens
-	 - destination: distribution account
-	 - asset: asset code format
-	 	- code: asset code
-	 	- issuer account: issuing account
-	 - trust limit: tokens to be created 
-
-**Signers**: issuing account
-
-Transaction 4 is created and submitted to the network by the issuing account. In this transaction, it pays the distribution account the tokens, creating them on the network. The total number of tokens paid to the distribution account is the total number of tokens created. 
-
-#### Transaction 5: Asset Creation
-**Account**: issuing account  
-**Operations**:
-- [Set Option - Home Domain](../concepts/list-of-operations.md#set-options): set home domain of stellar.toml
-	 - home domain: domain location 
-
-**Signers**: issuing account
+事务 3 由分发账户提交到 Stellar 网络，这个事务会为分发账户创建一条包含了发行账户的信任线，也就是说使分发账户信任发行账户。目前自定义资产代码有两种类型：最多包含 4 位字符的类型(Alphanumeric 4)与最多包含 12 位字符的类型(Alphanumeric 12)。字符集可以为 [a-z][A-Z][0-9]。在这一步中，您已经在 Stellar 网络中引入了您想发行的自定义令牌，但是您还没有创建任何可以用来交易的令牌。`trust limit` 参数限制了分发帐户最多能保留的令牌数，建议将此参数设置为您想发行的令牌总数，或将其设置为帐户可以容纳的最大值（最大值为 9223372036854775807(int64) 个 stroops）。
 
 
-Transaction 5 is created and submitted to the network. The domain location should be set to the domain that is hosting your stellar.toml file (which contains metadata regarding your token).
+#### 事务 4：创建资产
+**发起事务的账户**：发行账户  
+**操作**：
+- [Payment](../concepts/list-of-operations.md#payment): 向分发账户发放令牌
+	 - destination: 分发账户
+	 - asset: 资产
+	 	- code: 资产代码
+	 	- issuer account: 发行账户
+	 - trust limit: 将被创建的令牌总量
 
-At this step, a stellar.toml must be created and hosted on a domain of choice. The stellar.toml file should contain metadata relevant to the token being created. Maintaining a stellar.toml file is important, as it provides transparency for the asset and its usage. 
-A standard stellar.toml declaration of an asset should contain the following for each asset issued (all values in curly brackets are variable, and should be filled in):
+**事务的签署者**：发行账户
+
+事务 4 由发行账户创建并提交到 Stellar 网络。在这个事务中，发行账户在网络中创建了令牌，并将这些令牌分发给了分发账户。分发账户收到的令牌数量就是发行账户发行的令牌数量。
+
+#### 事务 5：创建资产
+**发起事务的账户**：发行账户  
+**操作**：
+- [Set Option - Home Domain](../concepts/list-of-operations.md#set-options): 设置主域名以查找 stellar.toml
+	 - home domain: 域名地址
+
+**事务的签署者**：发行账户
+
+
+事务 5 由发行账户创建并提交到 Stellar 网络。`home domain` 值中的域名应该是您的 stellar.toml 文件所在的域名，stellar.toml 中包含了您的资产的元信息。
+
+在此步骤中，必须创建 stellar.toml 并将其您选定的域名上。stellar.toml 文件应包含令牌的元数据。维护 stellar.toml 文件非常重要，因为它为资产提供了详细的描述。对于每个发行的资产，stellar.toml 中的标准声明应包含以下字段（大括号中的值您需要根据实际情况填写）：
 ```
 [[CURRENCIES]]
-code="{asset code}"
-issuer="{public key of issuing account}"
-display_decimals={integer}
+code="{资产代码}"
+issuer="{发行账户的公钥}"
+display_decimals={整数}
 ```
 
-The field display_decimals represents the maximum decimal place that should be displayed by clients (wallets, exchanges, etc) on their user interface. 
+display_decimals 字段表示客户端（钱包，交易所等）应在其用户界面上显示的最大小数位数。
 
-Other fields that can be included in the stellar.toml file include:
+您也可以在 stellar.toml 中设置另外一些字段：
 ```
-name="{name}"
-desc="{description of asset}"
-conditions="{conditions for usage and distributions of the asset}"
-image="{url of an image to associate with the asset}"
+name="{名称}"
+desc="{资产描述}"
+conditions="{资产的使用和分配条件情况}"
+image="{资产图像的 URL 地址}"
 ```
 
-
-#### (OPTIONAL) Transaction A: Limit Token Supply
-**Account**: issuing account  
-**Operations**:
-- [Set Option - Thresholds & Weights](../concepts/list-of-operations.md#set-options): remove all weights and thresholds
+#### (可选) 事务 A: 限制发行资产的供应量
+**发起事务的账户**：发行账户  
+**操作**：
+- [Set Option - Thresholds & Weights](../concepts/list-of-operations.md#set-options): 移除主密钥
 	 - master weight: 0
 	 - low threshold: 0
 	 - medium threshold: 0
 	 - high threshold: 0 
 
-**Signers**: issuing account
+**事务的签署者**：发行账户
+
+事务 A 由发行账户创建并提交给网络。通过将权重和阈值全部设置为零，可以创建锁定方案。所有密钥(包括帐户的主密钥)都将成为无效密钥。锁定帐户意味着此账户无法再提交任何事务，因此也就不能再创建令牌。此事务的[XDR 表格](https://www.stellar.org/developers/horizon/reference/xdr.html)可以在提交后显示，您可以将它展示给用户以证明发行帐户已经被锁定了。
+
+***警告：执行此步骤后，您无法再使用该发行账户创建和提交新事务。事务 A 将是这个账户能执行的最后一个事务。***
 
 
-Transaction A is created and submitted to the network by the issuing account. By setting the weights and thresholds all to zero, this creates a lockout scenario. All keys, including the master key of the account, will become invalid keys. Locking an account prevents any further transaction to be created using this account, consequently meaning that no more tokens can be created. The [XDR form](https://www.stellar.org/developers/horizon/reference/xdr.html) of this transaction can be published once submitted to show proof of the account being locked. 
-
-
-
-***WARNING: AFTER CARRYING OUT THIS STEP YOU CAN NO LONGER CREATE NEW OPERATIONS OR SUBMIT NEW TRANSACTIONS WITH THE ISSUING ACCOUNT. THIS STEP IS FINAL.***
-
-
-#### Transaction 6: Token Distribution
-**Account**: distribution account  
-**Operations**:
-- [Manage Offer - Sell](../concepts/list-of-operations.md#manage-offer): create an offer to sell the created tokens
-	- selling: created asset code format
-		- code: asset code
-		- issuer account: issuer account
-	- buying: asset code format
-		- code: asset code
-		- issuer account: issuer account
-	- amount: amount to sell
-	- price: sale price in lumens
+#### 事务 6：资产分发
+**发起事务的账户**：分发账户  
+**操作**：
+- [Manage Offer - Sell](../concepts/list-of-operations.md#manage-offer): 创建一个销售您的资产的订单
+	- selling: 之前创建的资产
+		- code: 资产代码
+		- issuer account: 发行账户
+	- buying: 资产
+		- code: 资产代码
+		- issuer account: 发行账户
+	- amount: 待出售的资产的数量
+	- price: 售价
 	- offer id: 0  
 
-**Signer**: distribution account
+**事务的签署者**：分发账户
 
-Transaction 6 is created and submitted to the network by the distribution account. In this step, the created asset is being sold for a different asset. The different asset could be another created asset, a fiat currency, a cryptocurrency, or lumens.  If the offer id is set to zero, a new offer is being created. The amount is the price of 1 unit of asset to be sold (selling) in terms of the asset that is being bought (buying). 
+事务 6 由分发帐户创建并提交给网络。在这个步骤中，创建的资产将被出售以兑换为另外一种不同的资产。不同的资产可以是另一种被创造出来的资产、法定货币、加密货币或 Lumens。如果 `offer id` 设置为 `0`，则创建一个新订单。`price` 指的是每售出一个待售资产可以得到多少个待购资产，`amount` 指出的是代售资产的数量。
 
-By submitting Transaction 6, the created token will be listed on the Stellar Network's decentralized exchange. In order to be listed on exchange clients like Stellar Term and Stellar Port, please refer to their websites for listing instructions. It’s encouraged to be listed on exchange clients to increase visibility.
+通过提交事务 6，创建的令牌将会在 Stellar 的分布式交易所中交易。想要在 Stellar Term 和 Stellar Port 等交易所客户上市，请参阅他们的网站以获取详细的说明。我们鼓励您在各大交易所上市您的资产，这样可以提高您的资产的知名度。
 
+## 其他示例：
+想要了解与发行资产相关的更多信息，请参见[此处](../issuing-assets.md)。此外，通过[这篇文章](../concepts/assets.md#anchors-issuing-assets)，您可以更加深入的理解一些与创建资产有关的术语。[这篇文章](https://www.stellar.org/blog/tokens-on-stellar/)会教您如何简单使用 Stellar Laboratory 创建令牌。
 
-
-## Additional Examples:
-Examples for some of the transactions and more about issuing assets can be found [here](../issuing-assets.md). In addition, [this article](../concepts/assets.md#anchors-issuing-assets) provides more in-depth explanations of key terms regarding asset creation. A preliminary guide that walks through explaining token creation using Stellar Laboratory is available [here](https://www.stellar.org/blog/tokens-on-stellar/).
-
-## Resources:
-- [Becoming an Anchor](../anchor/) - Stellar<span>.org
-- [Minimum Account Balance Calculation](../concepts/fees.md#minimum-account-balance) - Stellar<span>.org
-- [Concept: stellar.toml](../concepts/stellar-toml.md) - Stellar<span>.org
-- [Concept: Trustlines](../concepts/assets.md#trustlines) - Stellar<span>.org
+## 资源:
+- [成为一个锚点](../anchor/) - Stellar.org
+- [计算账户需要保留的最低余额](../concepts/fees.md#minimum-account-balance) - Stellar.org
+- [概念：stellar.toml](../concepts/stellar-toml.md) - Stellar.org
+- [概念：信任线](../concepts/assets.md#trustlines) - Stellar.org
