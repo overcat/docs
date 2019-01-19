@@ -1,66 +1,65 @@
 ---
-title: Bifrost Server Setup
+title: 配置虹桥服务器
 ---
 
-Bifrost is a service that enables users to move BTC/ETH to the Stellar network. It can either be used to give a representation of BTC or ETH on the network or trade it to another custom token. This is particularly useful for ICOs (Initial Coin Oferrings). 
-This guide will focus on how to setup the Bifrost server to move ETH to the Stellar network.
+通过虹桥服务，用户可以将 BTC/ETH 移动到 Stellar 网络中。它既可以用于在 Stellar 网络上表示 BTC 或 ETH，也可以用于将其兑换为另一种自定义令牌，这个功能对 ICO(Initial Coin Offering) 特别有用。本指南将重点介绍如何设置虹桥服务器以将 ETH 转移至 Stellar 网络。
 
-## What you will need
+## 你需要配置哪些东西？
 
-- Postgresql DB 
-- Bitcoin/Ethereum node
-- Bifrost Server
+- PostgreSQL 数据库
+- Bitcoin/Ethereum 节点
+- 虹桥服务器
 
-## Setting up Postgresql
+## 设置 PostgreSQL
 
-This won't be covered here as there are handy documentation on how to set this up online, depending on your OS.
+由于不同的操作系统配置 PostgreSQL 的步骤不尽相同，所以我们不会在这里介绍如何配置它，请访问在线文档以了解如何配置它。
 
-## Setting up Ethereum node
+## 设置 Ethereum 节点
 
-- Download the [geth version 1.7.1 or above](https://geth.ethereum.org/downloads/).
-- Extract the contents of the downloaded file
-- Start the listener on the test network
+- 下载 [geth(版本 1.7.1 或以上)](https://geth.ethereum.org/downloads/).
+- 提取下载文件的内容
+- 在测试网络上启动节点
 
 ```bash  
 ./geth --testnet --rpc
 ```
 
-- Read more about [managing geth](https://github.com/ethereum/go-ethereum)
+- 想要了解更多请阅读[管理 geth](https://github.com/ethereum/go-ethereum)
 
-## Create a Sell Order for your Asset
+## 为您的资产创建一个出售订单
 
-Bifrost will automatically exchange the received BTC or ETH for your custom token. For this to happen, there has to be a sell order for the CUSTOM-TOKEN/BTC OR CUSTOM-TOKEN/ETH asset pairs on the Stellar's distributed exchange.
+虹桥能自动将收到的 BTC 或 ETH 兑换为您的自定义令牌。为了实现这一点，必须在 Stellar 的分布式交易所中创建 CUSTOM-TOKEN/BTC 或 CUSTOM-TOKEN/ETH 资产对的卖出订单。
 
-For example, let's say the exchange rate is 1 `TOKE` for 0.2 `ETH`. You can use [Stellar Laboratory](https://www.stellar.org/laboratory/) to create and submit a manage offer operation:
+举例来说，我们假设 1 `TOKE` 可以兑换到 0.2 `ETH`。你可以使用 [Stellar Laboratory](https://www.stellar.org/laboratory/) 来创建并提交一个订单。
 
-- Go to the "Transaction Builder" tab
-- Take note of the toggle button on the top right of the page with “test/public” ensure it is set to public for live transactions and test for transactions on the testnet
-- Fill the form on the page:
-  - Enter Source account (Asset Issuer or Distributing Account)
-  - Click the "Fetch next sequence number" button
-  - Scroll down, add select operation type: "Manage Offer"
-  - For selling: Select Alphanumeric 4
-  - Enter Asset Code: `TOKE`
-  - Enter Issuer Account ID: Issuer Account
-  - For buying: Select Alphanumeric 4
-  - Enter Asset Code: `ETH`
-  - Enter Issuer Account ID: Issuer Account
-  - Amount: Enter the amount of TOKE you are selling 
-  - Price: This is represented in terms of the buying asset. That is `1 selling_asset = X buying_asset`. In our case, since we want to sell 1TOKE for 0.2ETH, the value here should be 0.2
-  - Offer ID: Enter "0" to create a new offer
-  - Scroll down click "Sign transaction in Signer"
-  - Enter the secret key of the Asset Issuer or Distributing Account or sign a transaction using Ledger device
-  - Click on "Submit to Post transaction"
-  - Click on "Submit".
+- 进入 "Transaction Builder(创建事务)" 页面
+- 在右上角有一个 "test/public" 按钮，如果你想使用公共网络，请将它设置为 public，如果你想使用测试网络，请将它设置为 testnet。
+- 在页面中的表格中填写以下数据：
+  - 输入源帐号(资产发行账户或资产分发账户)
+  - 点击 "Fetch next sequence number(获取下一个序列号)" 按钮
+  - 向下滚动，添加需要操作类型： "Manage Offer"
+  - 待售资产的类型：Alphanumeric 4
+  - 待售资产的代码：`TOKE`
+  - 待售资产的发行账户：发行账户
+  - 待购资产的类型：Alphanumeric 4
+  - 待购资产的代码：`ETH`
+  - 待购资产的发行账户：发行账户
+  - 数量：你想出售的 `TOKE` 的数量
+  - 价格：以购买资产表示。，即 `1 待售资产 = X 待购资产`。在我们的示例中，由于我们想要以 0.2 ETH 的价格出售 1 TOKE，因此这里的值应为 0.2
+  - 订单 ID：输入 "0" 以创建一个新订单
+  - 向下滚动，点击 "Sign transaction in Signer(签名者签名事务)"
+  - 输入资产发行账户或分发账户的密钥来签署事务或使用 Ledger 签署事务
+  - 点击 "提交事务"
+  - 点击 "提交"
 
-The steps above will create a sell order for your asset on the distributed exchange.
+上面的步骤将在分布式交易所中为您的资产创建一个出售订单。
 
-## Setting up Bifrost
+## 设置虹桥服务器
 
-- Download [the latest version](https://github.com/stellar/go/releases/tag/bifrost-v0.0.2) and extract its component into a folder.
-- Rename downloaded file to `bifrost-server` (optional)
-- Generate your ethereum master public keys according to [BIP-0032](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki).  You can download [this implementation](https://iancoleman.io/bip39/) from GitHub and generate the keys on an offline machine. You can also extract master public key from the Ledger device.
-- Create a config file: `bifrost.cfg`, similar to the one below:
+- 下载[最新的版本](https://github.com/stellar/go/releases/tag/bifrost-v0.0.2)并将它提取到一个文件夹中。
+- 将下载文件重命名为 `bifrost-server` (可选)
+- 使用 [BIP-0032](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki) 协议生成你的主公钥。你可以从 GitHub 上下载[该实现](https://iancoleman.io/bip39/)，然后在一台离线的计算机上生成密钥。你还可以在 Ledger 上生成你的主公钥。
+- 创建一个和以下配置文件的类似的配置文件，文件名为 `bifrost.cfg`：
 
 <code-example name="bifrost.cfg">
 
@@ -69,7 +68,7 @@ port = 8002
 using_proxy = false
 access_control_allow_origin_header = "*"
 
-#uncomment bitcoin parameters if you will be accepting BTC
+#如果你想接收 BTC 的话，请将这些注释符删除。
 #[bitcoin]
 #master_public_key = "xpub6DxSCdWu6jKqr4isjo7bsPeDD6s3J4YVQV1JSHZg12Eagdqnf7XX4fxqyW2sLhUoFWutL7tAELU2LiGZrEXtjVbvYptvTX5Eoa4Mamdjm9u"
 #rpc_server = "localhost:18332"
@@ -104,14 +103,14 @@ dsn="postgres://stellar:pass1234@localhost/bifrost?sslmode=disable"
 </code-example>
 
 
-- Complete the config file with the values as described [here](https://github.com/stellar/go/tree/master/services/bifrost#config)
-- Check that you have the correct master public keys by running:
+- 使用[此处](https://github.com/stellar/go/tree/master/services/bifrost#config)描述的值完成配置文件
+- 运行以下命令检查您是否拥有正确的主公钥：
 
 ```bash 
 ./bifrost-server check-keys
 ```
 
-Output should be similar to:
+输出应类似于：
 
 ```bash
 MAKE SURE YOU HAVE PRIVATE KEYS TO CORRESPONDING ADDRESSES:
@@ -130,16 +129,15 @@ Ethereum:
 9 0xC5CD4b9E6c5D9c0cd1AAe5A52f6DCA3d20CF08BC
 ```
 
-## Start the Bifrost server
+## 启动虹桥服务器
 
-Once you are done setting up the config file, you can start the server by running:
+当你完成了对虹桥服务的设置之后，你可以通过以下命令来启动它：
 
 ```bash
 ./bifrost-server server
 ```
-The Bifrost server will be responsible for generating ethereum addresses, listening for payments on these addresses and transferring the token purchased to the user.
+虹桥服务器将负责生成以太地址，监听这些地址的收款信息并将发行的令牌发送给购买者。
 
-## Using Bifrost JS SDK.
+## 使用虹桥 JS SDK
 
-The Bifrost JS SDK provides a way for a client to communicate with the Bifrost server. 
-Download the [latest version](https://github.com/stellar/bifrost-js-sdk/releases) of the SDK, and include it in your frontend application. See the [example html file](https://github.com/stellar/bifrost-js-sdk/blob/master/example.html) in the [bifrost-js-sdk repo](https://github.com/stellar/bifrost-js-sdk) for an example on how this can be implemented.
+通过虹桥 JS SDK ，客户端可以与虹桥服务器进行通信。你可以下载[最新版](https://github.com/stellar/bifrost-js-sdk/releases)的 SDK，并将其应用在前端应用程序中。想要了解如何将它应用在前端应用中，请参阅  [bifrost-js-sdk repo](https://github.com/stellar/bifrost-js-sdk) 库中的[示例 html 文件](https://github.com/stellar/bifrost-js-sdk/blob/master/example.html)。
