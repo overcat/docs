@@ -1,90 +1,88 @@
 ---
-title: Add Stellar To Your Exchange
+title: 将 Stellar 添加到您的交易所中
 ---
 
-This guide describes how to add tokens from the Stellar network to your exchange. First, we walk through adding Stellar's native asset, lumens. Following that, we describe how to add other tokens. This example uses Node.js and the [JS Stellar SDK](https://github.com/stellar/js-stellar-sdk), but it should be easy to adapt to other languages.
+本文将向您介绍如何将 Stellar 网络中的令牌添加到您的交易所中。首先，我们将介绍 Stellar 的原生资产 Lumens，随后，我们将介绍其它类型的令牌。此示例使用 Node.js 和 [JS Stellar SDK](https://github.com/stellar/js-stellar-sdk)，但您很容易使用其它语言实现这些功能。
 
-There are many ways to architect an exchange. This guide uses the following design:
- - `issuing account`: One Stellar account that holds the majority of customer deposits offline.
- - `base account`: One Stellar account that holds a small amount of customer deposits online and is used to payout to withdrawal requests.
- - `customerID`: Each user has a customerID, used to correlate incoming deposits with a particular user's account on the exchange.
+交易所能采用的设计有很多种。本指南使用以下设计：
+ - `issuing account(发行账户)`: 用于储存大部分用户存款的离线账户。
+ - `base account(基础账户)`: 用于处理提现的在线账户，这个账户中持有少量的用户存款。
+ - `customerID(客户 ID)`: 每个用户都有一个 customerID，用于将收到的存款与交易所中特定用户的帐户相关联。
 
-The two main integration points to Stellar for an exchange are:<br>
-1) Listening for deposit transactions from the Stellar network<br>
-2) Submitting withdrawal transactions to the Stellar network
+交易所想要集成 Stellar 的话，需要实现这两点：<br>
+1) 从 Stellar 网络监听存款事务<br>
+2) 将提现事务提交到 Stellar 网络
 
-## Setup
+## 设置
 
-### Operational
-* *(optional)* Set up [Stellar Core](https://www.stellar.org/developers/stellar-core/software/admin.html)
-* *(optional)* Set up [Horizon](https://www.stellar.org/developers/horizon/reference/index.html)
+### 可选
+* *(可选)* 设置 [Stellar Core](https://www.stellar.org/developers/stellar-core/software/admin.html)
+* *(可选)* 设置 [Horizon](https://www.stellar.org/developers/horizon/reference/index.html)
 
-It's recommended, though not strictly necessary, to run your own instances of Stellar Core and Horizon - [this doc](https://www.stellar.org/developers/stellar-core/software/admin.html#why-run-a-node) lists more benefits. If you choose not to, it's possible to use the Stellar.org public-facing Horizon servers. Our test and live networks are listed below: 
+上述操作虽然不是必须的，但我们建议您运行自己的 Stellar Core 和 Horizo​​n 实例 —— [这篇文章](https://www.stellar.org/developers/stellar-core/software/admin.html#why-run-a-node)列出了这样做的诸多好处。如果您实在不想这样做的话，可以使用 Stellar.org 运行的面向公众的 Horizo​​n 服务器。我们的测试和公共网络如下：
 
 ```
-  test net: {hostname:'horizon-testnet.stellar.org', secure:true, port:443};
-  live: {hostname:'horizon.stellar.org', secure:true, port:443};
+  测试网络： {hostname:'horizon-testnet.stellar.org', secure:true, port:443};
+  公共网络： {hostname:'horizon.stellar.org', secure:true, port:443};
 ```
 
-### Issuing account
-An issuing account is typically used to keep the bulk of customer funds secure. An issuing account is a Stellar account whose secret keys are not on any device that touches the Internet. Transactions are manually initiated by a human and signed locally on the offline machine—a local install of `js-stellar-sdk` creates a `tx_blob` containing the signed transaction. This `tx_blob` can be transported to a machine connected to the Internet via offline methods (e.g., USB or by hand). This design makes the issuing account secret key much harder to compromise.
+### 发行帐户
+发行帐户通常用于保护大量资金的安全。发行帐户是 Stellar 帐户，其密钥不储存在任何联网的设备上。事务由用户构建并在离线的计算机上进行签名 —— 您可以在离线计算机上安装 `js-stellar-sdk` ，然后使用它创建包含签名的事务 `tx_blob`。该 `tx_blob` 可以通过离线方式（例如，USB 或手动）传输到已联网的机器。这种设计使得发行账户的密钥更加安全。
 
-### Base account
-A base account contains a more limited amount of funds than an issuing account. A base account is a Stellar account used on a machine that is connected to the Internet. It handles the day-to-day sending and receiving of lumens. The limited amount of funds in a base account restricts loss in the event of a security breach.
+### 基础账户
+基础帐户包含的资金数量比发行帐户的数量要少的多。基本帐户是在联网的计算机上使用的 Stellar 帐户。它处理 Lumens 的日常发送和接收任务。基本帐户中的有限资金能够减少发生安全漏洞时的损失。
 
-### Database
-- Need to create a table for pending withdrawals, `StellarTransactions`.
-- Need to create a table to hold the latest cursor position of the deposit stream, `StellarCursor`.
-- Need to add a row to your users table that creates a unique `customerID` for each user.
-- Need to populate the customerID row.
+### 数据库
+- 需要为待处理的提现创建一张表 `StellarTransactions`。
+- 需要创建一张表 `StellarCursor`，保存用于监听存款信息的最新游标。
+- 需要在 `Users` 表中为每个用户添加 `customerID` 行。
+- 需要在 `customerID` 行填写合适的信息。
 
 ```
 CREATE TABLE StellarTransactions (UserID INT, Destination varchar(56), XLMAmount INT, state varchar(8));
 CREATE TABLE StellarCursor (id INT, cursor varchar(50)); // id - AUTO_INCREMENT field
 ```
 
-Possible values for `StellarTransactions.state` are "pending", "done", "error".
+`StellarTransactions.state` 可能的值为 "pending(待处理)", "done(处理完成)", "error(错误)"。
 
 
-### Code
+### 代码
 
-Use this code framework to integrate Stellar into your exchange. For this guide, we use placeholder functions for reading/writing to the exchange database. Each database library connects differently, so we abstract away those details. The following sections describe each step:
+使用此代码框架将 Stellar 集成到您的交易所中。对于本指南，我们使用占位符函数来读取/写入交易所的数据库。每个数据库的连接方式不同，因此我们抽象出这些细节。以下部分描述了每个步骤：
 
 
 ```js
-// Config your server
+// 配置您的服务器
 var config = {};
 config.baseAccount = "your base account address";
 config.baseAccountSecret = "your base account secret key";
 
-// You can use Stellar.org's instance of Horizon or your own
+// 您可以使用 Stellar.org 提供的 Horizon 节点，也可以使用您自己搭建的
 config.horizon = 'https://horizon-testnet.stellar.org';
 
-// Include the JS Stellar SDK
-// It provides a client-side interface to Horizon
+// 导入 js-stellar-sdk 库，通过它，客户端可以与 Horizon 通讯
 var StellarSdk = require('stellar-sdk');
-// uncomment for live network:
+// 如果想使用公共网络的话，请不要注释下面这行
 // StellarSdk.Network.usePublicNetwork();
 
-// Initialize the Stellar SDK with the Horizon instance
-// You want to connect to
+// 使用您的 Horizon 配置初始化 SDK
 var server = new StellarSdk.Server(config.horizon);
 
-// Get the latest cursor position
+// 获取最新的游标位置
 var lastToken = latestFromDB("StellarCursor");
 
-// Listen for payments from where you last stopped
+// 从您上次停下的地方开始监听充值信息。
 // GET https://horizon-testnet.stellar.org/accounts/{config.baseAccount}/payments?cursor={last_token}
 let callBuilder = server.payments().forAccount(config.baseAccount);
 
-// If no cursor has been saved yet, don't add cursor parameter
+// 如果还没有保存游标参数的话，就不要添加它
 if (lastToken) {
   callBuilder.cursor(lastToken);
 }
 
 callBuilder.stream({onmessage: handlePaymentResponse});
 
-// Load the account sequence number from Horizon and return the account
+// 从 Horizon 获取账户的序列号，并返回该账户
 // GET https://horizon-testnet.stellar.org/accounts/{config.baseAccount}
 server.loadAccount(config.baseAccount)
   .then(function (account) {
@@ -92,19 +90,19 @@ server.loadAccount(config.baseAccount)
   })
 ```
 
-## Listening for deposits
-When a user wants to deposit lumens in your exchange, instruct them to send XLM to your base account address with the customerID in the memo field of the transaction.
+## 监听充值信息
+当用户想将 Lumens 存入您的交易所时，请指导他们将 XLM 发送到您的基本帐户中，并在事务的备忘录(Memo)中填写 customerID。
 
-You must listen for payments to the base account and credit any user that sends XLM there. Here's code that listens for these payments:
+您必须监听基本帐户的收款信息，并将收到的 XLM 记录在用户账上。这是监听收款信息的代码：
 
 ```js
-// Start listening for payments from where you last stopped
+// 从您上次停下的地方开始监听充值信息。
 var lastToken = latestFromDB("StellarCursor");
 
 // GET https://horizon-testnet.stellar.org/accounts/{config.baseAccount}/payments?cursor={last_token}
 let callBuilder = server.payments().forAccount(config.baseAccount);
 
-// If no cursor has been saved yet, don't add cursor parameter
+// 如果还没有保存游标参数的话，就不要添加它
 if (lastToken) {
   callBuilder.cursor(lastToken);
 }
@@ -113,95 +111,94 @@ callBuilder.stream({onmessage: handlePaymentResponse});
 ```
 
 
-For every payment received by the base account, you must:<br>
- - check the memo field to determine which user sent the deposit.<br>
- - record the cursor in the `StellarCursor` table so you can resume payment processing where you left off.<br>
- - credit the user's account in the DB with the number of XLM they sent to deposit.
+对于基本账户收到的每笔付款，您都需要做以下事情：<br>
+ - 检查备忘录(Memo)字段以确定这是由哪个用户发送的存款。<br>
+ - 将游标记录在 `StellarCursor` 表中，以便您可以从中断处继续进行存款业务。
+ - 将收到的 XLM 记录在用户的帐上。
 
-So, you pass this function as the `onmessage` option when you stream payments:
+所以，当您在以 Stream 的方式监听用户付款时，将以下函数传递给 `onmessage`：
 
 ```js
 function handlePaymentResponse(record) {
 
-  // GET https://horizon-testnet.stellar.org/transaction/{id of transaction this payment is part of}
+  // GET https://horizon-testnet.stellar.org/transaction/{此付款的事务 ID}
   record.transaction()
     .then(function(txn) {
       var customer = txn.memo;
 
-      // If this isn't a payment to the baseAccount, skip
+      // 如果不是付款给基本账户则忽略
       if (record.to != config.baseAccount) {
         return;
       }
       if (record.asset_type != 'native') {
-         // If you are a XLM exchange and the customer sends
-         // you a non-native asset, some options for handling it are
-         // 1. Trade the asset to native and credit that amount
-         // 2. Send it back to the customer  
+         // 如果您的交易所是一家 XLM 交易所，而用户给您发送了其它类型的资产，
+         // 您可以有以下两种处理方式：
+         // 1. 将它兑换为原生资产然后记录在用户帐上
+         // 2. 将它退回给用户
       } else {
-        // Credit the customer in the memo field
+        // 根据 Memo 将存款记录在用户帐上
         if (checkExists(customer, "ExchangeUsers")) {
-          // Update in an atomic transaction
+          // 更新数据库，该操作具有原子性
           db.transaction(function() {
-            // Store the amount the customer has paid you in your database
+            // 将用户存款记录在他们的帐上
             store([record.amount, customer], "StellarDeposits");
-            // Store the cursor in your database
+            // 将游标记录在数据库中
             store(record.paging_token, "StellarCursor");
           });
         } else {
-          // If customer cannot be found, you can raise an error,
-          // add them to your customers list and credit them,
-          // or do anything else appropriate to your needs
+          // 如果这个用户不存在，您可以抛出一个错误信息，
+          // 也可以把他们添加到您的用户列表中，然后将付款记录在他们帐上，
+          // 当然您也可以按照自己的想法进行处理
           console.log(customer);
         }
       }
     })
     .catch(function(err) {
-      // Process error
+      // 错误处理
     });
 }
 ```
 
 
-## Submitting withdrawals
-When a user requests a lumen withdrawal from your exchange, you must generate a Stellar transaction to send them XLM. See [building transactions](https://www.stellar.org/developers/js-stellar-base/learn/building-transactions.html) for more information.
+## 处理提现
+当用户申请对 XLM 进行提现时，您需要构建一个事务来发送 XLM。请参阅[构建事务](https://www.stellar.org/developers/js-stellar-base/learn/building-transactions.html)以了解更多信息。
 
-The function `handleRequestWithdrawal` will queue up a transaction in the exchange's `StellarTransactions` table whenever a withdrawal is requested.
+每当有用户申请提现时，`handleRequestWithdrawal` 函数将构建一个事务，这些事务会保存在交易所的 `StellarTransactions` 表中，然后被依次执行。
 
 ```js
 function handleRequestWithdrawal(userID,amountLumens,destinationAddress) {
-  // Update in an atomic transaction
+  // 更新数据库，该操作具有原子性
   db.transaction(function() {
-    // Read the user's balance from the exchange's database
+    // 从数据库中读取用户的余额
     var userBalance = getBalance('userID');
 
-    // Check that user has the required lumens
+    // 检查用户是否有足够的 XLM
     if (amountLumens <= userBalance) {
-      // Debit the user's internal lumen balance by the amount of lumens they are withdrawing
+      // 根据用户提现的金额记录用户的余额
       store([userID, userBalance - amountLumens], "UserBalances");
-      // Save the transaction information in the StellarTransactions table
+      // 将事务信息保存在 `StellarTransactions` 表中
       store([userID, destinationAddress, amountLumens, "pending"], "StellarTransactions");
     } else {
-      // If the user doesn't have enough XLM, you can alert them
+      // 如果用户没有足够的 XLM 的话，您可以提醒他们
     }
   });
 }
 ```
 
-Then, you should run `submitPendingTransactions`, which will check `StellarTransactions` for pending transactions and submit them.
+随后，您应该执行 `submitPendingTransactions`，它会检查等待提交的事务的 `StellarTransactions`，然后提交它们。
 
 ```js
 StellarSdk.Network.useTestNetwork();
-// This is the function that handles submitting a single transaction
+// 这个函数可以提交一个事务
 
 function submitTransaction(exchangeAccount, destinationAddress, amountLumens) {
-  // Update transaction state to sending so it won't be
-  // resubmitted in case of the failure.
+  // 将事务状态更新为正在发送，以便在发生错误时不会重新提交。
   updateRecord('sending', "StellarTransactions");
 
-  // Check to see if the destination address exists
+  // 检查收款地址是否存在
   // GET https://horizon-testnet.stellar.org/accounts/{destinationAddress}
   server.loadAccount(destinationAddress)
-    // If so, continue by submitting a transaction to the destination
+    // 如果操作的话，向收款地址付款。
     .then(function(account) {
       var transaction = new StellarSdk.TransactionBuilder(exchangeAccount)
         .addOperation(StellarSdk.Operation.payment({
@@ -209,7 +206,7 @@ function submitTransaction(exchangeAccount, destinationAddress, amountLumens) {
           asset: StellarSdk.Asset.native(),
           amount: amountLumens
         }))
-        // Sign the transaction
+        // 签署该事务
         .build();
 
       transaction.sign(StellarSdk.Keypair.fromSecret(config.baseAccountSecret));
@@ -217,13 +214,13 @@ function submitTransaction(exchangeAccount, destinationAddress, amountLumens) {
       // POST https://horizon-testnet.stellar.org/transactions
       return server.submitTransaction(transaction);
     })
-    //But if the destination doesn't exist...
+    // 如果收款账户不存在的话... ...
     .catch(StellarSdk.NotFoundError, function(err) {
-      // create the account and fund it
+      // 在网络中创建这个账户，初始金额设置为用户的提款金额
       var transaction = new StellarSdk.TransactionBuilder(exchangeAccount)
         .addOperation(StellarSdk.Operation.createAccount({
           destination: destinationAddress,
-          // Creating an account requires funding it with XLM
+          // 您需要给它发送一定的初始金额以在网络中创建该账户
           startingBalance: amountLumens
         }))
         .build();
@@ -233,36 +230,36 @@ function submitTransaction(exchangeAccount, destinationAddress, amountLumens) {
       // POST https://horizon-testnet.stellar.org/transactions
       return server.submitTransaction(transaction);
     })
-    // Submit the transaction created in either case
+    // 提交事务
     .then(function(transactionResult) {
       updateRecord('done', "StellarTransactions");
     })
     .catch(function(err) {
-      // Catch errors, most likely with the network or your transaction
+      // 捕获错误，最有可能是网络错误或是事务执行失败
       updateRecord('error', "StellarTransactions");
     });
 }
 
-// This function handles submitting all pending transactions, and calls the previous one
-// This function should be run in the background continuously
+// 这个函数会提交所有等待的事务，并不断调用自己
+// 此函数应该在后台持续运行
 
 function submitPendingTransactions(exchangeAccount) {
-  // See what transactions in the db are still pending
-  // Update in an atomic transaction
+  // 查看数据库中有那些事务等待处理
+  // 更新数据库，该操作具有原子性
   db.transaction(function() {
     var pendingTransactions = querySQL("SELECT * FROM StellarTransactions WHERE state =`pending`");
 
     while (pendingTransactions.length > 0) {
       var txn = pendingTransactions.pop();
 
-      // This function is async so it won't block. For simplicity we're using
-      // ES7 `await` keyword but you should create a "promise waterfall" so
-      // `setTimeout` line below is executed after all transactions are submitted.
-      // If you won't do it will be possible to send a transaction twice or more.
+      // 这个函数使用了 async，所以它不会阻塞。
+      // 为简单起见，我们使用的是 ES7 中的 `await`关键字，
+      // 但您应该创建一个 "promise 流"，以便在提交所有事务后执行下面的 "setTimeout" 行。
+      // 如果您不这样做，则可能会提交两次或更多次事务。
       await submitTransaction(exchangeAccount, tx.destinationAddress, tx.amountLumens);
     }
 
-    // Wait 30 seconds and process next batch of transactions.
+    // 等待 30 秒后处理下一系列的事务。
     setTimeout(function() {
       submitPendingTransactions(sourceAccount);
     }, 30*1000);
@@ -270,21 +267,21 @@ function submitPendingTransactions(exchangeAccount) {
 }
 ```
 
-## Going further...
-### Federation
-The federation protocol allows you to give your users easy addresses—e.g., bob*yourexchange.com—rather than cumbersome raw addresses such as: GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ?19327
+## 更进一步... ...
+### 联邦服务
+联邦协议允许您为用户提供简单的地址(例如 bob*yourexchange.com)，而不是繁琐的原始地址(例如 GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ?19327)。
 
-For more information, check out the [federation guide](./concepts/federation.md).
+有关更多信息，请查阅[联邦服务指南](./concepts/federation.md)。
 
-### Anchor
-If you're an exchange, it's easy to become a Stellar anchor as well. Anchors are entities people trust to hold their deposits and issue credits into the Stellar network. As such, they act a bridge between existing currencies and the Stellar network.  Becoming a anchor could potentially expand your business.
+### 锚点
+如果您是一个交易所的话，那么很容易成为一个恒星锚点。锚点是人们信任的实体，用于持有存款并在 Stellar 网络中发放信贷。因此，它们在现有货币和 Stellar 网络之间起桥梁作用。成为锚点能够扩展您的业务。
 
-To learn more about what it means to be an anchor, see the [anchor guide](./anchor/index.html).
+想要更多的了解成为一个锚点的意义，请参阅[锚点指南](./anchor/index.html)。
 
-### Accepting Other Tokens 
-If you'd like to accept other non-lumen tokens follow these instructions. 
+### 接收其它类型资产
+如果您想接受其它类型的令牌，请按照这些说明操作。
 
-First, open a [trustline](https://www.stellar.org/developers/guides/concepts/assets.html#trustlines) with the issuing account of the token you'd like to list -- without this you cannot begin to accept the token. 
+您需要为发行账户创建一条包含了您想接收的令牌的[信任线](https://www.stellar.org/developers/guides/concepts/assets.html#trustlines)，除非您创建了该信任线，否则您无法接收该类型的资产。
 
 ```js
 var someAsset = new StellarSdk.Asset('ASSET_CODE', issuingKeys.publicKey());
@@ -293,16 +290,16 @@ transaction.addOperation(StellarSdk.Operation.changeTrust({
         asset: someAsset
 }))
 ```
-If the token issuer has `authorization_required` set to true, you will need to wait for the trustline to be authorized before you can begin accepting this token. Read more about [trustline authorization here](https://www.stellar.org/developers/guides/concepts/assets.html#controlling-asset-holders).
+如果该资产的发行方启用了 `authorization_required` 标识，在他授权您接收此资产之前，您都无法收取该资产。请阅读[这篇文章](https://www.stellar.org/developers/guides/concepts/assets.html#controlling-asset-holders)来了解这意味着什么。
 
-Then, make a few changes to the example code above:
-* In the `handlePaymentResponse` function, we dealt with the case of incoming non-lumen assets. Since we are now accepting other tokens, you will need to change this condition; if the user sends us XLM we will either:
-	1. Trade lumens for the desired token
-	2. Send the lumens back to the sender
+然后，对上面的示例代码进行一些更改：
+* 在 `handlePaymentResponse` 函数中，我们处理了用户发送非原生资产的情况。由于我们现在可以接受其它类型的令牌，您需要修改此条件，如果用户向我们发送 XLM，我们将可以：
+	1. 将 Lumens 兑换为其它类型的目标资产
+	2. 将 Lumens 发回给用户
 
-*Note*: the user cannot send us tokens whose issuing account we have not explicitly opened a trustline with.
+*注意*：如果发行账户没有创建包含某种令牌的信任线，那么用户将无法向我们发送这种资产。
 
-* In the `withdraw` function, when we add an operation to the transaction, we must specify the details of the token we are sending. For example: 
+* 在 `withdraw` 函数中，在我们向用户发送资产时，我们必须指定发送的是哪种令牌。示例代码：
 ```js
 var someAsset = new StellarSdk.Asset('ASSET_CODE', issuingKeys.publicKey());
 
@@ -312,9 +309,9 @@ transaction.addOperation(StellarSdk.Operation.payment({
         amount: '10'
       }))
 ```
-* In the `withdraw` function your customer must have opened a trustline with the issuing account of the token they are withdrawing. So you must take the following into consideration:
-	* Confirm the user receiving the token has a trustline
-	* Parse the [Horizon error](https://www.stellar.org/developers/guides/concepts/list-of-operations.html#payment) that will occur after sending a token to an account without a trustline
+* 在 `withdraw` 函数中，您的用户必须为他提取的令牌创建了相应的信任线。所以您必须考虑以下因素：
+	* 确认接收令牌的用户具有相应的信任线
+	* 将令牌发送到没有相应的信任线的帐户后将发生的[Horizon 错误](https://www.stellar.org/developers/guides/concepts/list-of-operations.html#payment)
 
 
-For more information about tokens check out the [general asset guide](https://www.stellar.org/developers/guides/concepts/assets.html) and the [issuing asset guide](https://www.stellar.org/developers/guides/issuing-assets.html).
+如果想对资产有着更多的了解，请阅读这两篇文章：[资产](https://www.stellar.org/developers/guides/concepts/assets.html)和[发行资产指南](https://www.stellar.org/developers/guides/issuing-assets.html)。
