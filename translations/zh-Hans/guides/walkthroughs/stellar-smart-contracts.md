@@ -1,263 +1,266 @@
 ---
-title: Stellar Smart Contracts
+title: Stellar 智能合约
 ---
 
-Stellar can be used to build sophisticated smart contracts. Smart contracts are computer programs that can automatically execute an agreement based on programmed logic.
+Stellar 可用于构建复杂的智能合约。智能合约是可以基于编程逻辑自动执行协议的计算机程序。
 
-The concept of integrating technology and legal contracts dates back to the 1950s when scholars built computational methods that could enforce legal rules without involving traditional legal processes. Smart contracts were formally defined by Nick Szabo in 1997:
+整合技术和法律合同的概念可以追溯到 20 世纪 50 年代，当时学者们建立了可以在不涉及传统法律程序的情况下执行法律规则的计算方法。智能合约由 Nick Szabo 在 1997 年正式定义：
 
-> Smart contracts combine protocols with user interfaces to formalize and secure relationships over computer networks. Objectives and principles for the design of these systems are derived from legal principles, economic theory, and theories of reliable and secure protocols. 
+> 智能合约将协议与用户接口结合起来，它可以安全有效地确定公共网络上的关系。这些系统的设计目标和原则来源于法律原则、经济理论以及可靠和安全的协议理论。
 
-In recent years, blockchain technology has enabled a new breed of smart contracts with immutable storage of agreement terms, cryptographic authorization, and integrated transfers of value. 
+近年来，区块链技术使一种新型的智能合约成为可能，这种合约具有协议条款的不变存储、加密授权和价值的集成转移等特性。
 
-For the Stellar Network, smart contracts are manifested as Stellar Smart Contracts. A **Stellar Smart Contract** (SSC) is expressed as compositions of transactions that are connected and executed using various constraints. The following are examples of constraints that can be considered and implemented when creating SSCs:
+在 Stellar 网络中，智能合约的实现为 Stellar 智能合约（Stellar Smart Contract，SSC）。**Stellar 智能合约**由各种约束和事务组合而成。以下是在创建 Stellar 智能合约时可以考虑和采用的约束示例：
 
-- *Multisignature* - What keys are needed to authorize a certain operation? What parties need to agree on a circumstance in order to execute the steps?
+- *多重签名* - 需要哪些密钥来授权该事务？哪些机构需要就情况达成一致才能执行这些操作？
 
-Multisignature is the concept requiring signatures of multiple parties to sign transactions stemming from an account. Through signature weights and thresholds, representation of power in signatures is created. 
+多重签名是指需要多个签名来授权执行事务。签名者的权利以签名权重和阈值来表示。
 
-- *Batching/Atomicity* - What operations must all occur together or fail? What must happen in order to force this to fail or pass?
+- *批处理/原子性* - 哪些操作必须一起成功或失败？
 
-Batching is the concept of including multiple operations in one transaction. Atomicity is the guarantee that given a series of operations, upon submission to the network if one operation fails, all operation in the transaction fails. 
+批处理是指在一个事务中包含多个操作。原子性是指当一个操作执行失败时，事务中的所有操作都失败。
 
-- *Sequence* - In what order should a series of transactions be processed? What are the limitations and dependencies?
+- *序列号* - 一系列的事务应该以什么样的顺序提交？有哪些限制和依赖？
 
-The concept of sequence is represented on the Stellar Network through sequence number. Utilizing sequence numbers in transaction manipulation, it can be guaranteed that specific transactions do not succeed if an alternative transaction is submitted. 
+在事务处理中使用序列号，可以保证在提交二选一的事务不会成功。
 
-- *Time Bounds* - When can a transaction be processed?
+- *时间界限* - 这个事务可以在什么时间端被提交？
 
-Time bounds are limitations on the time period over which a transaction is valid. Using time bounds enables time periods to be represented in an SSC. 
+时间界限是事务能被顺利提交的时间段。我们可以用它来设置 Stellar 智能合约能被执行的时间范围。
 
-This overview presents two common design patterns that can be used to create SSCs on the Stellar Network. The transactions can be translated to API requests or can be executed using [Stellar Laboratory](https://www.stellar.org/laboratory/).
-
-
-## 2-Party Multisignature Escrow Account with Time Lock & Recovery
-### Use Case Scenario
-Ben Bitdiddle sells 50 CODE tokens to Alyssa P. Hacker, under the condition that Alyssa won’t resell the tokens until one year has passed. Ben doesn’t completely trust Alyssa so he suggests that he holds the tokens for Alyssa for the year.
-
-Alyssa protests. How will she know that Ben will still have the tokens after one year? How can she trust him to eventually deliver them?
-
-Additionally, Alyssa is sometimes forgetful. There’s a chance she won’t remember to claim her tokens at the end of the year long waiting period. Ben would like to build in a recovery mechanism so that if Alyssa doesn’t claim the tokens, they can be recovered. This way, the tokens won’t be lost forever.
-
-### Implementation
-An escrow agreement is created between two entities: the origin - the entity funding the agreement, and the target - the entity receiving the funds at the end of the contract. 
-
-Three accounts are required to execute a time-locked escrow contract between the two parties: a source account, a destination account, and an escrow account. The source account is the account of the origin that is initializing and funding the escrow agreement. The destination account is the account of the target that will eventually gain control of the escrowed funds. The escrow account is created by the origin and holds the escrowed funds during the lock up period. 
-
-Two periods of time must be established and agreed upon for this escrow agreement: a lock-up period, during which neither party may manipulate (transfer, utilize) the assets, and a recovery period, after which the origin has the ability to recover the escrowed funds from the escrow account. 
-
-Five transactions are used to create an escrow contract - they are explained below in the order of creation. The following variables will be used in the explanation:
--  **N**, **M** - sequence number of escrow account and source account, respectively; N+1 means the next sequential transaction number, and so on
-- **T** - the lock-up period
-- **D** - the date upon which the lock-up period starts
-- **R** - the recovery period
-
-For the design pattern described below, the asset being exchanged is the native asset. The order of submission of transactions to the Stellar network is different from the order of creation. The following shows the submission order, in respect to time: 
-
-![Diagram Transaction Submission Order for Escrow Agreements](assets/ssc-escrow.png)
-
-#### Transaction 1: Creating the Escrow Account
-**Account**: source account  
-**Sequence Number**: M  
-**Operations**:
-- [Create Account](../concepts/list-of-operations.md#create-account): create escrow account in system
-	 - starting balance: [minimum balance](../concepts/fees.md#minimum-account-balance) + [transaction fee](../concepts/fees.md#transaction-fee)
-
-**Signers**: source account
-
-Transaction 1 is submitted to the network by the origin via the source account. This creates the escrow account, funds the account with the current minimum reserve, and gives the origin access to the public and private key of the escrow account. The escrow account is funded with the minimum balance so it is a valid account on the network. It is given additional money to handle the transfer fee of transferring the assets at the end of the escrow agreement. It is recommended that when creating new accounts to fund the account with a balance larger than the calculated starting balance.
+本概述介绍了两种常用的设计模式，可用于在 Stellar 网络上创建智能合约。事务可以直接通过 API 提交，也可以使用 [Stellar Laboratory](https://www.stellar.org/laboratory/) 执行。
 
 
-#### Transaction 2: Enabling Multi-sig
-**Account**: escrow account   
-**Sequence Number**: N  
-**Operations**:
-- [Set Option - Signer](../concepts/list-of-operations.md#set-options): Add the destination account as a signer with weight on transactions for the escrow account
+## 需要双方签名的托管账户
+### 使用场景
+Ben Bitdiddle 出售 50 CODE 令牌给 Alyssa P. Hacker，条件是 Alyssa 在这一年内不会转售这些令牌。但是 Ben 并不完全信任 Alyssa，所以他建议这些令牌由他代为保管一年。
+
+Alyssa 反对这样做。她无法确信 Ben 在一年之后仍然持有这些令牌，也无法确信一年后 Ben 会将这些令牌发送给她。
+
+此外，Alyssa 记忆力不太好。在长达一年的等待期结束时，她可能会不记得去认领她的令牌。Ben 希望建立一个回收机制，这样只要回收期开始后 Alyssa 还没有认领这些令牌，Ben 就可以回收这些令牌。这样一来，令牌就不会永远丢失了。
+
+### 实现
+在两个实体之间建立了托管协议：资产发送方——托管资金的账户——在合约结束时资产接收方。
+
+在双方之间执行时间锁定的托管合约需要三个帐户：源帐户，目标账户和托管帐户。源账户负责在网络中创建托管账户并向其发送托管资金。目标账户是最终接收托管资金的账户。托管账户由源账户创建，并在锁定期间持有托管资金。
+
+必须为此托管协议商定并确定两个时间段：一个是锁定期，在此期间任何一方都不得操纵（转移，利用）资产；另一个是回收期，在这之后源账户可以从托管账户中回收托管资金。
+
+创建该合约一共用到了 5 笔事务——下面按创建顺序对其进行说明。讲解中将使用以下变量：
+-  **N**, **M** - 托管账户和源账户的序列号；N+1 表示下一个连续事务的序列号，依此类推
+- **T** - 锁定期
+- **D** - 锁定期的开始日期
+- **R** - 回收期
+
+对于下面描述的设计模式，要交换的资产是原生资产。向 Stellar 网络提交事务的顺序与创建顺序不同。以下是按时间排列的提交次序：
+
+![托管协议的事务关系图](assets/ssc-escrow.png)
+
+#### 事务 1：创建托管账户
+**发起事务的账户**：源账户
+**序列号**：M
+**操作**：
+- [Create Account](../concepts/list-of-operations.md#create-account): 在系统中创建托管账户
+	 - starting balance: [最低账户余额](../concepts/fees.md#minimum-account-balance) + [提交事务所需的手续费](../concepts/fees.md#transaction-fee)
+
+**签名者**：源账户
+
+事务 1 由源账户创建并提交到 Stellar 网络。这样就创建了托管账户，源账户持有者拥有对托管账户的控制权。源账户用网络当前的基本储备金为托管账户提供起始资金，还需要为它提供少量额外的资金以让它能够支付提交事务所需的手续费用。
+
+
+#### 事务 2：启用多重签名
+**发起事务的账户**：托管账户
+**序列号**：N
+**操作**：
+
+- [Set Option - Signer](../concepts/list-of-operations.md#set-options): 将接受账户添加到托管账户的签名者列表中
 	 - weight: 1
-- [Set Option - Thresholds & Weights](../concepts/list-of-operations.md#set-options): set weight of master key and change thresholds weights to require all signatures (2 of 2 signers)
+- [Set Option - Thresholds & Weights](../concepts/list-of-operations.md#set-options): 设置主密钥的权重，并配置阈值权重以确保事务需要得到所有可签名者的授权（目前签名列表中有两位成员）
 	 - master weight: 1
 	 - low threshold: 2
 	 - medium threshold: 2
-	 - high threshold: 2 
+	 - high threshold: 2
 
-**Signers**: escrow account
+**签名者**：托管账户
 
-Transaction 2 is created and submitted to the network. It is done by the origin using the escrow account, as origin has control of the escrow account at this time. The first operation adds the destination account as a second signer with a signing weight of 1 to the escrow account. 
+事务 2 由托管账户创建并提交到 Stellar 网络。目前托管账户由发送方控制着。第一个操作将目标账户添加为了签名者，并将它的权重设置为 1。
 
-By default, the thresholds are uneven. The second operation sets the weight of the master key to 1, leveling out its weight with that of the destination account. In the same operation, the thresholds are set to 2. This makes is so that all and any type of transactions originating from the escrow account now require all signatures to have a total weight of 2. At this point, the weight of signing with both the escrow account and the destination account adds up to 2. This ensures that from this point on, both the escrow account and the destination account (the origin and the target) must sign all transactions that regard the escrow account. This gives partial control of the escrow account to the target. 
+一般情况下我们将各个等级操作的阈值设置的各不相等，但在这里我们所做的稍有不同。第二个操作将主密钥的权重设置为 1，使其与目标账户的权重相等。在这里，将所有等级操作的阈值设置为 2，因此托管账户提交任何事务都必须得到 2 个权重授权。也就是说在提交这个事务后，托管账户提交任何事务，还需要得到目标账户的授权。
 
-#### Transaction 3: Unlock  
-**Account**: escrow account  
-**Sequence Number**: N+1  
-**Operations**:
-- [Set Option - Thresholds & Weights](../concepts/list-of-operations.md#set-options): set weight of master key and change thresholds weights to require only 1 signature
+#### 事务 3：解锁
+**发起事务的账户**：托管账户
+**序列号**：N+1
+**操作**：
+- [Set Option - Thresholds & Weights](../concepts/list-of-operations.md#set-options): 设置主密钥的权重，并配置阈值权重以确保事务指需要得到托管账户的授权
 	 - master weight: 0
 	 - low threshold: 1
 	 - medium threshold: 1
-	 - high threshold: 1 
+	 - high threshold: 1
 
-**Time Bounds**:
-- minimum time: unlock date
-- maximum time: 0  
+**时间界限(Time Bounds)**:
+- 时间下限(minimum time)：解锁日期
+- 时间上限(maximum time)：0
 
-**Immediate Signer**: escrow account  
-**Eventual Signer**: destination account
+**先进行签名的账户**：托管账户
+**后进行签名的账户**：目标账户
 
 
-#### Transaction 4: Recovery 
-**Account**: escrow account  
-**Sequence Number**: N+1  
-**Operations**:
-- [Set Option - Signer](../concepts/list-of-operations.md#set-options): remove the destination account as a signer
-	 - weight: 0  
- - [Set Option - Thresholds & Weights](../concepts/list-of-operations.md#set-options): set weight of master key and change thresholds weights to require only 1 signature
+#### 事务 4：回收
+**发起事务的账户**：托管账户
+**序列号**：N+1
+**操作**：
+
+- [Set Option - Signer](../concepts/list-of-operations.md#set-options): 将目标账户从签名者列表中移除
+	 - weight: 0
+ - [Set Option - Thresholds & Weights](../concepts/list-of-operations.md#set-options): 设置主密钥的权重，并配置阈值权重以确保事务只需要得到托管账户的授权
 	 - low threshold: 1
 	 - medium threshold: 1
-	 - high threshold: 1  
+	 - high threshold: 1
 
-**Time Bounds**:
-- minimum time: recovery date
-- maximum time: 0
+**时间界限(Time Bounds)**:
 
-**Immediate Signer**: escrow account  
-**Eventual Signer**: destination account  
+- 时间下限(minimum time)：回收期
+- 时间上限(maximum time)：0
 
-Transaction 3 and Transaction 4 are created and signed by the escrow account by the origin. The origin then gives Transaction 3 and Transaction 4, in [XDR form](https://www.stellar.org/developers/horizon/reference/xdr.html), to the target to sign using the destination account. The target then publishes them for the origin to [review](https://www.stellar.org/laboratory/#xdr-viewer?type=TransactionEnvelope&network=test) and save in a safe location. Once signed by both parties, these transactions cannot be modified. Both the origin and target must retain a copy of these signed transactions in their XDR form, and the transactions can be stored in a publicly accessible location without concerns of tampering.
+**先进行签名的账户**：托管账户
+**后进行签名的账户**：目标账户
 
-Transaction 3 and Transaction 4 are created and signed before the escrow account is funded, and have the same transaction number. This is done to ensure that the two parties are in agreement. If circumstances were to change before one of these two transactions are submitted, both the origin and the target need to authorize transactions utilizing the escrow account. This is represented by the requirement of the signatures of both the destination account and the escrow account. 
+事务 3 和事务 4 由托管账户创建并签署，随后托管账户将生成的事务 3 和事务 4 以 [XDR 的形式](https://www.stellar.org/developers/horizon/reference/xdr.html)发送给目标账户，目标账户在审阅该 XDR 后对它进行签名。随后目标账户将签署后的 XDR 发给源账户，源账户[审阅](https://www.stellar.org/laboratory/#xdr-viewer?type=TransactionEnvelope&network=test)该 XDR 后将它们保存在一个安全的地方。一旦这些事务被双方签署，那它们将不能被修改。双方都应该保留这些事务的 XDR 数据，并且可以将它们存储在可公开访问的位置，从而不用担心被篡改。
 
-Transaction 3 removes the escrow account as a signer for transactions generated from itself. This transaction transfers complete control of the escrow account to target. After the end of the lock-up time period, the only account that is needed to sign for transactions from the escrow account is the destination account. The unlock date (D+T) is the first date that the unlock transaction can be submitted. If Transaction 3 is submitted before the unlock date, the transaction will not be valid. The maximum time is set to 0, to denote that the transaction does not have an expiration date. 
+事务 3 和事务 4 是在源账户向托管账户发送托管资金前被创建和签署的，并且这两个事务具有相同的序列号，这样做是为了确保双方达成了协议。如果在提交这两个事务中的一个之前协议发生了变化，那么发送方和目标账户都需要对托管账户进行授权以执行事务。
 
-Transaction 4 is for account recovery in the event that target does not submit the unlock transaction. It removes the destination account as a signer, and resets the weights for signing transactions to only require its own signature. This returns complete control of the escrow account to the origin. Transaction 4 can only be submitted after the recovery date (D+T+R), and has no expiration date. 
+事务 3 将托管账户移出了签名者列表，同时修改了阈值，也就是说接收方现在完全控制着托管账户。在锁定时间段结束后，签署托管帐户执行的事务所需的唯一帐户是目标帐户。解锁日期(D+T)是可以提交解锁事务的第一天，如果在这之前提交了事务 3，那么这个事务不会被成功执行。时间上限设为 0 表示该事务不会过期。
 
-Transaction 3 can be submitted at any time during the recovery period, R. If the target does not submit Transaction 3 to enable access to the funds in the escrow account, the origin can submit Transaction 4 after the recovery date. The origin can reclaim the locked up assets if desired as Transaction 4 makes it so the target is no longer required to sign transactions for escrow account. After the recovery date, both Transaction 3 and Transaction 4 are valid and able to be submitted to the network but only one transaction will be accepted by the network. This is ensured by the feature that both transactions have the same sequence number. 
+事务 4 用于源账户在目标账户未提交解锁事务的情况下回收托管资金。该事务将目标账户移出了签名者列表，同时修改了阈值，现在托管账户只要自己的签名就可以执行事务了，也就是说托管账户现在被发行方控制着。事务 4 可以在回收期(D+T+R)到达后提交，它也不会过期。
 
-To summarize: if Transaction 3 is not submitted by the target, then Transaction 4 is submitted by the origin after the recovery period.
+事务 3 可以在回收期内的任何时间提交。如果接收方没有提交事务 3 的话，发送方可以提交事务 4 以回收资产到源账户中。如果需要的话，在事务 4 提交之后，源账户可以回收托管账户中锁定的资产，因为它已经不再被需要了。在回收期内，事务 3 和事务 4 都可以被提交到 Stellar 网络，因为它们拥有相同的序列号，所以只有先提交的那个会生效。
 
-#### Transaction 5: Funding  
-**Account**: source account  
-**Sequence Number**: M+1  
-**Operations**:
-- [Payment](../concepts/list-of-operations.md#payment): Pay the escrow account the appropriate asset amount  
+总结：如果事务 3 没有被目标用户提交，那么发送方可以在回收期到来后提交事务 4。
 
-**Signer**: source account
+#### 事务 5：向托管支付发送托管资产
+**发起事务的账户**：源账户
+**序列号**：M+1
+**操作**：
 
-Transaction 5 is the transaction that deposits the appropriate amount of assets into the escrow account from the source account. It should be submitted once Transaction 3 and Transaction 4 have been signed by the destination account and published back to the source account.
+- [Payment](../concepts/list-of-operations.md#payment): 向托管支付发送托管资金
 
-## Joint-Entity Crowdfunding 
-### Use Case Scenario
-Alyssa P. Hacker needs to raise money to pay for a service from a company, Coding Tutorials For Dogs, but she wants to source the funding from the public via crowdfunding. If enough people donate, she will be able to pay for the service directly to the company. If not, she will have a mechanism to return the donations. To guarantee her trustworthiness and reliability to the donors, she decides to asks Ben Bitdiddle if he’s willing to help her with getting people to commit to the crowdfunding. He will also vouch for Alyssa’s trustworthiness to his friends as a way to get them to donate to the crowdfunding efforts. 
+**签名者**：源账户
 
-### Pattern Implementation
-In the simplest example, a crowdfunding smart contract requires at least three parties: two of which (from here out called party A and party B) agree to sponsor the crowdfunding, and a third to which the final funds will be given (called the target). A token must be created as the mechanism to execute the crowdfunding. The participation token utilized, as well as a holding account, must be created by one of two parties. A holding account issues participation tokens that can be priced at any value per token. The holding account collects the funding, and, after the end of the crowdfunding period, will return contributors funds if the value goal isn't met. 
+源账户通过事务 5 将适当数量的资产存入托管账户。一旦事务 3 和事务 4 由目标账户签名并发给了源账户，就应该提交该事务。
 
-Five transactions are used to create a crowdfunding contract. The following variables are used in explaining the formulation of the contract:
-- **N**, **M** - sequence number of party A's account and the holding account, respectively; N+1 means the next sequential transaction number, and so on
-- **V** - total value the crowdfunding campaign is looking to raise
-- **X** - value at which the tokens will be sold
+## 联合实体众筹
+### 使用场景
+Alyssa P. Hacker 想要众筹资金来购买一家公司的 Coding Tutorials For Dogs 服务，但她希望通过众筹从公众那里获得资金。如果有足够多的人捐款，她就可以向公司支付服务费用。如果没有，她将通过一个机制来返还捐款。为了保证她对捐赠者的可信赖性和可靠性，她决定询问 Ben Bitdiddle 是否愿意帮助她让人们加入众筹。Ben Bitdiddle 需要向他的朋友们担保 Alyssa 是可信的，以此让他们加入众筹。
 
-There are four accounts used for creating a basic crowdfunding schema. First is the holding account, which is the account that deals with collecting and interacting with the donors. It requires the signature of both party A and party B in order to carry out any transactions. The second is the goal account, the account owned by the target to which the crowdfunded value is delivered to on success. The two remaining accounts are respectively owned by party A and party B, who are running the crowdfunding. 
+### 实现
+在最简单的例子中，众筹智能合约至少需要三方：其中两方（从这里称为甲方和乙方）负责众筹，第三方将获得最终资金（称为目标账户）。在这里我们必须创建一个令牌作为执行众筹的机制。所使用的参与众筹的令牌以及持有账户必须由甲乙两方之一创建。持有账户持有参与令牌，并且可以对该令牌定价。持有账户收取众筹资金，如果在众筹期结束后未达到目标金额，将资金返还给参与者。
 
-The transactions that create this design pattern can be created and submitted by any party sponsoring the crowdfunding campaign. The transactions are presented in order of creation. The order of submission to the Stellar Network is conditional, and depends on the success of the crowdfunding campaign.
+创建该合约一共用到了 5 笔事务——下面按创建顺序对其进行说明。讲解中将使用以下变量：
+- **N**, **M** - 分别是甲方账户和持有账户的序列号；N+1表示下一个连续事务序列号，依此类推
+- **V** - 想要众筹的资金总数
+- **X** - 参与令牌的价格
 
-![Diagram Transaction Submission Order for Crowdfunding Campaigns](assets/ssc-crowdfunding.png)
+有四个账户用于创建基本的众筹模式。一个是持有帐户，这是持有资金和兑换令牌的账户，该账户提交任何事务都需要甲、乙双方授权。第二个是目标账户，这个账户属于提供服务的公司，众筹一旦成功，众筹到的资金会被发送到这个账户。剩下的两个账户分别为甲方和乙方所有，他们负责众筹。
 
+创建此设计模式的事务可以由负责众筹活动的任何一方创建和提交。以下事务是按照创建顺序排列的，提交到恒星网络的顺序取决于众筹活动是否成功。
 
-#### Transaction 1: Create the Holding Account
-**Account**: party A  
-**Sequence Number**: M  
-**Operations**:
-- [Create Account](../concepts/list-of-operations.md#create-account): create holding account in system
-	- [starting balance](../concepts/fees.md#minimum-account-balance): minimum balance
+![众筹活动的事务关系图](assets/ssc-crowdfunding.png)
 
-**Signers**: party A
+#### 事务 1：创建持有账户
+**发起事务的账户**：甲方
+**序列号**：M
+**操作**：
 
-#### Transaction 2: Add signers
-**Account**: holding account  
-**Sequence Number**: N  
-**Operations**:
- - [Set Option - Signer](../concepts/list-of-operations.md#set-options): Add party A as a signer with weight on transactions for the escrow account
+- [Create Account](../concepts/list-of-operations.md#create-account): 在网络中创建持有账户
+	- [starting balance](../concepts/fees.md#minimum-account-balance): 最低账户余额
+
+**签名者**：甲方
+
+#### 事务 2：添加签名者
+**发起事务的账户**：持有账户
+**序列号**：N
+**操作**：
+ - [Set Option - Signer](../concepts/list-of-operations.md#set-options): 将甲方账户添加到托管账户的签名者列表中
 	- weight: 1
- - [Set Option - Signer](../concepts/list-of-operations.md#set-options): Add party B as a signer with weight on transactions for the escrow account
+ - [Set Option - Signer](../concepts/list-of-operations.md#set-options): 将乙方账户添加到托管账户的签名者列表中
 	- weight: 1
- - [Set Option - Thresholds & Weights](../concepts/list-of-operations.md#set-options): remove master keys and change thresholds weights to require all other signatures (2 of 2 signers)
+ - [Set Option - Thresholds & Weights](../concepts/list-of-operations.md#set-options): 将主密钥的权重设置为 0，并配置阈值权重以确保事务需要得到所有可签名者的授权（目前签名列表中有两位成员）
 	- master weight: 0
 	- low threshold: 2
 	- medium threshold: 2
 	- high threshold: 2
 
-**Signers**: holding account
+**签名者**：持有账户
 
 
-Transaction 1 and 2 are created and submitted by one of the two parties sponsoring the crowdfunding campaign. Transaction 1 creates the holding account. The holding account is funded with a starting balance in order to make it valid on the network. It is recommended that when creating new accounts to fund the account with a balance larger than the calculated starting balance. Transaction 2 removes the holding account as a signer for its own transactions, and adds party A and party B as signers. From this point on, all parties involved must agree and sign all transactions coming from the holding account. This trust mechanism is in place to protect donors from one party carrying malicious actions.  
+事务 1 和事务 2 由甲方或乙方创建并提交到 Stellar 网络。在事务 1 中，甲方用网络当前的基本储备金为持有账户提供起始资金，一般来说还需要为它提供少量额外的资金以让它能够支付提交事务所需的手续费用。事务 2 将所有等级操作的阈值设置为 2、将主密钥的权重设置为 0、将甲乙双方添加为签名者，同时将它们双方的权重设置为 1，也就是说持有账户提交任何事务都必须得到甲乙双方的授权。这种信任机制是为了保护捐助者免受其中一方恶意行为的伤害。
 
-After Transaction 2, the holding account should be funded with the tokens to be used for the crowdfunding campaign, as well as with enough lumens to cover the transaction fees for all of the following transactions. 
+在事务 2 之后, 持有账户的资金应包括用于众筹活动的令牌, 以及足够的 Lumens 来支付以下所有事务的手续费。
 
-#### Transaction 3: Begin Crowdfunding
-**Account**: holding account  
-**Sequence Number**: N+1  
-**Operations**:
-- [Manage Offer - Sell](../concepts/list-of-operations.md#manage-offer): sell participation tokens at a rate of X per token
+#### 事务 3：开始众筹
+**发起事务的账户**：持有账户
+**序列号**：N+1
+**操作**：
+- [Manage Offer - Sell](../concepts/list-of-operations.md#manage-offer): 以 X 的价格售出参与令牌
 
-**Signer**: party A’s account, party B’s account
+**签名者**：甲方账户，乙方账户
 
-Transaction 3 is created and submitted to the network to begin the crowdfunding campaign. It creates an offer on the network that sells the participation tokens at a rate of X per token. Given a limited amount of tokens are created for the crowdfunding campaign, the tokens are priced in a manner that enables a total of V to be raised through sales. 
+创建事务 3 并提交给网络, 以开始众筹活动。它在网络上创建一个订单来出售这些令牌，出售价格为 X。由于令牌的总量是有限的，所以最多可以众筹到资金为 V。
 
-#### Transaction 4: Crowdfunding Succeeds  
-**Account**: holding account  
-**Sequence Number**: N+2    
-**Operations**:
-- [Payment](../concepts/list-of-operations.md#payment): send V from the holding account to the goal account
-
-
-**Time Bounds**: 
-- minimum time: end of crowdfunding period
-- maximum time: 0
-
-**Signers**: party A’s account, party B’s account
-
-#### Transaction 5: Crowdfunding Fails
-**Account**: holding account    
-**Sequence Number**: N+3      
-**Operations**: 
-- [Manage Offer - Cancel](../concepts/list-of-operations.md#manage-offer): cancel pre-existing offer to sell tokens 
- - [Manage Offer - Buy](../concepts/list-of-operations.md#manage-offer): holding account buys participation tokens at a rate of X per token
-
-**Time Bounds**:
-- minimum time: end of crowdfunding period
-- maximum time: 0
-
-**Signers**: party A’s account, party B’s account  
-
-Transaction 4 and Transaction 5 are pre-signed, unsubmitted transactions that are published. Both transactions have a minimum time of the end of the crowdfunding period to prevent them from being submitted earlier than agreed upon by the sponsoring parties. They can be submitted by anyone upon the end of the crowdfunding. Transaction 4 transfers the raised amount to the goal account. Transaction 5 prevents all remaining tokens from being sold by canceling the offer and enables donors to create offers to sell back tokens to the holding account.
-
-Security is provided through sequence numbers. As noted, the sequence number for Transaction 4 is *N+2* and the sequence number for Transaction 5 is *N+3*. These sequential sequence numbers demand that both Transaction 4 and Transaction 5 are submitted to the network in the appropriate order.  
-
-The crowdfunding was a failure when not enough funds were raised by the expected date. This is the equivalent to not selling all of the participation tokens. Transaction 4 is submitted to the network, but it will fail. The holding account will have enough lumens to pay the transaction fee, so the transaction will be considered in consensus and a sequence number will get consumed. An error will occur, though, because there will not be enough funds in the account to cover the actual requested amount of the payment. Transaction 5 is then submitted to the network, enabling contributors to sell back their tokens. Additionally, Transaction 5 cancels the holding account’s ability to sell participation tokens, halting the status of the crowdfunding event.  
-
-The crowdfunding is a success if V was raised by the appropriate time. Raising enough funds is equivalent to having all participation tokens being purchased from the holding account. Transaction 4 is submitted to the network and will succeed because there are enough funds present in the account to fulfill the payment operation, as well as cover the transaction fee. Transaction 5 will then be submitted to the network, but will fail. The holding account will have enough lumens to pay the transaction fee, so the transaction will be considered in consensus and a sequence number will get consumed. The transaction will succeed, but because the holding account will not have the funds to buy back the tokens, participants will not be able to make attempts to recover their funds. 
-
-#### Bonus: Crowdfunding Contributors
-The following steps are carried out in order to become a contributor to the crowdfunding:
-1. [Create a trustline](../concepts/list-of-operations.md#change-trust) to the holding account for participation tokens
-	- The trustline creates trust between the contributor and the holding accounts, enabling transactions involving participation tokens to be valid
-2. [Create an offer](../concepts/list-of-operations.md#manage-offer) to buy participation tokens
-	- The contributor account will receive participation tokens and the holding account will receive the value
-3. If the crowdfunding:
-	- succeeds - do nothing
-	- fails - create an offer to sell participation tokens, enabling the contributor to get back their value invested
-
-## SSC Best Practices
-When it comes to designing a smart contract, parties must come together and clearly outline the purpose of the contract, the cooperation between parties, and the desired outcomes. In this outline, clear conditions and their outcomes should be agreed upon. After establishing the conditions and their outcomes, the contract can then be translated to a series of operations and transactions. As a reminder, smart contracts are created using code. Code can contain bugs or may not perform as intended. Be sure to analyze and agree upon all possible edge cases when coming up with the conditions and outcomes of the smart contract. 
+#### 事务 4：众筹成功
+**发起事务的账户**：持有账户
+**序列号**：N+2
+**操作**：
+- [Payment](../concepts/list-of-operations.md#payment): 将众筹到的资金发送给目标账户
 
 
-## Resources
+**时间界限(Time Bounds)**:
+- 时间下限(minimum time)：众筹结束的日期
+- 时间上限(maximum time)：0
 
-- [Jurimetrics - The Next Steps Forward](http://heinonline.org/HOL/LandingPage?handle=hein.journals/mnlr33&div=28&id=&page) - Lee Loevinger 
-- [Formalizing and Securing Relationships on Public Networks](http://firstmonday.org/article/view/548/469) - Nick Szabo 
-- [Smart Contracts: 12 Use Cases for Business and Beyond](https://bloq.com/assets/smart-contracts-white-paper.pdf) - Chamber of Digital Commerce
-- [Concept: Transactions](https://www.stellar.org/developers/guides/concepts/transactions.html) - Stellar<span>.org
-- [Concept: Multisignature](https://www.stellar.org/developers/guides/concepts/multi-sig.html) - Stellar<span>.org
-- [Concept: Time Bounds](https://www.stellar.org/developers/guides/concepts/transactions.html#time-bounds) - Stellar<span>.org
-- [Concept: Trustlines](https://www.stellar.org/developers/guides/concepts/assets.html#trustlines) - Stellar<span>.org
+**签名者**：甲方账户，乙方账户
 
+#### 事务 5：众筹失败
+**发起事务的账户**：持有账户
+**序列号**：N+3
+**操作**：
+- [Manage Offer - Cancel](../concepts/list-of-operations.md#manage-offer): 取消所有出售参与令牌的订单
+- [Manage Offer - Buy](../concepts/list-of-operations.md#manage-offer): 持有账户以 X 的价格回购参与令牌
+
+**时间界限(Time Bounds)**:
+- 时间下限(minimum time)：众筹结束的日期
+- 时间上限(maximum time)：0
+
+**签名者**：甲方账户，乙方账户
+
+事务 4 和事务 5 是预签名的、未提交的、公开的事务。这两笔事务都设置了能被提交的最早时间，以防止其提交时间不在担保方商定的时间范围内。它们可以由任何人在众筹结束后提交。事务 4 将筹集到的资产发送到目标帐户。事务 5 通过取消订单防止剩余的令牌被出售，并创建一个订单回购之前售出的资产，购买价格也应该为 X。
+
+安全性是通过序列号提供的。如上所述，事务 4 的序列号为 N+2，事务 5 的序列号 N+3，这些序列号要求事务 4 和事务 5 以适当的顺序提交到网络。
+
+假设在众筹结束时仍未众筹到足够的资金，也就是说没有售出所有的令牌。事务 4 需要提交到网络，但它将失败。持有账户有足够的 Lumens 来支付事务手续费，因此虽然此事务会因没有足够的资产来支付付款而失败，但是序列号仍然会增大。随后将事务 5 提交到网络，使捐赠者能够使用令牌赎回他们的资产。此外, 事务 5 取消了出售令牌的订单，停止了该众筹。
+
+如果在众筹结束前筹集到数量为 V 的资产，众筹便是成功的。筹集足够的资金意味着所有的参与令牌都被售出了。事务 4 被提交到网络后将会执行成功，因为账户中有足够的资金来完成支付操作。之后如果将事务 5 提交到网络的话，它也会执行成功，但由于持有帐户将没有资金来回购令牌，所以捐赠者将无法兑回它们的资金。
+
+#### 如何参与众筹
+如果想要参与众筹，需要执行以下步骤：
+1. [创建一条信任线](../concepts/list-of-operations.md#change-trust)以持有参与众筹用的令牌
+  - 信任线在捐赠者和持有帐户之间创建信任，从而使涉及参与令牌的事务有效
+2. [创建订单](../concepts/list-of-operations.md#manage-offer)购买参与令牌
+  - 捐赠者帐户将收到参与令牌，持有帐户将收到资金
+3. 众筹成功与否：
+  - 成功了 - 什么都不用做
+  - 失败了 - 创建一个订单出售这些参与令牌以赎回资金
+
+## 智能合约最佳实践
+当涉及到设计一个智能合约时，当事人必须走到一起，清楚地阐述合同的目的、当事人之间如何合作以及期望的结果。在这个合同中，应该就明确的条件及其结果达成一致。在确定了条件及其结果之后，合同就可以转化为一系列操作和事务。值得注意的是，智能合约是使用代码创建的，但是代码可能包含 bug，也可能不按预期执行。当商定智能合约的条件和结果时，一定要分析并商定所有可能的边缘情况。
+
+
+## 资源
+
+- [判决法理学 - 未来的发展](http://heinonline.org/HOL/LandingPage?handle=hein.journals/mnlr33&div=28&id=&page) - Lee Loevinger
+- [基于公共网络进行“关系”的确立及保障](http://firstmonday.org/article/view/548/469) - Nick Szabo
+- [智能合约: 12个商业及其他用例](https://bloq.com/assets/smart-contracts-white-paper.pdf) - Chamber of Digital Commerce
+- [概念：事务](https://www.stellar.org/developers/guides/concepts/transactions.html) - Stellar.org
+- [概念：多重签名](https://www.stellar.org/developers/guides/concepts/multi-sig.html) - Stellar.org
+- [概念：时间界限](https://www.stellar.org/developers/guides/concepts/transactions.html#time-bounds) - Stellar.org
+- [概念：信任线](https://www.stellar.org/developers/guides/concepts/assets.html#trustlines) - Stellar.org
