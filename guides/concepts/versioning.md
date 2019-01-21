@@ -1,31 +1,40 @@
 ---
-title: 版本与升级管理
+title: Versioning and Upgrading
 ---
 
 
-本文档描述了用于整个系统在演进时保持其正常工作的各种机制。
+This document describes the various mechanisms used to keep the overall system working as it evolves.
 
-# 账页版本管理
-## 账页版本
-在账页头（ledger header）中使用一个uint32用于描述整体协议的版本号。在此协议既定义为数据传输格式(wire format)——如在此账页中存储的所有对象的序列化形式——又包括其行为。此版本号在每次协议更改时都会递增。
+# Ledger versioning
+## ledgerVersion
+This uint32 stored in the ledger header describes the version number of the overall protocol.
+Protocol in this case is defined both as "wire format"--i.e., the serialized forms of all objects stored in the ledger--and its behavior.
+
+This version number is incremented every time the protocol changes.
 
 ### Integration with consensus
-大多数情况下，节点仅就哪一个事务集需要应用到之前的账页（ledger）进行共识。然而，也可以就（协议）升级进行共识。
+Most of the time, consensus is simply reached on which transaction set needs to be applied to the previous ledger.
 
-其中一个升级步骤是“在 N 个账页（ledger）后升级总账版本到值 X”。如果节点认为该升级步骤无效，可以投票终止该动作。
-节点认为步骤无效是因为它们不理解它或者某些条件不满足。在前面的示例中，可能是节点不支持版本X，或者账页编号（ledger number）尚未达到 N 。
+Consensus can also, however, be reached on upgrade steps.
 
-（在达到触发条件时，如上述条件，节点）会在应用事务集合之前先执行升级步骤，以保证逻辑调度步骤与处理它的保持一致。否则必须在该账页关账后才能执行升级步骤。
+One such upgrade step is "update ledgerVersion to value X after ledger N".
 
-### 支持的版本
-每个节点都应自己来跟踪它支持的版本——例如，“最小版本（min version）”，“最大版本（max version）” ——但它也可以包括“禁用版本”之类的内容。协议本身不包含跟踪支持版本这块内容。
+If nodes do not consider that the upgrade step is valid, they simply drop the upgrade step from their vote.
 
-注意（接受共识的）最小协议版本（minProtocolVersion）与节点实例能处理的版本并不一致：通常一个节点的代码实现会具备处理从版本 n 到最大协议版本（maxProtocolVersion）之间的版本的能力，这里的 n <= 最小协议版本（minProtocolVersion）。
-这样做的原因是节点需要具备从（最低为版本 n 的）历史记录重放事务的能力，但可能存在一些我们不希望可用于新事务的问题/漏洞。
+A node considers a step invalid either because they do not understand it or some condition is not met. In the previous example, it could be that X is not supported by the node or that the ledger number didn't reach N yet.
 
-## 账页对象版本管理
+Upgrade steps are applied before applying the transaction set to ensure that the logic scheduling steps is the same that is processing it. Otherwise, the steps would have to be applied after the ledger is closed.
 
-数据结构也可能随时间而演化，其包含以下扩展点（extension point）：
+### Supported versions
+Each node has its own way of tracking which version it supports--for example, a "min version", "max version"--but it can also include things like "black listed versions." Supported versions are not tracked from within the protocol.
+
+Note that minProtocolVersion is distinct from the version an instance understands:
+typically an implementation understands versions n .. maxProtocolVersion, where n <= minProtocolVersion.
+The reason for this is that nodes must be able to replay transactions from history (down to version 'n'), yet there might be some issue/vulnerability that we don't want to be exploitable for new transactions.
+
+## Ledger object versioning
+
+Data structures that are likely to evolve over time contain the following extension point:
 ```C++
 union switch(int v)
 {
@@ -34,22 +43,23 @@ case 0:
 } ext;
 ```
 
-在这种情况下，版本“v”指的是对象的版本并允许添加新的臂（arms）。
-该方案提供了几个好处：
-* 节点的代码实现无需修改代码，仅需更新协议定义文件（protocol definition files）即可实现数据兼容（wire compatible）。
-* 即使没有更新协议定义文件，只要它们不遇到更新的格式，旧的节点代码实现就可以继续运行。
-* 这样提升了多个对象版本之间的代码共享程度。
+In this case, the version 'v' refers to the version of the object and permits the addition of new arms.
 
-注意，虽然此方案提升了使用这些对象的组件的代码共享能力，但是对 stellar-core 本身不一定提升代码共享，因为所有版本都要保留此举措：为了从任意时间点重建账页链，该举措必须100％兼容。
+This scheme offers several benefits:
+* Implementations become wire compatible without code changes only by updating their protocol definition files.
+* Even without updating the protocol definition files, older implementations continue to function as long as they don't encounter newer formats.
+* It promotes code sharing between versions of the objects.
 
-## 操作（Operations）版本管理
+Note that while this scheme promotes code sharing for components consuming those objects, code sharing is not necessarily promoted for stellar-core itself because the behavior must be preserved for all versions: In order to reconstruct the ledger chain from arbitrary points in time, the behavior must be 100% compatible.
 
-操作（Operations）作为整体进行版本化：如果需要添加或更改新参数，则通过添加新操作来实现版本控制。
-这会在客户端中导致一些逻辑重复，但此举避免引入潜在的错误。例如，原本仅签署某些类型事务的代码，就必须完全知晓它所要签署的内容。
+## Operations versioning
 
-## 封包（Envelope）版本管理
+Operations are versioned as a whole: If a new parameter needs to be added or changed, versioning is achieved by adding a new operation.
+This causes some duplication of logic in clients but avoids introducing potential bugs. For example, code that would sign only certain types of transactions must be fully aware of what it's signing.
 
-用于允许封包具备可扩展性的模式（签名内容）：
+## Envelope versioning
+
+Pattern used to allow for extensibility of envelopes (signed content):
 ```C++
 union TransactionEnvelope switch (int v)
 {
@@ -62,31 +72,35 @@ case 0:
 };
 ```
 
-此模式允许在需要时修改封包，并确保客户端不会盲目地使用无法验证的内容。
+This pattern allows the capability to modify the envelope if needed and ensures that clients don't blindly consume content that they couldn't validate.
 
-## 升级没有扩展点（extension point）的对象
+## Upgrading objects that don't have an extension point
 
-必须克隆对象的模式（schema），并且必须更新其父对象以使用新的对象类型。 这里的假设是没有尚未进行版本管理的（unversioned）的“根”对象。
+The object's schema must be cloned and its parent object must be updated to use the new object type. The assumption here is that there is no unversioned "root" object.
 
-## 支持的节点代码实现生命周期注意事项
+## Supported implementations lifetime considerations
 
-为了使代码库保持在可维护状态，代码实现可能无法保留从创世区块（genesis）开始回放的能力。相反，他们可能会选择支持有限的范围——例如，只保留重播之前3个月事务的能力（假设当前网络的最小协议版本（minProtocolVersion）比这些事务的版本更新）。
+In order to keep the codebase in a maintainable state, implementations may not preserve the ability to play back from genesis. Instead they may opt to support a limited range--for example, only preserve the capability to replay the previous 3 months of transactions (assuming that the network's minProtocolVersion is more recent than that).
 
-这不会改变节点（重新）加入或参与网络的能力; 它只影响节点进行历史数据验证的能力。
+This does not change the ability of the node to (re)join or participate in the network; it only affects the ability for a node to do historical validation.
 
-# 网络交互（Overlay）版本管理
+# Overlay versioning
 
-网络交互（Overlay）遵循类似的模式进行版本管理：有着最小-最大版本（min-maxOverlayVersion）。
+Overlay follows a similar pattern for versioning: It has a min-maxOverlayVersion.
 
-网络交互层的版本管理策略当到达弃用阶段时会变得比较激进。涉及的节点集仅限于直连到节点实例的这些节点。
+The versioning policy at the overlay layer is a lot more aggressive when it comes to the deprecation schedule; the set of nodes involved is limited to the ones that connect directly to the instance.
 
-鉴于此，在本层中结构使用“克隆”模式：
-如果一个消息需要修改，那么通过克隆旧消息并使用最新类型标识的方式定义一个新消息。
+With this in mind, structures follow the "clone" model at this layer:
+if a message needs to be modified, a new message is defined by cloning the old message type using a new type identifier.
 
-要知道旧的代码实现总会被删除，克隆模型可以重构大部分代码，避免了维护旧版本的麻烦。
+Knowing that the older implementation will be deleted anyway, the clone model makes it possible to refactor large parts of the code and avoids the headache of maintaining older versions.
 
-在本层中，只要保持兼容，修改旧版本的行为是可以接受的。
+At this layer, it's acceptable to modify the behavior of older versions as long as it stays compatible.
 
-代码实现也可以决定共享底层代码——例如，通过在内部将旧消息转换为新格式的方式。
+The implementation may decide to share the underlying code--for example, by converting legacy messages into the new format internally.
 
-当节点互联时交换的“问候（HELLO）”消息包含该实例支持的最小和最大版本。 如果另一个端点认为不兼容，则可以决定立即断开连接。
+The "HELLO" message exchanged when peers connect to each other contains the min and max version the instance supports. The other endpoint may decide to disconnect right away if it's not compatible.
+
+
+
+
