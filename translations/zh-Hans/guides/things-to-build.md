@@ -1,128 +1,124 @@
 ---
-title: Build Stellar Apps
+title: 构建 Stellar 应用程序
 ---
-Build cool things on Stellar! This list outlines a few ideas for applications. Feel free to add your own or take one here and run with it.
-As always, if you need help building anything with Stellar, just ask on [Slack chat](http://slack.stellar.org/), [IRC](https://kiwiirc.com/client/irc.freenode.net/#stellar-dev), or email developers@stellar.org.
+在 Stellar 上构建有趣的应用吧！此列表列出了一些想法，请随意添加你的想法，或是从中挑选一个开始完成它。如果在构建应用的时候碰到了麻烦，你可以通过 [Slack chat](http://slack.stellar.org/)、[IRC](https://kiwiirc.com/client/irc.freenode.net/#stellar-dev) 或电子邮箱 developers@stellar.org 联系我们。
 
-If you're not looking for a full-blown project but still want to help out, look for `help wanted` issue labels in any of our [repos](https://github.com/stellar).
+如果你并不想开始一个新的项目，只是想帮助我们完善已存在的应用。你可以在我们的代码仓库中寻找具有 `help wanted` 标签的 Issues。
 
-# Slack Bot
-- Report a stream of all stellar transactions to a channel.
-- *Advanced*: Allow people to send money/points/+1's to other Slack team members `/send @bob $5`.
+# Slack 机器人
+- 在一个频道中展示 Stellar 上源源不断的事务
+- *高级功能*：允许用户向 Slack 中的其它用户发送资产/积分。例如 `/send @bob $5`。
 
-# API Mashups
-- Twilio meets Stellar: SMS alerts for transactions (you can check the example [here](https://github.com/stellar/stellar-sms-client))
-- Twitter meets Stellar: Tweet to send money or Twitter alerts
-- Reddit meets Stellar: Tipbot!
-- Many more possibilities
+# API 混搭
+- Twilio 与 Stellar：短信交易提醒（你可以查看[这个示例](https://github.com/stellar/stellar-sms-client)）
+- Twitter 与 Stellar：使用 Tweet 发送资产或使用 Twitter 告警
+- Reddit 与 Stellar：小费机器人
+- 更多其它可能的组合
 
-# Graph of Horizon data
-A relatively simple project that graphically displays information pulled from Horizon and could look up accounts and transactions. It would also be cool to see:
- - Tree of account creation. All accounts are created by other accounts, so you could show this tree of lineage.
- - Graph of ledger header info over time:
-   - Transaction count
-   - Operation count
-   - Ledger close times
-   - Fee pool
+# Horizon 数据图
+一个相对简单的项目，图形化地显示从 Horizon 获取的信息，可以查找账户和事务。如果能看到以下数据就更酷了：
+ - 因为任何一个账户都是被其它账户创建的，所以你可以使用树状图来展示账户间的关联。
+ - 总账头部信息随时间变化的图表：
+   - 事务总数
+   - 操作总数
+   - 总账关闭时间
+   - 费用池
 
-# Federation Service
-Implement a simple [Federation server](https://www.stellar.org/developers/guides/concepts/federation.html) and setup a webpage where anyone can claim a name*yourdomain.com stellar address and associate their stellar account ID with it. The catch is your service will only federate for accounts that set their [inflation destination](https://www.stellar.org/developers/guides/concepts/inflation.html) to one provided by your domain.
+# 联邦服务
+实现一个简单的[联邦服务](https://www.stellar.org/developers/guides/concepts/federation.html)并建立一个网站，任何人都可以在这申请一个 `名称*[yourdomain.com` 这样的 Stellar 地址，并将这个 Stellar 地址与他们的账户 ID 绑定。你也可以只为那些将[通货膨胀目标](https://www.stellar.org/developers/guides/concepts/inflation.html)设置为您的账户提供服务。
 
-You can also contribute to the [federation server](https://github.com/stellar/go/tree/master/services/federation) maintained by Stellar Development Foundation.
+您还可以向 Stellar 基金会维护的[联邦服务](https://github.com/stellar/go/tree/master/services/federation)贡献代码。
 
-# Lumens to any email address
-Allow anyone to send lumens from their Stellar client to any email address. They would simply enter something like `<emailaddress>*domain.com` and then they are able to send it lumens. If the recipient doesn't have a stellar account already one will be created for them and they will get an email alerting them that they have lumens.
+# 发送 Lumens 到任意邮箱地址
+允许任何人在 Stellar 客户端中将 Lumens 发送到任意电子邮件地址。他们只需要输入类似 `<emailaddress>*domain.com` 这样的地址就可以将 Lumens 发送过去。如果接收方还没有一个与该邮箱地址绑定的 Stellar 账户，该用户就会收到一封邮件告知他收到了 Lumens。
 
-This would be a service hosted at `domain.com` that does the following:
-- Runs a federation server.
-- Will federate payment addresses with an email prefix like `jed@stellar.org*domain.com`.
-- If there is a federation request for an address you don't know that starts with a valid email address:
-  - Generate a key pair
-  - Return the generated public key as the accountID
-  - Watch the network to see if that account is created.
-  - If the account is created, you send an email to the given email address with the private half of the keypair with links to a Stellar client.
+如果你想在 `domain.com` 上运行一个这样的服务，请执行以下步骤：
 
-*Advanced* allow people to manage the stellar account you just created for them by sending emails to control@domain.com. This makes someone's inbox a Stellar client. For example: `send 100 XLM to bob@gmail.com`
+- 运行一个联邦服务。
+- 将 `jed@stellar.org*domain.com` 这样的地址与 Stellar 地址关联。
+- 如果你收到了一个有效的联邦服务查询申请，但是您没有找到与之对于的 Stellar 地址：
+  - 生成一对 `Keypair`
+  - 将生成的公钥作为 账户 ID 返回
+  - 观察网络以确定该账户是否被创建了
+  - 如果创建了该帐户，则向给定的电子邮件地址发送一封电子邮件，邮件中其中包含密钥，点击密钥将会跳转到 Stellar 客户端的页面。
 
-[Adding this feature to a wallet](https://galactictalk.org/d/37-project-idea-sending-lumens-to-any-address)
+*高级功能* 允许人们通过向 control@domain.com 发送电子邮件来管理您为他们创建的账户。 使用户的邮箱成为了一个 Stellar 客户端。例如 `send 100 XLM to bob@gmail.com`。
 
-# Distributed Exchange
-Description and discussion [here.](https://galactictalk.org/d/26-project-idea-distributed-exchange)
+[将这个功能添加到钱包当中](https://galactictalk.org/d/37-project-idea-sending-lumens-to-any-address)
 
+# 分布式交易所
+请在[此处](https://galactictalk.org/d/26-project-idea-distributed-exchange)查阅关于这个话题的描述与讨论。
 
-# Resource Paywall
-Let's say you have a public-facing service, perhaps for streaming or open wifi. You want to allow other people to use this service if they pay you small amounts. These payments could be used for spam prevention or to support your business. This is a job for the **toll collector**...
+# 资源付费墙
+假设你有一个面向公众的服务，比如流媒体或者开放的 WIFI。如果用户想使用你的服务，那么需要支付小额的费用。这些付款可防止滥用或作为您的运营经费。你需要要一个服务来帮你收取费用。
 
-## Toll Collector
-A simple service that keeps track of any XLM sent to a `toll address`. The toll collector has a database of public keys and amounts of XLM it has sent to the toll address. It watches for payments to the toll address on the Stellar network and adds them to this DB.
+## 收费服务
+一个简单的服务，用于跟踪任何发送到`收费地址`的 XLM，并将它记录在数据库中，这个数据库保存了对方的公钥地址和发送的 XLM 的数量。
 
-The toll collector service has one RPC or endpoint that you can call:
+收费服务拥有一个可以调用的 RPC 接口：
 
-  - `charge(publicKey, amount of XLM)` returns
-    - `amount XLM charged`
-    - `amount of XLM this key has left`
+  - `charge(公钥, XLM 数量)` 返回
+    - `收取的 XLM 数量`
+    - `XLM 余额`
 
-Your app can publish its Stellar toll address for payments. When someone tries to use your service, the server has them authenticate their public key and calls `charge` on the Toll Collector to decrements the consumer's balance in the DB. You can send the consumer a message when their balance is zero.
+您的应用可以公布其 Stellar 收费地址。当有人试图使用您的服务时，服务器让他们使用公钥进行身份验证，随后调用收费服务上的 `charge` 接口以减少 DB 中的使用者的余额。您可以在使用者的账户余额为零时向它发送通知。
 
-# Multisig Coordinator
-A web application that facilitates creating multisig transactions. Typically you must coordinate between several parties to generate a transaction for an account protected by multisig. This site would make this process much easier and allow you to coordinate in cases where you don't know the other party.
+# 多重签名协调服务
+该服务帮助您更轻松的创建需要多重签名的事务。通常情况下，您必须在多方之间进行协调才能生成一个需要多重签名的事务。该 Web 站点使这个过程更加容易，并可以在您不了解另一方的情况下进行协调。
 
-Ideally, the multisig coordinator includes the following features:
-- Associate an email address with your public key
-- Create a tx that you would like to be signed by multiple parties
-- Enter the public keys that you would like to sign the tx
-- If any of these keys have previously associated their email address, then they will be sent a message
-- When you come to the site you see a list of all pending transactions:
-  - You can see the details of each transaction
-  - You can see who initiated the transaction
-  - You can see who else has signed the transaction
-  - You can sign any that are waiting for you
-- Once a pending transaction is signed by enough people, it is submitted to the network
-- Once the transaction is submitted, all the signers are notified
+理想情况下，多重签名协调服务包含以下功能：
+- 将电子邮件地址与公钥关联起来
+- 创建一个需要多方签名的事务
+- 输入要签署事务的公钥
+- 如果这些公钥中的任何一个在之前已经关联了电子邮件地址，那么用户会收到邮件通知
+- 当你访问这个网站时，你会看到一个等待你签名的事务清单：
+  - 您可以看到每个事务的详细信息
+  - 您可以看到是谁发起了事务
+  - 您可以看到还有谁签署了事务
+  - 您可以为等待您授权的事务签名
+-  一旦某个事务得到了足够多的签名，它就会被提交到网络上
+- 一旦提交了事务，就会通知所有的签名者
 
-# Market Feed
-Data feed for the distributed Exchange inside Stellar. Something equivalent to the [Poloniex API](https://poloniex.com/public?command=returnTicker).
-This will be useful for apps like [stellarTerm](http://stellarterm.com) as well as getting the Stellar trade volume added to charting sites like [CoinMarketCap](http://coinmarketcap.com)
+# 交易市场数据订阅(Feed)接口
+为 Stellar 内置的分布式交易所提供像 [Poloniex API](https://poloniex.com/public?command=returnTicker) 这样的数据订阅接口。这对于像 [stellarTerm](http://stellarterm.com/) 这样的应用程序非常有用，并且可以将 Stellar 交易量添加到 [CoinMarketCap](http://coinmarketcap.com/) 这样的图表网站。
 
-# Quorum Monitor
-A web page that shows the state of the network quorum graph. Ideally, the quorum monitor shows:
-- A live graph of how the network is connected
-- What servers are having issues
-- Any servers that disagree with the rest of the network
-- Perhaps a history of uptime for each validator
+# 仲裁节点(Quorum)监视器
+显示网络中仲裁节点状态的网页。它应该包含以下功能：
+- 网络连接状态的实时图
+- 哪些服务器有问题
+- 任何与网络其余部分不一致的服务器
+- 记录每个验证节点的正常运行时间
 
-You should be able to view the quorum graph from the point of view of any given validator. You would probably need to run stellar-core to build the quorum monitor. You can get the data from the stellar-core logs and the /quorum command.
+您应该能够从任何给定的验证验证节点的角度来查看仲裁节点状态图。你或许需要运行 stellar-core 来构建此监视器。您可以从 stellar-core 日志和 `/quorum` 命令获取数据。
 
-*Advanced*: Build a server that connects to stellar-core and monitors the externalized messages and the various validator broadcasts.
+*高级功能*：构建连接到 stellar-core 的服务，并监视外部消息和各个验证节点的广播。
 
-# Libraries
-Build a library in your favorite language:
+# SDK
+你可以使用你喜欢的语言构建一个 SDK：
 - C#
 - PHP
 - Haskell
-- Other languages
+- 其它语言
 
-Or contribute to our existing SDKs:
+也可以向已存在的 SDK 贡献代码：
 - [JavaScript](https://github.com/stellar/js-stellar-sdk)
 - [Go](https://github.com/stellar/go)
 - [Java](https://github.com/stellar/java-stellar-sdk)
 - [Python](https://github.com/StellarCN/py-stellar-base/)
 
-# Product and Service Ideas We've Heard
-- Microsavings account for school, health, insurance
-- Microinsurance
-- P2P lending
-- Conditional cash transfers
-- Donation systems for nonprofits
-- Loyalty points programs
-- Community currencies
-- Time banks
-- Volunteer hour tracking
-- Anywhere ATM or human ATM mobile apps
+# 我们听说过的产品和服务理念
 
-# Atomic cross-chain swap facilitator
-- End-user software that to facilitate atomic cross-chain swaps with
-  various other cryptocurrencies (between both Lumens and other
-  Stellar currencies).
-- A rendezvous service establishing a marketplace for cross-chain
-  swaps.
+- 为学费、健康、保修创建的小额账户
+- 小额保险
+- P2P 借贷
+- 有条件的现金转移
+- 非营利组织的捐赠系统
+- 忠诚客户积分计划
+- 共同体货币
+- 时间银行
+- 志愿者服务时间跟踪
+- 无处不在的 ATM 或 ATM 手机应用
+
+# 促进原子跨链交换
+- 最终用户软件，用于促进 Stellar 中的资产（Lumens 和 Stellar 中的其它资产）与其它生态中的加密资产进行原子跨链交换。
+- 建立依托原子跨链交换技术的交易所。
