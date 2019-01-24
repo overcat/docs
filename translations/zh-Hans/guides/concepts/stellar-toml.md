@@ -2,26 +2,26 @@
 title: Stellar.toml
 ---
 
-# Introduction
+# 介绍
 
-The `stellar.toml` file is used to provide a common place where the Internet can find information about your domain's Stellar integration. Any website can publish Stellar network information. You can announce your validation key, your [federation](./federation.md) server, peers you are running, your quorum set, if you are an anchor, etc.
+`stellar.toml` 是用于发布网站与 Stellar 网络集成信息的地方，任何网站都可以发布 Stellar 网络信息。在这里你可以声明你的校验公钥、[联邦服务器地址](./federation.md) 、正在运行对等节点(peers)、仲裁集合(quorum set)，如果你是一个锚点的话，你还需要添加一些其它信息。
 
-The stellar.toml file is a text file in the [TOML format](https://github.com/toml-lang/toml).
+stellar.toml 文件以 [TOML 格式](https://github.com/toml-lang/toml)编码。
 
-## Publishing stellar.toml
+## 发布 stellar.toml
 
-Given the domain "DOMAIN", the stellar.toml will be searched for at the following location:
+对于给定的域名 "DOMAIN"，stellar.toml 文件应该能从以下位置访问到：
 
 `https://DOMAIN/.well-known/stellar.toml`
 
-## Enabling cross-origin resource sharing (CORS)
-You must enable CORS on the stellar.toml so people can access this file from other sites. The following HTTP header *must* be set for a HTTP response for `stellar.toml` file request.
+## 开启跨域资源共享(CORS)
+您必须为 stellar.toml 文件启用 CORS，这样人们才能从其他站点访问这个文件。 也就是说您*必须*将 stellar.toml 文件的 HTTP 响应头设置为如下：
 
 ```
 Access-Control-Allow-Origin: *
 ```
 
-**Important**: Only enable CORS for stellar.toml (or any files it references). For example, in Apache you would set something like:
+**重要**: 若想只为 stellar.toml 文件启用 CORS(或其它任任何文件)。在 Apache 中你可以这样设置：
 
 ```xml
 <Location "/.well-known/stellar.toml">
@@ -29,7 +29,7 @@ Access-Control-Allow-Origin: *
 </Location>
 ```
 
-Or in nginx:
+在 Nginx 中你可以这样设置：
 
 ```
 location /.well-known/stellar.toml {
@@ -37,17 +37,17 @@ location /.well-known/stellar.toml {
 }
 ```
 
-For other web servers, see: http://enable-cors.org/server.html
+对于其它类型的服务器，请查阅：http://enable-cors.org/server.html
 
-## Testing CORS
+## 测试 CORS
 
-1. Run a curl command in your terminal similar to the following (replace stellar.org with the hosting location of your stellar.toml file):
+1. 在终端中允许以下命令 (将 stellar.org 替换为你自己的域名)：
 
   ```bash
   curl --head https://stellar.org/.well-known/stellar.toml
   ```
 
-2. Verify the `Access-Control-Allow-Origin` header is present as shown below.
+2. 确定 `Access-Control-Allow-Origin` 出现在 HTTP 头中
 
   ```bash
   curl --head https://stellar.org/.well-known/stellar.toml
@@ -58,15 +58,15 @@ For other web servers, see: http://enable-cors.org/server.html
   ...
   ```
 
-3. Also run the command on a page that should not have it and verify the `Access-Control-Allow-Origin` header is missing.
+3. 使用上述命令测试未启用 CORS 的页面，确认 `Access-Control-Allow-Origin` 头没有出现。
 
-## Stellar.toml example
+## Stellar.toml 样例
 
-This file is UTF-8 with Dos-, UNIX-, or Mac-style end of lines.
-Blank lines and lines beginning with '#' are ignored.
-Undefined sections are reserved.
-All sections are optional.
-Many of these sections reflect what would be listed in your [stellar-core.cfg](https://github.com/stellar/stellar-core/blob/master/docs/stellar-core_example.cfg)
+文件需要是 UTF-8 编码，换行符可以是 LF 或 CRLF。
+空行和以 `#` 开头的行会被忽略。
+未定义的字段会被保留。
+所有的字段都是可选的。
+以下配置中的许多字段和您的 [stellar-core.cfg](https://github.com/stellar/stellar-core/blob/master/docs/stellar-core_example.cfg) 配置有关。
 
 ```toml
 # Sample stellar.toml
@@ -168,7 +168,7 @@ VALIDATORS=[
 # Required compliance fields:
 #      name=<recipient name>
 #      addr=<recipient address>
-# Federation Format:  
+# Federation Format:
 #        <phone number>*anchor.com
 #        Forwarding supported by sending to: forward*anchor.com
 #           forward_type=bank_account
