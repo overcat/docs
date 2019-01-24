@@ -1,57 +1,57 @@
 ---
-title: How and Why to Complete Your Stellar.toml
+title: 如何以及为何设置您的 Stellar.toml
 ---
 
->*If you are interested in issuing a token on the Stellar network, but haven't yet, start by consulting the step-by-step instructions for custom asset creation *[*here*](./custom-assets.md)*.*
+>*如果您想要但却还没有在 Stellar 网络上发布令牌，请*[*在此处查阅*](./custom-assets.md)*创建自定义令牌的详细步骤。*
 
-Hello! We made this short guide to help you, a token issuer, put your token in the best possible place to succeed on Stellar.
+您好！我们制作了这个简短的指南指导您如何使发行的令牌取得成功。
 
-Mostly, we want to make sure you know how to **provide information to the network** about yourself and your token, so that potential buyers and apps, like exchanges and wallets, will trust your asset. You provide this necessary information by completing your **stellar.toml** file.
+我们希望确保您知道如何向**网络提供**有关您自己和您的令牌的信息，以便潜在的买家和应用（如交易所和钱包）信任您的资产。您可以通过填写 **stellar.toml** 文件来提供此必要信息。
 
-The best tokens on Stellar already follow the guidelines below, and *apps and buyers will expect your token to do the same*.
+Stellar 上最成功的那些令牌已经遵循以下指南，*应用程序和买家将期望您的令牌也能这样做*。
 
-Why you should complete your stellar.toml file
+为什么您应该设置您的 stellar.toml
 ----------------------------------------------
 
-The most successful token issuers give exchanges and potential buyers lots of information about themselves. On Stellar, they do this in the **stellar.toml** file. More information in your token's stellar.toml will mean:
+那些成功的令牌发行方往往向交易所和潜在的购买者提供了大量关于他们的信息。在 Stellar 中，他们可以将这些信息配置在 **stellar.toml** 中。如果您提供了足够多的信息可能会带来以下好处：
 
-* your token is listed on *more* exchanges
+* 您的令牌能在*更多*的交易所上架
 
-* your token holders are *more* confident
+* 令牌的持有者*更加*信任您的令牌
 
-* very likely, your project is *more* successful
+* 您的项目很有可能会取得*更大*的成功
 
-For example, the Stellar app, [StellarX](http://stellarx.com/), uses the stellar.toml file to decide how your token is presented to traders in its markets view. If you don't provide enough information, your token may be hidden from many traders.  Other Stellar exchanges like stellarport.io and stellarterm.com make similar decisions.
+举例来说，Stellar 应用程序 [StellarX](http://stellarx.com/) 通过 stellar.toml 文件来决定如何在市场视图中向交易者展示令牌。如果您没有提供足够的信息，您的令牌可能会被隐藏。stellarport.io 和 stellarterm.com 等其它的 Stellar 交易所也采取了类似的措施。
 
-*Many won't list your token at all without a robust stellar.toml.*
+*如果您没有提供一个完善的 stellar.toml，大多数交易所都不会列出您的令牌。*
 
-The stellar.toml file is *so* important that the first Stellar Ecosystem Proposal is devoted to outlining what it should contain. You can find the complete SEP 0001 [here](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md), but we'll summarize the important parts below.
+stellar.toml 文件非常重要，因此第一个 Stellar 生态系统提案致力于概述它应该包含的内容。您可以在[这里](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md)找到完整的 SEP 0001，我们将在下面总结其中重要的部分。
 
-What is your stellar.toml?
+什么是 stellar.toml？
 --------------------------
 
-Your stellar.toml is a file you write in [TOML](https://github.com/toml-lang/toml), which is a simple configuration file format, and publish at https://YOUR_DOMAIN/.well-known/stellar.toml.  Anyone can look it up, and it *proves* that the owner of the https domain hosting the stellar.toml claims *responsibility* for the accounts and tokens listed in it.  So it's your chance to legitimize your offering, and to announce vital information about your organization and your token.  **If you offer multiple tokens, you can list them all in one stellar.toml file.**
+stellar.toml 是以 [TOML](https://github.com/toml-lang/toml) 格式（一种简单的配置文件格式）编写到一个文件，它会被发布到 https://YOUR_DOMAIN/.well-known/stellar.toml。任何人都可以查看它，该文件*证明*了您拥有托管 stellar.toml 文件的域名，也声明了您对其中列出的账户和令牌*负责*。您可以通过这个文件使您的令牌更加符合标准，也可以在这里提供关于您的组织和令牌的更多信息。**如果您提供了多种令牌，您可以将它们在一个 stellar.toml 文件中列出。**
 
-How to complete your stellar.toml
+如何完成您的 stellar.toml
 ---------------------------------
 
-[SEP](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md)[ 0001](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md) specifies five sections you can add to your stellar.toml: Account Information, Issuer Documentation, Point of Contact Documentation, Currency Documentation, and Validator Information.  Within those sections, some fields only apply to specialized tokens, but many apply to *all* tokens, and these guidelines will outline which fields are:
+[SEP 0001](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md) 规定了可以添加到 stellar.toml 中的五个部分：账户信息、发行人信息、联系人信息、令牌信息和验证节点信息。在这些部分中，一些字段只适用于特定的令牌，但是许多字段适用于*所有*令牌，下文中会注明哪些信息的必须提供的，哪些信息是建议提供的。
 
-* **Required**: all token issuers *must* include this information in their stellar.toml if they want to be listed on exchanges.
+* **必需提供**：如果要在交易所上市，所有令牌发行人*必须*在其 stellar.toml 中填写此信息。
 
-* **Suggested**: any token issuer who wants their offering to stand out should complete these fields.
+* **建议提供**：任何希望其令牌更加被用户信任的令牌发行人都应填写这些字段。
 
-### ACCOUNT INFORMATION
+### 账户信息
 
-There is one field in the Account Information section required for *all* token issuers:
+*所有*令牌发行者*都*需要填写“帐户信息”部分中的一个字段：
 
-* `ACCOUNTS`: A list of **public keys** for all the Stellar accounts associated with your token. 
+* `ACCOUNTS`: 与令牌关联的所有 Stellar 帐户的**公钥**列表。
 
-Listing your public keys lets users confirm that you, in fact, own them. For example, when https://google.com hosts a stellar.toml file, users can be sure that *only* the accounts listed on it belong to Google. If someone then says, "You need to pay your Google bill this month, send payment to address GIAMGOOGLEIPROMISE", but that key is not listed on Google's stellar.toml, then users know to not trust it. 
+列出您的公钥可以让用户确认您实际上拥有它们。例如 https://google.com 托管了一个 stellar.toml 文件，用户可以确保*只有*其中列出的帐户属于 Google。如果有人说：“您需要在本月支付您的 Google 账单，请把付款发送到 GIAMGOOGLEIPROMISE”，用户查看 Google 的 stellar.toml 后发现该地址并不在其中，便明白了这个人是不可信的。
 
-Most of the other information specified in the Account Information section is only necessary for validators and financial institutions.
+“帐户信息”部分中指定的大多数其他信息仅对验证节点和金融机构有用。
 
-Here's an example of a completed `ACCOUNTS` field listing three public keys:
+下面是一个完整的 `ACCOUNTS` 字段的示例，它列出了三个公钥：
 
 	ACCOUNTS=[
 	"GAOO3LWBC4XF6VWRP5ESJ6IBHAISVJMSBTALHOQM2EZG7Q477UWA6L7U",
@@ -59,43 +59,43 @@ Here's an example of a completed `ACCOUNTS` field listing three public keys:
 	"GB6REF5GOGGSEHZ3L2YK6K4T4KX3YDMWHDCPMV7MZJDLHBDNZXEPRBGM"
 	]
 
-### ISSUER DOCUMENTATION
+### 发行方信息
 
-Basic information about your organization goes into a TOML **table** called `[DOCUMENTATION]`.  Issuer Documentation is your chance to inform exchanges and buyers about your business, and to demonstrate that your business is legitimate and trustworthy. 
+将您的组织的基本信息放在 TOML 文件的 `[DOCUMENTATION]` 表中。您可以在这里向交易所和买家展示您的业务信息，也可以在这里向用户证明您的业务合法且值得信任。
 
-The more you fill out, the more likely people are to believe in your offering.  
+您提供的信息越多，用户就越有可能信任您发行的令牌。
 
-**Required:** All issuers must include the following information:
+**必需提供**：所有发行方必须填写以下信息：
 
-* The legal name of your organization (`org_name`), and if your business has one, its official dba (`org_dba`).
+* 您的组织的法定名称 (`org_name`)，如果您的公司有一个经营名称(`org_dba`)，那么您也需要添加它。
 
-* The URL of your organization's official website (`org_url`).  In order to prove the website is yours, *you must host your stellar.toml on the same domain you list here.*  That way, exchanges and buyers can view the SSL certificate on your website, and feel reasonably confident that you are who you say you are.
+* 您的组织的官方网站的 URL(`org_url`)。为了证明该网站是您的网站，*您必须在此处列出的相同域名中托管您的 stellar.toml。* 这样，交易所和买家就可以在您的网站上查看 SSL 证书，并可以以此判断您的身份。
 
-* A URL to a company logo (`org_logo`), which will show up next to your organization on exchanges.  If you fail to provide a logo, the icon next to your organization will appear blank on many exchanges.
+* 组织 Logo 的 URL(`org_logo`) ，它将在交易所中显示在您的组织旁边。如果您未能提供此参数，在许多交易所中您的组织 Logo 将在显示为空白。
 
-* The physical address of your organization (`org_physical_address`). We understand you might want to keep your work address private. At the very least, you should put the *city* and *country* in which you operate. A street address is ideal and provides a higher level of trust and transparency to your potential users.
+* 您的组织的实际地址(`org_physical_address`)。我们了解您可能希望将您的工作地址保密。但您至少应该把您所在的*国家*和*城市*填写在这里。如果能详细到街道地址就更好了，这可以让潜在用户更加信任您的组织。
 
-* Your organization's official phone number (`org_phone_number`). 
+* 您的组织的官方电话号码(`org_phone_number`)。
 
-* Your organization's official Twitter handle (`org_twitter`).
+* 您的组织的官方 Twitter 帐号(`org_twitter`)。
 
-* The best contact email address for you organization (`org_official_email`). This should be hosted at the same domain as your official website.
+* 您的组织的官方电子邮箱地址(`org_official_email`)。邮箱的邮箱域应该和您官方网站的域名相同。
 
-**Suggested:** Including this information will help your offering stand out:
+**建议提供**：提供以下信息可以使您的令牌更加被用户信任：
 
-* Your organization's official Github account (`org_github`).
+* 您的组织的官方 GitHub 帐号(`org_github`)。
 
-* Your organization's official Keybase account (`org_keybase`).  Your Keybase account should contain proof of ownership of any public online accounts you list here, including your organization's domain. 
+* 您的组织的官方 Keybase 帐号 (`org_keybase`)。您的 Keybase 帐户应包含您在此处列出的所有公共在线帐户和组织域名所有权的证明。
 
-* A description of your organization (`org_description`).  This is fairly open-ended, and you can write as much as you want.  It's a great place to distinguish yourself by describing what it is that you do.
+* 介绍您的组织 (`org_description`)。您可以根据自己的需要填写该值，比如在这里描述您的组织正在做什么。
 
-Exchanges might desire additional verifiable information when deciding how to present your token to traders, and prioritize tokens that include it:
+交易所或许需要额外的可验证信息来决定如何向客户展示您的令牌，包含以下信息的令牌可能会获得更高的优先级：
 
-* Attestation of the physical address listed above (`org_physical_address_attestation`).  This is a URL to an image on your organization's domain of an official third party document (such as a utility bill) that shows your organization's name and address.
+* 证明上述的实际地址是可信的 (`org_physical_address_attestation`)。该值是一个链接到图片的 URL，这个图片是由第三方机构提供的文档（例如公用事业账单），文档中应该包含了您的组织的名字和地址。
 
-* Attestation of the phone number listed above (`org_phone_number_attestation`).  This is a URL to an image on your domain showing a phone bill listing both your phone number and your organization's name.
+* 证明上述的联系电话是可信的 (`org_physical_address_attestation`)。Attestation of the phone number listed above (`org_phone_number_attestation`)。该值是一个链接到图片的 URL，这个图片显示的是包含您的电话号码和组织名称的电话帐单。
 
-Here's an example of completed Issuer Documentation:
+以下是一份完整的发行方信息示例：
 
     [DOCUMENTATION]
     ORG_NAME="Organization Name"
@@ -103,7 +103,7 @@ Here's an example of completed Issuer Documentation:
     ORG_URL="https://www.domain.com"
     ORG_LOGO="https://www.domain.com/awesomelogo.jpg"
     ORG_DESCRIPTION="Description of issuer"
-    ORG_PHYSICAL_ADDRESS="123 Sesame St., New York, NY, 12345" 
+    ORG_PHYSICAL_ADDRESS="123 Sesame St., New York, NY, 12345"
     ORG_PHYSICAL_ADDRESS_ATTESTATION="https://www.domain.com/address_attestation.jpg"
     ORG_PHONE_NUMBER="1 (123)-456-7890"
     ORG_PHONE_NUMBER_ATTESTATION="https://www.domain.com/phone_attestation.jpg"
@@ -112,33 +112,33 @@ Here's an example of completed Issuer Documentation:
     ORG_GITHUB="orgcode"
     ORG_OFFICIAL_EMAIL="support@domain.com"
 
-### POINT OF CONTACT DOCUMENTATION
+### 联系人信息
 
-Information about the primary point of contact for your organization goes into a TOML **list** called `[[PRINCIPALS]]`.  You need to put contact information for *at least one person* at your organization.  If you don't, exchanges can't verify your offering, and it is unlikely that buyers will be interested.
+将您的组织的主要联系人的信息放置在  TOML 文件的 [[ PRINCIPALS ]] **列表**中。您至少需要输入组织中的一个人的联系信息。如果您不这样做，交易所就无法核实您的令牌，买家也可能不会对您的令牌感兴趣。
 
-**Required**: All token issuers should include the following information about their point of contact:
+**必需提供**：所有的发行方都应该提供以下信息：
 
-* The name of the primary contact (`name`).
+* 主要联系人的名字 (`name`)。
 
-* The primary contact's official email address (`email`).  This should be hosted at the same domain as your organization's official website.
+* 首要联系人的官方电子邮箱地址(`email`)。邮箱的邮箱域应该和您官方网站的域名相同。
 
-* The personal Twitter handle of the point of contact (`twitter`).
+* 首要联系人的 Twitter 帐号 (`twitter`)。
 
-**Suggested:** If the point of contact for your organization has them, we suggest you also include:
+**建议提供**：如果主要联系人有以下信息，我们建议您填写它们：
 
-* The personal Github account of the point of contact (`github`).
+* 首要联系人的个人 GithHb 帐号(`github`)。
 
-* The personal Keybase account for the point of contact (`keybase`). This account should include proof of ownership of the email address listed above.
+* 首要联系人的个人 Keybase 帐号(`keybase`)。此帐户应包括上述电子邮件地址的所有权证明。
 
-Again, the more information you provide, the better. Exchanges might desire additional verifiable information when deciding how to present your token to traders, and prioritize tokens that include it:
+您提供的信息越多越好。交易所或许需要额外的可验证信息来决定如何向客户展示您的令牌，包含以下信息的令牌可能会获得更高的优先级：
 
-* A SHA-256 hash of a photo of the point of contact's government-issued photo ID (`id_photo_hash`). 
+* 政府签发的身份证明的照片的 SHA-256 hash (`id_photo_hash`)。
 
-* A SHA-256 hash of a verification photo of the point of contact holding a signed, dated, handwritten message detailed in SEP 0001 (`verification_photo_hash`).
+* 手持包含签名、日期和手写的 SEP 0001 信息的照片的 SHA-256 hash (`verification_photo_hash`)。
 
-The photo hashes allow exchanges and wallets to confirm the identity of your point of contact.  Those services can contact you privately to request ID and verification photos, then check those photos against the hashes listed here to make sure they match.  If the hashes match, they will let their clients know that your contact information is verified.
+交易所和钱包可以通过 hash 确认您的联系人的身份。这些服务提供商可以私下与您联系以获取身份证和验证照片，然后根据此处列出的 hash 检查这些照片，以确保它们匹配。如果哈希值匹配，他们会让客户知道您的联系人信息已经经过了验证。
 
-Here's an example of completed Point of Contact Documentation for one principal:
+以下是一份完整的主要联系人信息示例：
 
     [[PRINCIPALS]]
     name="Jane Jedidiah Johnson"
@@ -150,80 +150,80 @@ Here's an example of completed Point of Contact Documentation for one principal:
     verification_photo_hash="693687f6abd594366a09cfe6b380e58f9023867a851cc9fa71f302ab4889e48"
 
 
-### TOKEN DOCUMENTATION
+### 令牌信息
 
-Information about your token goes into a TOML **list** called `[[CURRENCIES]]`.  If you are issuing multiple tokens, you can include them all in one stellar.toml.  Each token should have its own `[[CURRENCIES]]` list.
+将您的组织的主要联系人的信息放置在 TOML 文件的 [[ CURRENCIES ]] **列表**中。如果您发行了多种令牌，您可以将这些令牌放置在一个 stellar.toml 文件中，每种令牌都有单独的`[[CURRENCIES]]` 列表。
 
-**Required**: All issuers must provide the following information for each token they issue:
+**必需提供**：所有的发行方都需要为它们发行的令牌提供以下信息：
 
-* The asset code (`code`).  This is one of two key pieces of information that identify your token.  Without it, your token cannot be listed anywhere.
+* 资产代码(`code`)。这是识别令牌的两个关键信息之一。如果没有它，您的令牌就不能在任何地方列出。
 
-* The Stellar public key of the issuing account (`issuer`).  This is the second key piece of information that identifies your token. Without it, your token cannot be listed anywhere.
+* 发行账户的 Stellar 公钥 (`issuer`)。这是识别令牌的第二个关键信息。如果没有它，您的令牌就不能在任何地方列出。
 
-* The status of your token (`status`): *live*, *dead*, or *test*.  Marking your token *live* means you are ready for exchanges to list it.  If your token is ready to trade, and you fail to list its status, it may not appear on exchanges. 
+* 令牌的状态(`status`)：*live(存活)*、*dead(死亡)*或 *test(测试)*。如果您已经准备好了将它在交易所中上市，那您需要将它的状态设置为 *live*。如果您的令牌已准备好交易，而您未能表明其状态，则它可能不会出现在交易所中。
 
-* An indication of whether your token is anchored or native (`is_asset_anchored`): `true` if your token can be redeemed for an asset outside the Stellar network, `false` if it can’t.  Exchanges use this information to sort tokens by type in listings.  If you fail to provide it, your token is unlikely to show up in filtered market views.  
+* 指示您的令牌是是否是锚定资产(`is_asset_anchored`)：如果您的令牌可以在 Stellar 网络之外赎回其它资产，则为 `true`；如果不能，则为`false`。交易所使用此信息按清单中的类型对令牌进行排序。如果您未能提供它，则您的令牌可能不会出现在筛选后的市场视图中。
 
-* A preference for number of decimals when client displays currency balance (`display_decimals`).
+* 客户端显示货币余额时应精确到小数点后几位(`display_decimals`)。
 
-* A short name for the token (`name`).  If you fail to name your token, exchanges may not be able to display it properly.
+* 令牌的简称(`name`)。如果您没有提供该信息，那么交易所中可能无法正确显示该令牌。
 
-You also need to describe your **token issuance policy** by filling in exactly *one* of the following mutually exclusive fields:
+您还需要通过填写以下互斥字段中的*一个*来描述您的**令牌发行政策**：
 
-* `fixed_number`, which you should specify if you are issuing a set number of tokens, and that number will never increase.
+* `fixed_number`，如果您一次性发行了一定数量的令牌，且不会增发，那么您应该配置这个值。
 
-* `max_number`, which you should specify if there is an upper limit to the number of tokens you will issue.
+* `max_number`，允许发行的资产数量的上限。
 
-* `is_unlimited`, which you should specify if you reserve the right to create more tokens at your discretion.
+* `is_unlimited`，该资产是否允许增发。
 
-**Suggested:** If you want your token to stand out, you should also include the following:
+**建议提供**：提供以下信息可以使您的令牌更加被用户信任：
 
-* A description of your token and what it represents (`desc`).  This is a good place to clarify what your token does, and why someone might want to own it.
+* 您应该介绍您的令牌(`desc`)，包括它有什么用处，人们为什么会想要拥有它。
 
-* Any conditions you place on the redemption of your token (`conditions`).
+* 使用该令牌在 Stellar 网络之外赎回其它资产的条件(`conditions`)。
 
-* A URL to an image representing token (`image`).  Without it, your token will appear blank on many exchanges
+* 表示该令牌的图像的 URL(`image`)。没有它的话，在许多交易所中您的令牌图标将显示为空白。
 
-Here's what an example of completed Currency Documentation:
+以下是一份完整的令牌信息示例：
 
 	[[CURRENCIES]]
-    code="GOAT"
-    issuer="GD5T6IPRNCKFOHQWT264YPKOZAWUMMZOLZBJ6BNQMUGPWGRLBK3U7ZNP"
-    status=”live”
-    display_decimals=2
-    name="goat share"
-    desc="1 GOAT token entitles you to a share of revenue from Elkins Goat Farm."
-    conditions="There will only ever be 10,000 GOAT tokens in existence. We will distribute the revenue share annually on Jan. 15th"
-    image="https://pbs.twimg.com/profile_images/666921221410439168/iriHah4f.jpg"
-    fixed_number=10000
+	code="GOAT"
+	issuer="GD5T6IPRNCKFOHQWT264YPKOZAWUMMZOLZBJ6BNQMUGPWGRLBK3U7ZNP"
+	status="live"
+	display_decimals=2
+	name="goat share"
+	desc="1 GOAT token entitles you to a share of revenue from Elkins Goat Farm."
+	conditions="There will only ever be 10,000 GOAT tokens in existence. We will distribute the revenue share annually on Jan. 15th"
+	image="https://pbs.twimg.com/profile_images/666921221410439168/iriHah4f.jpg"
+	fixed_number=10000
 
-### ANCHORED OR ASSET-BACKED TOKEN REQUIREMENTS:
+### 锚定令牌的要求：
 
-Anchored tokens are specialized assets in the Stellar ecosystem because they can be redeemed outside of the network for other assets.  If you are issuing an anchored token, you need to provide additional information about those assets, and about how to redeem your token for them. 
+锚定令牌是 Stellar 生态系统中的特殊资产，因为它们可以在网络外部兑换为其他资产。如果您要发布锚定令牌，则需要提供有关这些资产的附加信息，以及介绍如何将这些令牌兑换为其它的资产。
 
-In addition to Currency Documentation listed above, the following fields are **required** for anchored tokens:
+除上面文档中提到的信息外，锚定令牌还**需要**以下字段：
 
-* The type of asset your token represents (`anchor_asset_type`).  The possible categories are *fiat*, *crypto*, *stock*, *bond*, *commodity*, *realestate*, and *other*.
+* 令牌锚定的资产类型(`anchor_asset_type`)。可能的类别是*政府发行的货币*，*数字货币*，*股票*，*债券*，*大宗商品*，*房地产*及*其他*。
 
-* The name of the asset that serves as the anchor for your token (`anchor_asset`). 
+* 锚定的资产(`anchor_asset`)。
 
-* Instructions to redeem your token for the underlying asset (`redemption_instructions`).
+* 兑换这些令牌的说明(`redemption_instructions`)。
 
-Because of the nature of assets anchored to crypto, exchanges are unlikely to list them without the following **verifiable** information:
+如果令牌锚定的是数字货币的话，在上市前交易所还需要**核实**以下信息：
 
-* The public addresses that hold the crypto assets (`collateral_addresses`).
+* 持有锚定的数字货币的地址 (`collateral_addresses`)。
 
-* Proof that you control those public addresses (`collateral_address_signatures`).  [SEP 0001](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md) contains a template for these signatures, and instructions for tailoring them to your token.
+* 证明您确实控制这这些地址 (`collateral_address_signatures`)，[SEP 0001](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md) 包含了签名数据的模板，您可以根据您的令牌的实际情况使用这个模板。
 
-Exchanges use the collateral address signatures to verify that the accounts you list belong to you, and will look  at the reserve in those accounts.  If you cannot prove 100% reserve, it is unlikely they will list your token.
+交易所使用 `collateral_address_signatures` 来验证您确实持有 `collateral_addresses`，它还会检查这些地址中的余额，如果您不能提供 100% 的资金储备，它将不会列出您的令牌。
 
 	[[CURRENCIES]]
 	code="BTC"
 	issuer="GAOO3LWBC4XF6VWRP5ESJ6IBHAISVJMSBTALHOQM2EZG7Q477UWA6L7U"
-	status=”live”
+	status="live"
 	display_decimals=7
-	name=”Bitcoin”
-	desc=”Organization promises to purchase each BTC token from any holder for the value of 1 Bitcoin”
+	name="Bitcoin"
+	desc="Organization promises to purchase each BTC token from any holder for the value of 1 Bitcoin"
 	conditions="Withdrawal fees apply"
 	image="https://domain.com/img/Bitcoin-100x100.png"
 	anchor_asset_type="crypto"
@@ -232,22 +232,22 @@ Exchanges use the collateral address signatures to verify that the accounts you 
 	collateral_addresses=["2C1mCx3ukix1KfegAY5zgQJV7sanAciZpv"]
 	collateral_address_signatures=["304502206e21798a42fae0e854281abd38bacd1aeed3ee3738d9e1446618c4571d10"]
 
-How to publish your stellar.toml
+如何部署您的 stellar.toml 文件
 --------------------------------
-After you've followed the steps above to complete your stellar.toml, post it at the following location:
+按照上面的步骤完成 stellar.toml 之后，将它发布到以下位置：
 
 * https://YOUR_DOMAIN/.well-known/stellar.toml
 
-Enable [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) so people can access this file from other sites, and set the following header for an HTTP response for a /.well-known/stellar.toml file request.
+启用 [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) 以便人们可以从其他站点访问该文件，并为 /.well-known/stellar.toml 文件请求的 HTTP 响应设置以下 HTTP 头部：
 
 * Access-Control-Allow-Origin: *
 
-Once you've done that, you're all set!  Now apps and buyers can access all the information you've provided with a simple HTTP request.
+您已经完成最后一个步骤了。现在，应用程序和买家可以通过简单的 HTTP 请求访问您提供的所有信息。
 
-### An example of a good stellar.toml: Stronghold
+### 优秀的 stellar.toml 示例：Stronghold
 
-If you want to see a stellar.toml done right, take a look at Stronghold’s [here](https://stronghold.co/.well-known/stellar.toml).  You can easily find out everything you need to know about the company, their Stellar accounts, their points of contact, and their tokens, and you can take steps to verify that information.    
+如果您想要一个优秀的 stellar.toml 示例作为参考，那么去看看 [Stronghold](https://stronghold.co/.well-known/stellar.toml) 的吧。您可以轻松找到有关公司、Stellar 帐户、联系人及其令牌的所有信息，您也可以验证这些信息。
 
-If your stellar.toml looks like Stronghold’s, exchanges and buyers will take notice.  
+如果您的 stellar.toml 和 Stronghold 的一样完善，交易所和买家将会注意到您的令牌。
 
 *****
