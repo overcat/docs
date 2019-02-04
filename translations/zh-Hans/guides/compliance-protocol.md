@@ -11,7 +11,7 @@ title: 合规协议
  - 生日
  - 住址
 
-执行合规协议是执行[联邦协议](https://stellar-docs.overcat.me/guides/concepts/federation.html)之后的后的另一个步骤。在此步骤中，发送机构联系接收机构以获得发送事务的许可。为此，接收机构创建一个 `AUTH_SERVER` 并将其端点地址添加到自己的 [stellar.toml](https://stellar-docs.overcat.me/guides/concepts/stellar-toml.html) 中。
+执行合规协议是执行[联邦协议](https://stellar-docs.overcat.me/guides/concepts/federation.html)之后的另一个步骤。在此步骤中，发送机构联系接收机构以获得发送事务的许可。为此，接收机构创建一个 `AUTH_SERVER` 并将其端点地址添加到自己的 [stellar.toml](https://stellar-docs.overcat.me/guides/concepts/stellar-toml.html) 中。
 
 您可以自己实现合规协议服务，也可以使用我们编写好的一个[简单的合规协议服务软件](https://github.com/stellar/bridge-server/blob/master/readme_compliance.md)。
 
@@ -35,7 +35,7 @@ data=<data value>&sig=<sig value>
 `tx` | string: base64 encoded [xdr.Transaction](https://github.com/stellar/stellar-core/blob/4961b8bb4a64c68838632c5865389867e9f02840/src/xdr/Stellar-transaction.x#L297-L322) | 发送机构希望以 XDR 格式提交的事务。此事务是未签署的，它的序列号应该为 0。 
 `attachment` | string | 附件全文。这个附件的 hash 被包含在事务的备注(Memo)中。该字段的内容应该符合 [Stellar 附件公约](./attachment.md)，并且应该提供了足够的信息以供收款机构能对发送方进行制裁检查。 
 
-**sig** 是发送机构对发送的数据的签名。接送机构需要使用发送机构的签名公钥对签名进行检查，以确认数据的确是由发送方签署的。发送机构的签名公钥可以在 [stellar.toml](https://www.stellar.org/developers/guides/concepts/stellar-toml.html) 的 `SIGNING_KEY` 字段中找到。
+**sig** 是发送机构对发送数据的签名。接送机构需要使用发送机构的签名公钥对签名进行检查，以确认数据的确是由发送方签署的。发送机构的签名公钥可以在 [stellar.toml](https://www.stellar.org/developers/guides/concepts/stellar-toml.html) 的 `SIGNING_KEY` 字段中找到。
 
 请求体示例 (请注意这里面包含了 `data` 和 `sig`)：
 ```
@@ -177,5 +177,3 @@ data=%7B%22sender%22%3A%22aldi%2AbankA.com%22%2C%22need_info%22%3Atrue%2C%22tx%2
 
  - 它根据缓存检查事务 hash，或者重新执行对发送方的制裁检查。
  - 它将收到的付款记录在 Bogart 的账户中，或者退回这笔付款。
-
-
