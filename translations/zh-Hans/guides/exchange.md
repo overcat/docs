@@ -2,12 +2,12 @@
 title: 将 Stellar 添加到您的交易所中
 ---
 
-本文将向您介绍如何将 Stellar 网络中的令牌添加到您的交易所中。首先，我们将介绍 Stellar 的原生资产 Lumens，随后，我们将介绍其它类型的令牌。此示例使用 Node.js 和 [JS Stellar SDK](https://github.com/stellar/js-stellar-sdk)，但您很容易使用其它语言实现这些功能。
+本文将向您介绍如何将 Stellar 网络中的令牌添加到您的交易所中。首先，我们将介绍 Stellar 的原生资产 Lumens，随后，我们将介绍其它类型的令牌。此示例使用 Node.js 和 [JS Stellar SDK](https://github.com/stellar/js-stellar-sdk)，但您很容易地能使用其它语言来实现这些功能。
 
 交易所能采用的设计有很多种。本指南使用以下设计：
  - `issuing account(发行账户)`: 用于储存大部分用户存款的离线账户。
  - `base account(基础账户)`: 用于处理提现的在线账户，这个账户中持有少量的用户存款。
- - `customerID(客户 ID)`: 每个用户都有一个 customerID，用于将收到的存款与交易所中特定用户的帐户相关联。
+ - `customerID(客户 ID)`: 每个用户都有一个 customerID，用于将收到的存款与交易所中特定用户的账户相关联。
 
 交易所想要集成 Stellar 的话，需要实现这两点：<br>
 1) 从 Stellar 网络监听存款事务<br>
@@ -26,11 +26,11 @@ title: 将 Stellar 添加到您的交易所中
   公共网络： {hostname:'horizon.stellar.org', secure:true, port:443};
 ```
 
-### 发行帐户
-发行帐户通常用于保护大量资金的安全。发行帐户是 Stellar 帐户，其密钥不储存在任何联网的设备上。事务由用户构建并在离线的计算机上进行签名 —— 您可以在离线计算机上安装 `js-stellar-sdk` ，然后使用它创建包含签名的事务 `tx_blob`。该 `tx_blob` 可以通过离线方式（例如，USB 或手动）传输到已联网的机器。这种设计使得发行账户的密钥更加安全。
+### 发行账户
+发行账户通常用于保护大量资金的安全。发行账户是 Stellar 账户，其密钥不储存在任何联网的设备上。事务由用户构建并在离线的计算机上进行签名 —— 您可以在离线计算机上安装 `js-stellar-sdk` ，然后使用它创建包含签名的事务 `tx_blob`。该 `tx_blob` 可以通过离线方式（例如，USB 或手动）传输到已联网的机器。这种设计使得发行账户的密钥更加安全。
 
 ### 基础账户
-基础帐户包含的资金数量比发行帐户的数量要少的多。基本帐户是在联网的计算机上使用的 Stellar 帐户。它处理 Lumens 的日常发送和接收任务。基本帐户中的有限资金能够减少发生安全漏洞时的损失。
+基础账户包含的资金数量比发行账户的数量要少得多。基本账户是在联网的计算机上使用的 Stellar 账户。它处理 Lumens 的日常发送和接收任务。基本账户中的有限资金能够减少发生安全漏洞时所产生的损失。
 
 ### 数据库
 - 需要为待处理的提现创建一张表 `StellarTransactions`。
@@ -91,9 +91,9 @@ server.loadAccount(config.baseAccount)
 ```
 
 ## 监听充值信息
-当用户想将 Lumens 存入您的交易所时，请指导他们将 XLM 发送到您的基本帐户中，并在事务的备忘录(Memo)中填写 customerID。
+当用户想将 Lumens 存入您的交易所时，请指导他们将 XLM 发送到您的基本账户中，并在事务的备忘录(Memo)中填写 customerID。
 
-您必须监听基本帐户的收款信息，并将收到的 XLM 记录在用户账上。这是监听收款信息的代码：
+您必须监听基本账户的收款信息，并将收到的 XLM 记录在用户账上。这是监听收款信息的代码：
 
 ```js
 // 从您上次停下的地方开始监听充值信息。
@@ -114,7 +114,7 @@ callBuilder.stream({onmessage: handlePaymentResponse});
 对于基本账户收到的每笔付款，您都需要做以下事情：<br>
  - 检查备忘录(Memo)字段以确定这是由哪个用户发送的存款。<br>
  - 将游标记录在 `StellarCursor` 表中，以便您可以从中断处继续进行存款业务。
- - 将收到的 XLM 记录在用户的帐上。
+ - 将收到的 XLM 记录在用户的账上。
 
 所以，当您在以 Stream 的方式监听用户付款时，将以下函数传递给 `onmessage`：
 
@@ -133,21 +133,21 @@ function handlePaymentResponse(record) {
       if (record.asset_type != 'native') {
          // 如果您的交易所是一家 XLM 交易所，而用户给您发送了其它类型的资产，
          // 您可以有以下两种处理方式：
-         // 1. 将它兑换为原生资产然后记录在用户帐上
+         // 1. 将它兑换为原生资产然后记录在用户账上
          // 2. 将它退回给用户
       } else {
-        // 根据 Memo 将存款记录在用户帐上
+        // 根据 Memo 将存款记录在用户账上
         if (checkExists(customer, "ExchangeUsers")) {
           // 更新数据库，该操作具有原子性
           db.transaction(function() {
-            // 将用户存款记录在他们的帐上
+            // 将用户存款记录在他们的账上
             store([record.amount, customer], "StellarDeposits");
             // 将游标记录在数据库中
             store(record.paging_token, "StellarCursor");
           });
         } else {
           // 如果这个用户不存在，您可以抛出一个错误信息，
-          // 也可以把他们添加到您的用户列表中，然后将付款记录在他们帐上，
+          // 也可以把他们添加到您的用户列表中，然后将付款记录在他们账上，
           // 当然您也可以按照自己的想法进行处理
           console.log(customer);
         }
@@ -185,7 +185,7 @@ function handleRequestWithdrawal(userID,amountLumens,destinationAddress) {
 }
 ```
 
-随后，您应该执行 `submitPendingTransactions`，它会检查等待提交的事务的 `StellarTransactions`，然后提交它们。
+随后，您应该执行 `submitPendingTransactions`，它会检查等待提交事务的 `StellarTransactions`，然后提交它们。
 
 ```js
 StellarSdk.Network.useTestNetwork();
@@ -311,7 +311,7 @@ transaction.addOperation(StellarSdk.Operation.payment({
 ```
 * 在 `withdraw` 函数中，您的用户必须为他提取的令牌创建了相应的信任线。所以您必须考虑以下因素：
 	* 确认接收令牌的用户具有相应的信任线
-	* 将令牌发送到没有相应的信任线的帐户后将发生的[Horizon 错误](https://www.stellar.org/developers/guides/concepts/list-of-operations.html#payment)
+	* 将令牌发送到没有相应的信任线的账户后将发生的[Horizon 错误](https://www.stellar.org/developers/guides/concepts/list-of-operations.html#payment)
 
 
 如果想对资产有着更多的了解，请阅读这两篇文章：[资产](https://www.stellar.org/developers/guides/concepts/assets.html)和[发行资产指南](https://www.stellar.org/developers/guides/issuing-assets.html)。
