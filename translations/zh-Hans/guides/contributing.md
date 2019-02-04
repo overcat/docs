@@ -6,18 +6,18 @@ title: 贡献指南
 
 您对恒星网络的贡献将帮助我们更快地改善世界金融基础设施。
 
-我们希望用户能够轻松的提交一个修改以帮助 Stellar 网络茁壮成长。以下是我们要求贡献者遵循的一些指导原则，以便我们能够快速合并您的更改。
+我们希望用户能够轻松地提交一个修改以帮助 Stellar 网络茁壮成长。以下是我们要求贡献者遵循的一些指导原则，以便我们能够快速地合并您的更改。
 
 ## 如何开始
 
 * 您需要有一个 [GitHub 帐号](https://github.com/join)。
-* 如果 GitHub 上没有与您的问题相关的 Issue，那么您需要自己创建一个。
+* 如果 GitHub 上没有与您问题相关的 Issue，那么您需要自己创建一个。
   * 清晰且详细地描述这个问题，如果是一个 bug 的话请写出如何复现它。
 * Fork Github 上的代码仓库。
 
 ## 找寻您可以参与的问题
 
-您可以现看看您感兴趣的项目的 GitHub Issue 列表，那些被标记为 [help wanted](https://github.com/issues?q=is%3Aopen+is%3Aissue+user%3Astellar+label%3A%22help+wanted%22) 的问题通常来说是一个好的切入点。
+您可以现在看看您感兴趣的项目的 GitHub Issue 列表，那些被标记为 [help wanted](https://github.com/issues?q=is%3Aopen+is%3Aissue+user%3Astellar+label%3A%22help+wanted%22) 的问题通常来说是一个好的切入点。
 
 我们也使用 GitHub Issues 来标记和跟踪正在处理的问题，如果您看到某个 Issue 被标记为 `in progress`，这意味着有其他人正在处理这个问题。`orbit` 标签意味着我们可能会在未来一两周处理这个问题。`ready` 标签意味着我们已经将它标记为高优先级，将尽快开始处理它。
 
