@@ -2,9 +2,9 @@
 title: 操作清单
 ---
 
-想要知道操作是如何在 Stellar 中运行的，请阅读[这篇文章](./operations.md)。
+如果您想要知道操作是如何在 Stellar 中运行的，请阅读[这篇文章](./operations.md)。
 
-要了解操作的协议规范，请参阅 [stellar-transactions.x](https://github.com/stellar/stellar-core/blob/master/src/xdr/Stellar-transaction.x)。
+如果您想要了解操作的协议规范，请参阅 [stellar-transactions.x](https://github.com/stellar/stellar-core/blob/master/src/xdr/Stellar-transaction.x)。
 
 - [Create Account(创建账户)](#create-account)
 - [Payment(付款)](#payment)
@@ -48,7 +48,7 @@ title: 操作清单
 ## Payment(付款)
 [JavaScript](http://stellar.github.io/js-stellar-sdk/Operation.html#.payment) | [Java](http://stellar.github.io/java-stellar-sdk/org/stellar/sdk/PaymentOperation.Builder.html) | [Go](https://godoc.org/github.com/stellar/go/build#PaymentBuilder)
 
-将特定数量的特定资产发送给目标帐户。
+将特定数量的特定资产发送给目标账户。
 
 阈值等级：中
 
@@ -69,7 +69,7 @@ title: 操作清单
 |PAYMENT_MALFORMED| -1| 输入的参数不正确。 |
 |PAYMENT_UNDERFUNDED| -2| 源账户(发送方)没有足够的资产去完成这笔付款，或是这个操作会导致账户无法满足它的售出负债。另外，发送 XLM 的时候需要确保发送后账户仍然满足账户最低余额的要求。 |
 |PAYMENT_SRC_NO_TRUST| -3| 源账户没有信任他正在尝试发送的资产的发行账户。 |
-|PAYMENT_SRC_NOT_AUTHORIZED| -4| 源帐号无权发送该资产。 |
+|PAYMENT_SRC_NOT_AUTHORIZED| -4| 源账号无权发送该资产。 |
 |PAYMENT_NO_DESTINATION| -5| 接收方的账户不存在。 |
 |PAYMENT_NO_TRUST| -6| 接收方没有信任待接收资产的发行账户。请通过[资产](./assets.md)的文档了解更多。 |
 |PAYMENT_NOT_AUTHORIZED| -7| 接收方没有被资产发行方允许持有该资产。 |
@@ -79,10 +79,10 @@ title: 操作清单
 ## Path Payment(路径付款)
 [JavaScript](http://stellar.github.io/js-stellar-sdk/Operation.html#.pathPayment) | [Java](http://stellar.github.io/java-stellar-sdk/org/stellar/sdk/PathPaymentOperation.Builder.html) | [Go](https://godoc.org/github.com/stellar/go/build#PayWithPath)
 
-通过报价路径将特定数目的特定资产发送到目标帐户。这可以使发送的资产(例如，450 XLM)不同于接收的资产(例如，6 BTC)。
+通过报价路径将特定数目的特定资产发送到目标账户。这可以使发送的资产(例如，450 XLM)不同于接收的资产(例如，6 BTC)。
 
 需要注意的几点：
-* 路径支付不允许中间报价来自源账户，因为这会产生最差的汇率。您需要将路径付款拆分为两个支付数目较小的路径付款，或者确保源帐户的订单不在订单簿的顶部。
+* 路径支付不允许中间报价来自源账户，因为这会产生最差的汇率。您需要将路径付款拆分为两个支付数目较小的路径付款，或者确保源账户的订单不在订单簿的顶部。
 * 双方的账户余额在操作结束是计算。
    * 这里有一点值得一提，当 `(收款账户, 接收的资产) == (发送账户, 发送的资产)` 时，该账户相当于在操作执行期间获得无息贷款。
 
@@ -108,7 +108,7 @@ title: 操作清单
 |PATH_PAYMENT_MALFORMED| -1| 输入的参数不正确。 |
 |PATH_PAYMENT_UNDERFUNDED| -2| 源账户(发送方)没有足够的资产去完成这笔付款，或是这笔付款无法满足账户的售出负债。另外，发送 XLM 的时候需要确保发送后账户仍然满足账户最低余额的要求。 |
 |PATH_PAYMENT_SRC_NO_TRUST| -3| 源账户没有信任他正在尝试发送的资产的发行账户。 |
-|PATH_PAYMENT_SRC_NOT_AUTHORIZED| -4| 源帐号无权发送该资产。 |
+|PATH_PAYMENT_SRC_NOT_AUTHORIZED| -4| 源账号无权发送该资产。 |
 |PATH_PAYMENT_NO_DESTINATION| -5| 接收方的账户不存在。 |
 |PATH_PAYMENT_NO_TRUST| -6| 接收方没有信任待接收资产的发行账户。请通过[资产](./assets.md)的文档了解更多。 |
 |PATH_PAYMENT_NOT_AUTHORIZED| -7| 接收方没有被资产发行方允许持有该资产。 |
@@ -148,15 +148,15 @@ title: 操作清单
 |MANAGE_OFFER_MALFORMED| -1| 输入的参数不正确。 |
 |MANAGE_OFFER_SELL_NO_TRUST| -2| 创建订单的账户尚未为意图出售的资产创建信任线。 |
 |MANAGE_OFFER_BUY_NO_TRUST| -3| 创建订单的账户尚未为意图购买的资产创建信任线。 |
-|MANAGE_OFFER_SELL_NOT_AUTHORIZED| -4| 创建订单的帐户无权出售此资产。 |
-|MANAGE_OFFER_BUY_NOT_AUTHORIZED| -5| 创建订单的帐户无权购买此资产。 |
+|MANAGE_OFFER_SELL_NOT_AUTHORIZED| -4| 创建订单的账户无权出售此资产。 |
+|MANAGE_OFFER_BUY_NOT_AUTHORIZED| -5| 创建订单的账户无权购买此资产。 |
 |MANAGE_OFFER_LINE_FULL| -6| 创建此订单会导致该账户无法满足购买负载或买入资产的持有数量的限制。 |
-|MANAGE_OFFER_UNDERFUNDED| -7| 创建此订单会导致该账户无法满足买入的资产的持有数量的限制或售出负载。请注意，如果是销售 XLM 的话，那么此帐户必须保证满足最低账户余额的要求，最低账户余额是假设此订单不会立即完全成交而计算的。 |
-|MANAGE_OFFER_CROSS_SELF| -8| 此帐号有着等价或价格更低的对手订单，如果创建此订单会导致自己与自己交易。 |
+|MANAGE_OFFER_UNDERFUNDED| -7| 创建此订单会导致该账户无法满足买入的资产的持有数量的限制或售出负载。请注意，如果是销售 XLM 的话，那么此账户必须保证满足最低账户余额的要求，最低账户余额是假设此订单不会立即完全成交而计算的。 |
+|MANAGE_OFFER_CROSS_SELF| -8| 此账号有着等价或价格更低的对手订单，如果创建此订单会导致自己与自己交易。 |
 |MANAGE_OFFER_SELL_NO_ISSUER| -9| 出售资产的发行账户不存在。 |
 |MANAGE_OFFER_BUY_NO_ISSUER| -10| 买入资产的发行账户不存在。 |
 |MANAGE_OFFER_NOT_FOUND| -11| 提供的 `offerID` 不存在。 |
-|MANAGE_OFFER_LOW_RESERVE| -12| 该账户的 XLM 余额或售出负债不足以使该账户能够创建一个订单。每创建一个订单都会增加帐户需要持有的最低账户余额。 |
+|MANAGE_OFFER_LOW_RESERVE| -12| 该账户的 XLM 余额或售出负债不足以使该账户能够创建一个订单。每创建一个订单都会增加账户需要持有的最低账户余额。 |
 
 ## Create Passive Offer(创建被动订单)
 [JavaScript](http://stellar.github.io/js-stellar-sdk/Operation.html#.createPassiveOffer) | [Java](http://stellar.github.io/java-stellar-sdk/org/stellar/sdk/CreatePassiveOfferOperation.Builder.html) | [Go](https://godoc.org/github.com/stellar/go/build#ManageOfferBuilder)
@@ -188,20 +188,20 @@ title: 操作清单
 |MANAGE_OFFER_MALFORMED| -1| 输入的参数不正确。 |
 |MANAGE_OFFER_SELL_NO_TRUST| -2| 创建订单的账户尚未为意图出售的资产创建信任线。 |
 |MANAGE_OFFER_BUY_NO_TRUST| -3| 创建订单的账户尚未为意图购买的资产创建信任线。 |
-|MANAGE_OFFER_SELL_NOT_AUTHORIZED| -4| 创建订单的帐户无权出售此资产。 |
-|MANAGE_OFFER_BUY_NOT_AUTHORIZED| -5| 创建订单的帐户无权购买此资产。 |
+|MANAGE_OFFER_SELL_NOT_AUTHORIZED| -4| 创建订单的账户无权出售此资产。 |
+|MANAGE_OFFER_BUY_NOT_AUTHORIZED| -5| 创建订单的账户无权购买此资产。 |
 |MANAGE_OFFER_LINE_FULL| -6| 创建此订单会导致该账户无法满足购买负载或买入资产的持有数量的限制。 |
-|MANAGE_OFFER_UNDERFUNDED| -7| 创建此订单会导致该账户无法满足买入的资产的持有数量的限制或售出负载。请注意，如果是销售 XLM 的话，那么此帐户必须保证满足最低账户余额的要求，最低账户余额是假设此订单不会立即完全成交而计算的。 |
-|MANAGE_OFFER_CROSS_SELF| -8| 此帐号有着等价或价格更低的对手订单，如果创建此订单会导致自己与自己交易。 |
+|MANAGE_OFFER_UNDERFUNDED| -7| 创建此订单会导致该账户无法满足买入的资产的持有数量的限制或售出负载。请注意，如果是销售 XLM 的话，那么此账户必须保证满足最低账户余额的要求，最低账户余额是假设此订单不会立即完全成交而计算的。 |
+|MANAGE_OFFER_CROSS_SELF| -8| 此账号有着等价或价格更低的对手订单，如果创建此订单会导致自己与自己交易。 |
 |MANAGE_OFFER_SELL_NO_ISSUER| -9| 出售资产的发行账户不存在。 |
 |MANAGE_OFFER_BUY_NO_ISSUER| -10| 买入资产的发行账户不存在。 |
 |MANAGE_OFFER_NOT_FOUND| -11| 提供的 `offerID` 不存在。 |
-|MANAGE_OFFER_LOW_RESERVE| -12| 该账户的 XLM 余额或售出负债不足以使该账户能够创建一个订单。每创建一个订单都会增加帐户需要持有的最低账户余额。 |
+|MANAGE_OFFER_LOW_RESERVE| -12| 该账户的 XLM 余额或售出负债不足以使该账户能够创建一个订单。每创建一个订单都会增加账户需要持有的最低账户余额。 |
 
 ## Set Options(设置账户选项)
 [JavaScript](http://stellar.github.io/js-stellar-sdk/Operation.html#.setOptions) | [Java](http://stellar.github.io/java-stellar-sdk/org/stellar/sdk/SetOptionsOperation.Builder.html) | [Go](https://godoc.org/github.com/stellar/go/build#SetOptionsBuilder)
 
-此操作设置帐户的各种选项。
+此操作设置账户的各种选项。
 
 有关设置签名的更多信息，请参阅[多重签名](https://stellar-docs.overcat.me/guides/concepts/multi-sig.html)。
 
@@ -215,26 +215,26 @@ title: 操作清单
 
 |参数| 类型| 描述|
 | --- | --- | --- |
-|inflation Destination| account ID| 通货膨胀的目标帐户。 |
-|Clear flags| integer| 指定您想要清除的标识位。想要详细了解标识位，请参阅[账户文档](./accounts.md)。位掩码整数从帐户的现有标识中减去。这允许在不知道现有标志的情况下设置特定标识位。 |
-|Set flags| integer| 指定您想要设置的标识位。想要详细了解标识位，请参阅[账户文档](./accounts.md)。位掩码整数添加到帐户的现有标识上。这允许在不知道现有标志的情况下设置特定标识位。 |
-|Master weight| integer| 主密钥的权重。此帐户还可以使用 `signer` 参数添加用于签署事务的其他密钥。 |
-|Low threshold| integer| 0-255之间的数字，表示此帐户在其执行的具有[低等阈值的](https://stellar-docs.overcat.me/guides/concepts/multi-sig.html)操作所需要的[阈值](https://stellar-docs.overcat.me/guides/concepts/multi-sig.html)。 |
-|Medium threshold| integer| 0-255之间的数字，表示此帐户在其执行的具有[中等阈值的](https://stellar-docs.overcat.me/guides/concepts/multi-sig.html)操作所需要的[阈值](https://stellar-docs.overcat.me/guides/concepts/multi-sig.html)。 |
-|High threshold| integer| 0-255之间的数字，表示此帐户在其执行的具有[高等阈值的](https://stellar-docs.overcat.me/guides/concepts/multi-sig.html)操作所需要的[阈值](https://stellar-docs.overcat.me/guides/concepts/multi-sig.html)。 |
+|inflation Destination| account ID| 通货膨胀的目标账户。 |
+|Clear flags| integer| 指定您想要清除的标识位。想要详细了解标识位，请参阅[账户文档](./accounts.md)。位掩码整数从账户的现有标识中减去。这允许在不知道现有标志的情况下设置特定标识位。 |
+|Set flags| integer| 指定您想要设置的标识位。想要详细了解标识位，请参阅[账户文档](./accounts.md)。位掩码整数添加到账户的现有标识上。这允许在不知道现有标志的情况下设置特定标识位。 |
+|Master weight| integer| 主密钥的权重。此账户还可以使用 `signer` 参数添加用于签署事务的其他密钥。 |
+|Low threshold| integer| 0-255之间的数字，表示此账户在其执行的具有[低等阈值的](https://stellar-docs.overcat.me/guides/concepts/multi-sig.html)操作所需要的[阈值](https://stellar-docs.overcat.me/guides/concepts/multi-sig.html)。 |
+|Medium threshold| integer| 0-255之间的数字，表示此账户在其执行的具有[中等阈值的](https://stellar-docs.overcat.me/guides/concepts/multi-sig.html)操作所需要的[阈值](https://stellar-docs.overcat.me/guides/concepts/multi-sig.html)。 |
+|High threshold| integer| 0-255之间的数字，表示此账户在其执行的具有[高等阈值的](https://stellar-docs.overcat.me/guides/concepts/multi-sig.html)操作所需要的[阈值](https://stellar-docs.overcat.me/guides/concepts/multi-sig.html)。 |
 |Home domain| string| 为账户设置主域名。请参阅[联邦服务](./federation.md)。 |
-|Signer| {Public Key, weight}| 为帐户添加，更新或删除签名者。如果将权重设为 0 的话，则删除签名者。 |
+|Signer| {Public Key, weight}| 为账户添加，更新或删除签名者。如果将权重设为 0 的话，则删除签名者。 |
 
 可能发送的错误：
 
 | 错误代码 | 编号 | 描述 |
 | ----- | ---- | ------|
-|SET_OPTIONS_LOW_RESERVE| -1| 该账户的 XLM 余额或售出负债不足以使该账户能够新增一个子条目。每添加一个新的签名者都会增加帐户需要持有的最低账户余额。 |
-|SET_OPTIONS_TOO_MANY_SIGNERS| -2| 帐户最多可拥有 20 个签名者，当添加的签名者超过这个限制的时候会失败。 |
+|SET_OPTIONS_LOW_RESERVE| -1| 该账户的 XLM 余额或售出负债不足以使该账户能够新增一个子条目。每添加一个新的签名者都会增加账户需要持有的最低账户余额。 |
+|SET_OPTIONS_TOO_MANY_SIGNERS| -2| 账户最多可拥有 20 个签名者，当添加的签名者超过这个限制的时候会失败。 |
 |SET_OPTIONS_BAD_FLAGS| -3| 添加/清除的单个标志或组合无效。 |
-|SET_OPTIONS_INVALID_INFLATION| -4| `inflation` 字段中设置的目标帐户不存在。 |
-|SET_OPTIONS_CANT_CHANGE| -5| 该帐户正在尝试更改无法再被更改的设置项。 |
-|SET_OPTIONS_UNKNOWN_FLAG| -6| 该帐户正在尝试设置未知的标志。 |
+|SET_OPTIONS_INVALID_INFLATION| -4| `inflation` 字段中设置的目标账户不存在。 |
+|SET_OPTIONS_CANT_CHANGE| -5| 该账户正在尝试更改无法再被更改的设置项。 |
+|SET_OPTIONS_UNKNOWN_FLAG| -6| 该账户正在尝试设置未知的标志。 |
 |SET_OPTIONS_THRESHOLD_OUT_OF_RANGE| -7| 阈值或为签名者设置的权重不合理。 |
 |SET_OPTIONS_BAD_SIGNER| -8| 主密钥不能作为额外的签名者添加到账户中。 |
 |SET_OPTIONS_INVALID_HOME_DOMAIN| -9| 主域名参数不正确。 |
@@ -260,7 +260,7 @@ title: 操作清单
 |CHANGE_TRUST_MALFORMED| -1| 输入的参数不正确。 |
 |CHANGE_TRUST_NO_ISSUER| -2| 无法找到资产的发行人。 |
 |CHANGE_TRUST_INVALID_LIMIT| -3| 将 `limit` 设置为该值会导致该账户无法满足购买负载或现有资产的持有数量的限制。 |
-|CHANGE_TRUST_LOW_RESERVE| -4| 该账户的 XLM 余额或售出负债不足以使该账户能够新增一个子条目。每添加一个新的信任线都会增加帐户需要持有的最低账户余额。 |
+|CHANGE_TRUST_LOW_RESERVE| -4| 该账户的 XLM 余额或售出负债不足以使该账户能够新增一个子条目。每添加一个新的信任线都会增加账户需要持有的最低账户余额。 |
 
 ## Allow Trust(允许信任)
 [JavaScript](http://stellar.github.io/js-stellar-sdk/Operation.html#.allowTrust) | [Java](http://stellar.github.io/java-stellar-sdk/org/stellar/sdk/AllowTrustOperation.Builder.html) | [Go](https://godoc.org/github.com/stellar/go/build#AllowTrustBuilder)
@@ -278,7 +278,7 @@ title: 操作清单
 |参数| 类型| 描述|
 | --- | --- | --- |
 |Trustor| account ID| 设置了该信任线的目标账户。 |
-|Type| asset | 信任线中的资产类型。例如，如果锚点希望允许另一个帐户持有其美元资产，则 `Type` 应该设置为 USD:anchor。 |
+|Type| asset | 信任线中的资产类型。例如，如果锚点希望允许另一个账户持有其美元资产，则 `Type` 应该设置为 USD:anchor。 |
 |Authorize| boolean| 该信任线是否得到了授权。 |
 
 可能发送的错误：
@@ -287,8 +287,8 @@ title: 操作清单
 | ----- | ---- | ------|
 |ALLOW_TRUST_MALFORMED| -1| 指定资产类型的 `Type` 参数非法。 |
 |ALLOW_TRUST_NO_TRUST_LINE| -2| `trustor` 并没有设置包含此发行账户的信任线。 |
-|ALLOW_TRUST_TRUST_NOT_REQUIRED| -3| 源帐户(执行此操作的发行账户)不需要执行信任操作。也就是说源账户并没有启用 `AUTH_REQUIRED_FLAG 标识。 |
-|ALLOW_TRUST_CANT_REVOKE| -4| 源帐户正试图撤消对 `trustor` 的信任线的授权，但它不能这样做。 |
+|ALLOW_TRUST_TRUST_NOT_REQUIRED| -3| 源账户(执行此操作的发行账户)不需要执行信任操作。也就是说源账户并没有启用 `AUTH_REQUIRED_FLAG 标识。 |
+|ALLOW_TRUST_CANT_REVOKE| -4| 源账户正试图撤消对 `trustor` 的信任线的授权，但它不能这样做。 |
 
 ## Account Merge(账户合并)
 [JavaScript](http://stellar.github.io/js-stellar-sdk/Operation.html#.accountMerge) | [Java](http://stellar.github.io/java-stellar-sdk/org/stellar/sdk/AccountMergeOperation.Builder.html) | [Go](https://godoc.org/github.com/stellar/go/build#AccountMergeBuilder)
@@ -307,7 +307,7 @@ title: 操作清单
 
 | 错误代码 | 编号 | 描述 |
 | ----- | ---- | ------|
-|ACCOUNT_MERGE_MALFORMED| -1| 该操作格式不正确，因为源帐户无法与自身合并。 `destination` 不能是源账户。 |
+|ACCOUNT_MERGE_MALFORMED| -1| 该操作格式不正确，因为源账户无法与自身合并。 `destination` 不能是源账户。 |
 |ACCOUNT_MERGE_NO_ACCOUNT| -2| `destination` 账户不存在。 |
 |ACCOUNT_MERGE_IMMUTABLE_SET| -3| 源账户启用了 `AUTH_IMMUTABLE` 标识。 |
 |ACCOUNT_MERGE_HAS_SUB_ENTRIES | -4| 源账户有信任线或订单。 |
@@ -332,7 +332,7 @@ title: 操作清单
 ## Manage Data(管理数据条目)
 [JavaScript](http://stellar.github.io/js-stellar-sdk/Operation.html#.manageData) | [Java](http://stellar.github.io/java-stellar-sdk/org/stellar/sdk/ManageDataOperation.Builder.html) | [Go](https://godoc.org/github.com/stellar/go/build#ManageDataBuilder)
 
-允许您设置、修改或删除特定帐户上的数据条目(键/值对)。一个帐户可以设置任意数量的数据条目。每添加一个数据条目都会增加帐户需要持有的最低账户余额。
+允许您设置、修改或删除特定账户上的数据条目(键/值对)。一个账户可以设置任意数量的数据条目。每添加一个数据条目都会增加账户需要持有的最低账户余额。
 
 数据对可以用于各种应用程序中，但它们并不被 Stellar 的核心协议所使用。
 
@@ -342,7 +342,7 @@ title: 操作清单
 
 |参数| 类型| 描述|
 | --- | --- | --- |
-|Name| string | 长度最多为 64 bytes 的字符串。如果这是一个新的键(Name)，它将向帐户添加给定的数据条目。如果此键(Name)已经存在，则将修改其对应的值。 |
+|Name| string | 长度最多为 64 bytes 的字符串。如果这是一个新的键(Name)，它将向账户添加给定的数据条目。如果此键(Name)已经存在，则将修改其对应的值。 |
 |Value| binary data | (可选) 如果该值为空的话，这个数据条目会被删除。如果存在的话，则会作为值设置在数据条目中。该值最长为 64 bytes。 |
 
 可能发送的错误：
@@ -359,9 +359,9 @@ title: 操作清单
 
 *仅在协议版本 10 及以上版本中可用*
 
-Bump sequence 操作允许源帐户增大自己的序列号，通过该操作您可以使序列号小于新序列号的所有事务失效。
+Bump sequence 操作允许源账户增大自己的序列号，通过该操作您可以使序列号小于新序列号的所有事务失效。
 
-如果指定的 `bumpTo` 序列号大于源帐户的序列号，则系统会使用该值更新帐户的序列号，否则不会修改。
+如果指定的 `bumpTo` 序列号大于源账户的序列号，则系统会使用该值更新账户的序列号，否则不会修改。
 
 阈值等级：低
 
