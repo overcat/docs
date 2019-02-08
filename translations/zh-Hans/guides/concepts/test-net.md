@@ -6,7 +6,7 @@ title: 测试网络
 
 SDF 在测试网络中运行 3 个 Stellar Core 验证节点。
 
-你可以让 [stellar-core](https://github.com/stellar/stellar-core) 使用[此配置](https://github.com/stellar/stellar-core/blob/master/docs/stellar-core_testnet.cfg)来将其连接到测试网络。
+您可以让 [stellar-core](https://github.com/stellar/stellar-core) 使用[此配置](https://github.com/stellar/stellar-core/blob/master/docs/stellar-core_testnet.cfg)来将其连接到测试网络。
 
 SDF 还提供一个与测试网络相连接的 Horizon 实例。
 
@@ -20,19 +20,19 @@ SDF 还提供一个与测试网络相连接的 Horizon 实例。
 ## Stellar 测试网络不适合用来做什么？
 
 * 压力测试。
-  * 如果你想对性能进行测试的话，我们推荐您阅读 [Stellar Core 的性能说明](https://github.com/stellar/stellar-core/blob/master/performance-eval.md#networks-to-test-against)。
+  * 如果您想对性能进行测试的话，我们推荐您阅读 [Stellar Core 的性能说明](https://github.com/stellar/stellar-core/blob/master/performance-eval.md#networks-to-test-against)。
 * 测试高可用性基础架构 - SDF 无法保证测试网络的可用性。
 * 在网络上长期存储数据 - [测试网络上的数据不会永久保存，会被定期重置](test-net.md#periodic-reset-of-testnet-data)。
-* 你的测试软件需要对测试环境做更多的适应性处理，例如:
+* 您的测试软件需要对测试环境做更多的适应性处理，例如:
   * 处理测试网络数据被重置的情况。
-  * 在将私密数据发送到公共网络上之前，你需要对它们进行妥善的处理。
+  * 在将私密数据发送到公共网络上之前，您需要对它们进行妥善的处理。
 
-如果不想使用 SDF 提供的测试网络的话，你可以自己搭建一个私有的测试网络。
+如果不想使用 SDF 提供的测试网络的话，您可以自己搭建一个私有的测试网络。
 
 ## 使用测试网络的最佳实践
 
 ### 测试网络的数据会被定期重置
-为了让开发人员的拥有良好体验，SDF 测试网络会定期将总账重置为初始总账。这样可以删除网络中的垃圾信息，最大限度地缩短其它节点获取最新总帐的时间，并且可以使维护系统更加轻松。
+为了让开发人员的拥有良好体验，SDF 测试网络会定期将总账重置为初始总账。这样可以删除网络中的垃圾信息，最大限度地缩短其它节点获取最新总账的时间，并且可以使维护系统更加轻松。
 
 当总账被重置为初始总账时，Stellar Core 和 Horizon 的所有总账条目(如账户、信任线、交易挂单等)、事务和历史数据都会被清除。
 
@@ -50,7 +50,7 @@ Dashboard](http://dashboard.stellar.org/) 及一些开发者社区中通知确�
 
 ### 自动化测试
 
-由于大多数应用程序依赖于网络中已存在的数据来执行后续的操作，因此我们建议您在编写自动测试软件时，应该让它包含自动填充数据的功能，这样你才能从容的面对测试网络被重置的情况，而且如果您选择这样做的话，你可以低成本的将该测试软件应用在私有测试网络中。
+由于大多数应用程序依赖于网络中已存在的数据来执行后续的操作，因此我们建议您在编写自动测试软件时，应该让它包含自动填充数据的功能，这样您才能从容的面对测试网络被重置的情况，而且如果您选择这样做的话，您可以低成本的将该测试软件应用在私有测试网络中。
 
 例如：
 * 生成资产发行人以测试钱包的开发。
@@ -58,7 +58,6 @@ Dashboard](http://dashboard.stellar.org/) 及一些开发者社区中通知确�
 
 作为应用程序的维护者，您需要考虑创建一个足以代表测试主要用例的数据集，以便在测试网络不可用时也能进行可靠的测试。
 
-你的测试软件中应包含一系列的脚本来自动帮您完成数据的填充，比如通过脚本[自动使用 Friendbot 创建账户](../get-started/create-account.md)或提交一系列的
-[事务](transactions.md)。
+您的测试软件中应包含一系列的脚本来自动帮您完成数据的填充，比如通过脚本[自动使用 Friendbot 创建账户](../get-started/create-account.md)或提交一系列的[事务](transactions.md)。
 
-如果你还有其它问题的话，我们推荐您访问 [Stellar's Stack Exchange](https://stellar.stackexchange.com/)。
+如果您还有其它问题的话，我们推荐您访问 [Stellar's Stack Exchange](https://stellar.stackexchange.com/)。
