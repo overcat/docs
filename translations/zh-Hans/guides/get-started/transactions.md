@@ -27,38 +27,36 @@ var server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
 var sourceKeys = StellarSdk.Keypair
   .fromSecret('SCZANGBA5YHTNYVVV4C3U252E2B6P6F5T3U6MM63WBSBZATAQI3EBTQ4');
 var destinationId = 'GA2C5RFPE6GCKMY3US5PAB6UZLKIGSPIUKSLRB6Q723BM2OARMDUYEJ5';
-// Transaction will hold a built transaction we can resubmit if the result is unknown.
+// 事务信息应该被保留，以便我们在无法确定事务状态的情况下重新提交它
 var transaction;
 
-// First, check to make sure that the destination account exists.
-// You could skip this, but if the account does not exist, you will be charged
-// the transaction fee when the transaction fails.
+// 首先，确认接收账户真实存在于网络中。
+// 您也可以跳过这一步，但是如果接收账户不存在的话，事务将执行失败，但手续费还是会被扣除。
 server.loadAccount(destinationId)
-  // If the account is not found, surface a nicer error message for logging.
+  // 如果接收账户不存在的话，打印错误信息
   .catch(StellarSdk.NotFoundError, function (error) {
     throw new Error('The destination account does not exist!');
   })
-  // If there was no error, load up-to-date information on your account.
+  // 如果此处没有错误的话，载入您的账户的最新信息。
   .then(function() {
     return server.loadAccount(sourceKeys.publicKey());
   })
   .then(function(sourceAccount) {
-    // Start building the transaction.
+    // 开始构建一个事务。
     transaction = new StellarSdk.TransactionBuilder(sourceAccount)
       .addOperation(StellarSdk.Operation.payment({
         destination: destinationId,
-        // Because Stellar allows transaction in many currencies, you must
-        // specify the asset type. The special "native" asset represents Lumens.
+        // 因为 Stellar 允许用户发送多种类型的资产，所以您需要指定资产类型。
+        // "native" 代表着原生资产 Lumens。
         asset: StellarSdk.Asset.native(),
         amount: "10"
       }))
-      // A memo allows you to add your own metadata to a transaction. It's
-      // optional and does not affect how Stellar treats the transaction.
+      // 您可以将备注信息添加在事务的 memo 中。这是一个可选值。
       .addMemo(StellarSdk.Memo.text('Test Transaction'))
       .build();
-    // Sign the transaction to prove you are actually the person sending it.
+    // 签署这个事务，这表明您同意执行该事务。
     transaction.sign(sourceKeys);
-    // And finally, send it off to Stellar!
+    // 最后，将它发送到 Stellar 网络上。
     return server.submitTransaction(transaction);
   })
   .then(function(result) {
@@ -66,8 +64,7 @@ server.loadAccount(destinationId)
   })
   .catch(function(error) {
     console.error('Something went wrong!', error);
-    // If the result is unknown (no response body, timeout etc.) we simply resubmit
-    // already built transaction:
+    // 如果结果未知（没有回应信息，超时等），我们可以简单的重新提交这个已经构建好的事务。
     // server.submitTransaction(transaction);
   });
 ```
@@ -79,26 +76,24 @@ Server server = new Server("https://horizon-testnet.stellar.org");
 KeyPair source = KeyPair.fromSecretSeed("SCZANGBA5YHTNYVVV4C3U252E2B6P6F5T3U6MM63WBSBZATAQI3EBTQ4");
 KeyPair destination = KeyPair.fromAccountId("GA2C5RFPE6GCKMY3US5PAB6UZLKIGSPIUKSLRB6Q723BM2OARMDUYEJ5");
 
-// First, check to make sure that the destination account exists.
-// You could skip this, but if the account does not exist, you will be charged
-// the transaction fee when the transaction fails.
-// It will throw HttpResponseException if account does not exist or there was another error.
+// 首先，确认接收账户真实存在于网络中。
+// 您也可以跳过这一步，但是如果接收账户不存在的话，事务将执行失败，但手续费还是会被扣除。
+// 如果接收账户不存在或是有其它错误，这里会抛出 HttpResponseException 异常。
 server.accounts().account(destination);
 
-// If there was no error, load up-to-date information on your account.
+// 如果此处没有错误的话，载入您的账户的最新信息。
 AccountResponse sourceAccount = server.accounts().account(source);
 
-// Start building the transaction.
+// 开始构建一个事务。
 Transaction transaction = new Transaction.Builder(sourceAccount)
         .addOperation(new PaymentOperation.Builder(destination, new AssetTypeNative(), "10").build())
-        // A memo allows you to add your own metadata to a transaction. It's
-        // optional and does not affect how Stellar treats the transaction.
+        // 您可以将备注信息添加在事务的 memo 中。这是一个可选值。
         .addMemo(Memo.text("Test Transaction"))
         .build();
-// Sign the transaction to prove you are actually the person sending it.
+// 签署这个事务，这表明您同意执行该事务。
 transaction.sign(source);
 
-// And finally, send it off to Stellar!
+// 最后，将它发送到 Stellar 网络上。
 try {
   SubmitTransactionResponse response = server.submitTransaction(transaction);
   System.out.println("Success!");
@@ -106,8 +101,7 @@ try {
 } catch (Exception e) {
   System.out.println("Something went wrong!");
   System.out.println(e.getMessage());
-  // If the result is unknown (no response body, timeout etc.) we simply resubmit
-  // already built transaction:
+  // 如果结果未知（没有回应信息，超时等），我们可以简单的重新提交这个已经构建好的事务。
   // SubmitTransactionResponse response = server.submitTransaction(transaction);
 }
 ```
@@ -125,7 +119,7 @@ func main () {
 	source := "SCZANGBA5YHTNYVVV4C3U252E2B6P6F5T3U6MM63WBSBZATAQI3EBTQ4"
 	destination := "GA2C5RFPE6GCKMY3US5PAB6UZLKIGSPIUKSLRB6Q723BM2OARMDUYEJ5"
 
-	// Make sure destination account exists
+	// 确认接收账户真实存在于网络中。
 	if _, err := horizon.DefaultTestNetClient.LoadAccount(destination); err != nil {
 		panic(err)
 	}
@@ -146,7 +140,7 @@ func main () {
 		panic(err)
 	}
 
-	// Sign the transaction to prove you are actually the person sending it.
+	// 签署这个事务，这表明您同意执行该事务。
 	txe, err := tx.Sign(source)
 	if err != nil {
 		panic(err)
@@ -157,7 +151,7 @@ func main () {
 		panic(err)
 	}
 
-	// And finally, send it off to Stellar!
+	// 最后，将它发送到 Stellar 网络上。
 	resp, err := horizon.DefaultTestNetClient.SubmitTransaction(txeB64)
 	if err != nil {
 		panic(err)
@@ -179,7 +173,7 @@ func main () {
 
     ```js
     server.loadAccount(destinationId)
-      .then(function(account) { /* validate the account */ })
+      .then(function(account) { /* 验证账户 */ })
     ```
 
     ```java
@@ -337,31 +331,29 @@ var StellarSdk = require('stellar-sdk');
 var server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
 var accountId = 'GC2BKLYOOYPDEFJKLKY6FNNRQMGFLVHJKQRGNSSRRGSMPGF32LHCQVGF';
 
-// Create an API call to query payments involving the account.
+//  调用 API 接口查询与特定账户相关的支付信息。
 var payments = server.payments().forAccount(accountId);
 
-// If some payments have already been handled, start the results from the
-// last seen payment. (See below in `handlePayment` where it gets saved.)
+// 如果其中一些支付信息已经被处理了，那么您可以接着处理之后的支付信息。
+// (该游标在 `handlePayment` 中保存)
 var lastToken = loadLastPagingToken();
 if (lastToken) {
   payments.cursor(lastToken);
 }
 
-// `stream` will send each recorded payment, one by one, then keep the
-// connection open and continue to send you new payments as they occur.
+// `stream` 会一个个发送所有已有的支付信息，并且会保持连接以向您发送新产生的支付信息。
 payments.stream({
   onmessage: function(payment) {
-    // Record the paging token so we can start from here next time.
+    // 记录游标，以便我们下次能从此处开始处理支付信息。
     savePagingToken(payment.paging_token);
 
-    // The payments stream includes both sent and received payments. We only
-    // want to process received payments here.
+    // 支付 Stream 包含了收款与付款信息，在这里我们只想处理收款信息。
     if (payment.to !== accountId) {
       return;
     }
 
-    // In Stellar’s API, Lumens are referred to as the “native” type. Other
-    // asset types have more detailed information.
+    // 在 Stellar 的 API 中，Lumens 的资产类型为 "native"
+    // 其它类型的资产还包含了一些其它的字段。
     var asset;
     if (payment.asset_type === 'native') {
       asset = 'lumens';
@@ -379,12 +371,11 @@ payments.stream({
 });
 
 function savePagingToken(token) {
-  // In most cases, you should save this to a local database or file so that
-  // you can load it next time you stream new payments.
+  // 在大多数情况下，您应该将这个值储存在本地数据库或文件中，以便您在下次监听支付信息时使用它。
 }
 
 function loadLastPagingToken() {
-  // Get the last paging token from a local database or file
+  // 从本地数据库或文件中获取最新的游标。
 }
 ```
 
@@ -392,26 +383,24 @@ function loadLastPagingToken() {
 Server server = new Server("https://horizon-testnet.stellar.org");
 KeyPair account = KeyPair.fromAccountId("GC2BKLYOOYPDEFJKLKY6FNNRQMGFLVHJKQRGNSSRRGSMPGF32LHCQVGF");
 
-// Create an API call to query payments involving the account.
+// 调用 API 接口查询与特定账户相关的支付信息。
 PaymentsRequestBuilder paymentsRequest = server.payments().forAccount(account);
 
-// If some payments have already been handled, start the results from the
-// last seen payment. (See below in `handlePayment` where it gets saved.)
+// 如果其中一些支付信息已经被处理了，那么您可以接着处理之后的支付信息。
+// (该游标在 `handlePayment` 中保存)
 String lastToken = loadLastPagingToken();
 if (lastToken != null) {
   paymentsRequest.cursor(lastToken);
 }
 
-// `stream` will send each recorded payment, one by one, then keep the
-// connection open and continue to send you new payments as they occur.
+// 会一个个发送所有已有的支付信息，并且会保持连接以向您发送新产生的支付信息。
 paymentsRequest.stream(new EventListener<OperationResponse>() {
   @Override
   public void onEvent(OperationResponse payment) {
-    // Record the paging token so we can start from here next time.
+    // 记录游标，以便我们下次能从此处开始处理支付信息。
     savePagingToken(payment.getPagingToken());
 
-    // The payments stream includes both sent and received payments. We only
-    // want to process received payments here.
+    // 支付 Stream 包含了收款与付款信息，在这里我们只想处理收款信息。
     if (payment instanceof PaymentOperationResponse) {
       if (((PaymentOperationResponse) payment).getTo().equals(account)) {
         return;
@@ -514,7 +503,7 @@ if (lastToken != null) {
 ```js
 payments.stream({
   onmessage: function(payment) {
-    // handle a payment
+    // 处理支付信息。
   }
 });
 ```
@@ -523,7 +512,7 @@ payments.stream({
 paymentsRequest.stream(new EventListener<OperationResponse>() {
   @Override
   public void onEvent(OperationResponse payment) {
-    // Handle a payment
+    // 处理支付信息。
   }
 });
 ```
@@ -537,7 +526,7 @@ paymentsRequest.stream(new EventListener<OperationResponse>() {
 ```js
 payments.call().then(function handlePage(paymentsPage) {
   paymentsPage.records.forEach(function(payment) {
-    // handle a payment
+    // 处理支付信息。
   });
   return paymentsPage.next().then(handlePage);
 });
@@ -547,7 +536,7 @@ payments.call().then(function handlePage(paymentsPage) {
 Page<OperationResponse> page = payments.execute();
 
 for (OperationResponse operation : page.getRecords()) {
-	// handle a payment
+	// 处理付款信息
 }
 
 page = page.getNextPage();
